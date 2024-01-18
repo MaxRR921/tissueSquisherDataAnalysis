@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from mpl_toolkits.mplot3d import Axes3D
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from tkinter import Tk, Label, Button, filedialog, Frame
 
 
@@ -138,15 +138,9 @@ def browse_file():
 
 
 
-       # Plot phase vs. time
-        fig1, ax1 = plt.subplots()
-        ax1.plot(timeList, phase)
-        ax1.set_title('Phase vs. Time')
-        ax1.set_xlabel('Time (s)')
-        ax1.set_ylabel('Phase (*/pi radians)')
+      
 
-        canvas1 = FigureCanvasTkAgg(fig1, master=frame)
-        canvas1.get_tk_widget().pack()
+       
 
         # Write the analyzed data into a .csv file
         data = np.vstack((timeList, strain, phase)).T
@@ -159,6 +153,15 @@ def browse_file():
         ax2.set_title('Phase vs. Strain')
         ax2.set_xlabel('Strain (mm/mm)')
         ax2.set_ylabel('Phase (pi radians)')
+
+        # Embed the Matplotlib graph in Tkinter
+        canvas1 = FigureCanvasTkAgg(fig2, master=frame)
+        canvas1.get_tk_widget().pack(side='left')
+
+        # Create NavigationToolbar
+        toolbar = NavigationToolbar2Tk(canvas1, frame)
+        canvas1_widget = canvas1.get_tk_widget()
+        canvas1_widget.pack(fill='both', expand=True)
 
         # Plot circle trace on sphere (for reference)
         fig3 = plt.figure()
@@ -178,6 +181,16 @@ def browse_file():
         ax3.set_ylabel('s2')
         ax3.set_zlabel('s3')
         ax3.set_title('Circle Trace on Sphere')
+
+         # Embed the Matplotlib graph in Tkinter
+        canvas1 = FigureCanvasTkAgg(fig3, master=frame)
+        canvas1_widget = canvas1.get_tk_widget()
+        canvas1.get_tk_widget().pack(side='left')
+
+        # Create NavigationToolbar
+        toolbar = NavigationToolbar2Tk(canvas1, frame)
+        canvas1_widget = canvas1.get_tk_widget()
+        canvas1_widget.pack(side='left', fill='both', expand=True)
 
         plt.show()
 
