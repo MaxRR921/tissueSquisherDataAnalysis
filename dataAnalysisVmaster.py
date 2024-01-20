@@ -125,22 +125,21 @@ def analyze_data(file_path):
 
     return timeList, strain, phase, s1List, s2List, s3List
 
-def browse_file():
+def browse_file(root):
     file_path = filedialog.askopenfilename(filetypes=[('CSV Files', '*.csv')])
     if file_path:
         timeList, strain, phase, s1List, s2List, s3List = analyze_data(file_path)
         window = Tk()
         window.title("Data Analysis Results")
-
+        window.geometry("1920x1080")
         frame = Frame(window)
         frame.pack()
 
-
-
-
-      
-
-       
+        button = Button(window, text="Quit", command=lambda: [window.destroy(), root.destroy()]) 
+  
+        # Attaching button to the top-level window 
+        # Always remember to attach your widgets to the top-level 
+        button.pack(side='top', pady=200) 
 
         # Write the analyzed data into a .csv file
         data = np.vstack((timeList, strain, phase)).T
@@ -161,7 +160,7 @@ def browse_file():
         # Create NavigationToolbar
         toolbar = NavigationToolbar2Tk(canvas1, frame)
         canvas1_widget = canvas1.get_tk_widget()
-        canvas1_widget.pack(fill='both', expand=True)
+        canvas1_widget.pack(side='left', fill='both', expand=True)
 
         # Plot circle trace on sphere (for reference)
         fig3 = plt.figure()
@@ -194,17 +193,19 @@ def browse_file():
 
         plt.show()
 
+def run():
+    # Create Tkinter window
+    root = Tk()
+    root.title("Data Analysis GUI")
 
-# Create Tkinter window
-root = Tk()
-root.title("Data Analysis GUI")
+    # Add label and button to the window
+    label = Label(root, text="Click the button to select a CSV file:")
+    label.pack(pady=10)
 
-# Add label and button to the window
-label = Label(root, text="Click the button to select a CSV file:")
-label.pack(pady=10)
+    button = Button(root, text="Browse", command=lambda: browse_file(root))
+    button.pack(pady=10)
 
-button = Button(root, text="Browse", command=browse_file)
-button.pack(pady=10)
+    # Run the Tkinter event loop
+    root.mainloop()
 
-# Run the Tkinter event loop
-root.mainloop()
+run()
