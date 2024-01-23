@@ -125,21 +125,11 @@ def analyze_data(file_path):
 
     return timeList, strain, phase, s1List, s2List, s3List
 
-def browse_file(root):
+def browse_file(window):
     file_path = filedialog.askopenfilename(filetypes=[('CSV Files', '*.csv')])
     if file_path:
         timeList, strain, phase, s1List, s2List, s3List = analyze_data(file_path)
-        window = Tk()
-        window.title("Data Analysis Results")
-        window.geometry("1920x1080")
-        frame = Frame(window)
-        frame.pack()
-
-        button = Button(window, text="Quit", command=lambda: [window.destroy(), root.destroy()]) 
-  
-        # Attaching button to the top-level window 
-        # Always remember to attach your widgets to the top-level 
-        button.pack(side='top', pady=200) 
+       
 
         # Write the analyzed data into a .csv file
         data = np.vstack((timeList, strain, phase)).T
@@ -148,23 +138,33 @@ def browse_file(root):
 
         # Plot phase vs. strain
         fig2, ax2 = plt.subplots()
+        fig2.set_figheight(4)
+        fig2.set_figwidth(4)
         ax2.plot(strain, phase)
         ax2.set_title('Phase vs. Strain')
         ax2.set_xlabel('Strain (mm/mm)')
         ax2.set_ylabel('Phase (pi radians)')
+       
+        
 
+
+        frameGraphs = Frame(window, width=800, height=400)
+        frameGraphs.pack()
+        frameGraphs.pack_propagate(False)
         # Embed the Matplotlib graph in Tkinter
-        canvas1 = FigureCanvasTkAgg(fig2, master=frame)
-        canvas1.get_tk_widget().pack(side='left')
+        canvas1 = FigureCanvasTkAgg(fig2, master=frameGraphs)
+        canvas1.get_tk_widget().pack(side="left")
 
-        # Create NavigationToolbar
-        toolbar = NavigationToolbar2Tk(canvas1, frame)
-        canvas1_widget = canvas1.get_tk_widget()
-        canvas1_widget.pack(side='left', fill='both', expand=True)
+        # # Create NavigationToolbar
+        # toolbar = NavigationToolbar2Tk(canvas1, frame)
+        # canvas1_widget = canvas1.get_tk_widget()
+        # canvas1_widget.pack(side='left', fill='both', expand=True)
 
         # Plot circle trace on sphere (for reference)
         fig3 = plt.figure()
         ax3 = fig3.add_subplot(111, projection='3d')
+        fig3.set_figheight(4)
+        fig3.set_figwidth(5)
 
         phi = np.linspace(0, np.pi, 100)
         theta = np.linspace(0, 2 * np.pi, 100)
@@ -173,6 +173,8 @@ def browse_file(root):
         y = np.sin(phi) * np.sin(theta)
         z = np.cos(phi)
         ax3.plot_wireframe(x, y, z, color='r', alpha=0.5, linewidth=0.1)
+        #fig3.set_figheight(400)
+        #fig3.set_figwidth(350)
 
 
         ax3.scatter(s1List, s2List, s3List)
@@ -182,30 +184,42 @@ def browse_file(root):
         ax3.set_title('Circle Trace on Sphere')
 
          # Embed the Matplotlib graph in Tkinter
-        canvas1 = FigureCanvasTkAgg(fig3, master=frame)
+        canvas1 = FigureCanvasTkAgg(fig3, master=frameGraphs)
         canvas1_widget = canvas1.get_tk_widget()
-        canvas1.get_tk_widget().pack(side='left')
+        canvas1.get_tk_widget().pack(side="left")
 
-        # Create NavigationToolbar
-        toolbar = NavigationToolbar2Tk(canvas1, frame)
-        canvas1_widget = canvas1.get_tk_widget()
-        canvas1_widget.pack(side='left', fill='both', expand=True)
+        # # Create NavigationToolbar
+        # toolbar = NavigationToolbar2Tk(canvas1, frame)
+        # canvas1_widget = canvas1.get_tk_widget()
+        # canvas1_widget.pack(side='left', fill='both', expand=True)
 
-        plt.show()
+        #plt.show()
 
 def run():
-    # Create Tkinter window
-    root = Tk()
-    root.title("Data Analysis GUI")
 
-    # Add label and button to the window
-    label = Label(root, text="Click the button to select a CSV file:")
-    label.pack(pady=10)
 
-    button = Button(root, text="Browse", command=lambda: browse_file(root))
-    button.pack(pady=10)
+
+
+    window = Tk()
+    window.config(background="red")
+    window.title("Data GUI")
+    window.geometry("800x500")
+    frameTopMenu = Frame(window, width=1000, height=30)
+    frameTopMenu.config(bg="blue")
+    frameTopMenu.pack(side='top')
+    frameTopMenu.pack_propagate(False)
+    
+
+    quitButton = Button(frameTopMenu, text="Quit", command=lambda: [window.quit()]) 
+    quitButton.pack(side='right') 
+    micrometerControlButton = Button(frameTopMenu, text="micrometer control")
+    micrometerControlButton.pack(side="left")
+
+
+    button = Button(frameTopMenu, text="browse for data file", command=lambda: [browse_file(window)])
+    button.pack(side='left')
 
     # Run the Tkinter event loop
-    root.mainloop()
+    window.mainloop()
 
 run()
