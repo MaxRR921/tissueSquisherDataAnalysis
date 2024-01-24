@@ -13,7 +13,6 @@ from tkinter import Tk, Label, Button, filedialog, Frame
 def analyze_data(file_path):
     # Read CSV file
     df = pd.read_csv(file_path, usecols=['Time Stamp [s]', 'Stokes 1', 'Stokes 2', 'Stokes 3'])
-
     pd.set_option('display.precision', 6)
     print(df)
 
@@ -24,8 +23,6 @@ def analyze_data(file_path):
     s1List = np.array(df['Stokes 1'].values)
     s2List = np.array(df['Stokes 2'].values)
     s3List = np.array(df['Stokes 3'].values)
-
-
 
 
     #convert stokes vector to polar coordinates (radius = 1)
@@ -125,6 +122,8 @@ def analyze_data(file_path):
 
     return timeList, strain, phase, s1List, s2List, s3List
 
+
+
 def browse_file(window):
     file_path = filedialog.askopenfilename(filetypes=[('CSV Files', '*.csv')])
     if file_path:
@@ -197,9 +196,6 @@ def browse_file(window):
 
 def run():
 
-
-
-
     window = Tk()
     window.config(background="red")
     window.title("Data GUI")
@@ -223,3 +219,4 @@ def run():
     window.mainloop()
 
 run()
+
