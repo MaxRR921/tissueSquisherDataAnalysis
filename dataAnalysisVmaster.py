@@ -4,11 +4,8 @@ import pandas as pd
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from tkinter import Tk, Label, Button, filedialog, Frame
+#TODO TAke out unnecessary imports 
 
-
-
-
-#hello
 
 def analyze_data(file_path):
     # Read CSV file
@@ -121,102 +118,4 @@ def analyze_data(file_path):
     strain = (timeList * rate) / thick
 
     return timeList, strain, phase, s1List, s2List, s3List
-
-
-
-def browse_file(window):
-    file_path = filedialog.askopenfilename(filetypes=[('CSV Files', '*.csv')])
-    if file_path:
-        timeList, strain, phase, s1List, s2List, s3List = analyze_data(file_path)
-       
-
-        # Write the analyzed data into a .csv file
-        data = np.vstack((timeList, strain, phase)).T
-        filename = 'analyzed_data.csv'
-        np.savetxt(filename, data, delimiter=',', header='time (s),strain (mm/mm),phase (pi radians)', comments='')
-
-        # Plot phase vs. strain
-        fig2, ax2 = plt.subplots()
-        fig2.set_figheight(4)
-        fig2.set_figwidth(4)
-        ax2.plot(strain, phase)
-        ax2.set_title('Phase vs. Strain')
-        ax2.set_xlabel('Strain (mm/mm)')
-        ax2.set_ylabel('Phase (pi radians)')
-       
-        
-
-
-        frameGraphs = Frame(window, width=800, height=400)
-        frameGraphs.pack()
-        frameGraphs.pack_propagate(False)
-        # Embed the Matplotlib graph in Tkinter
-        canvas1 = FigureCanvasTkAgg(fig2, master=frameGraphs)
-        canvas1.get_tk_widget().pack(side="left")
-
-        # # Create NavigationToolbar
-        # toolbar = NavigationToolbar2Tk(canvas1, frame)
-        # canvas1_widget = canvas1.get_tk_widget()
-        # canvas1_widget.pack(side='left', fill='both', expand=True)
-
-        # Plot circle trace on sphere (for reference)
-        fig3 = plt.figure()
-        ax3 = fig3.add_subplot(111, projection='3d')
-        fig3.set_figheight(4)
-        fig3.set_figwidth(5)
-
-        phi = np.linspace(0, np.pi, 100)
-        theta = np.linspace(0, 2 * np.pi, 100)
-        phi, theta = np.meshgrid(phi, theta)
-        x = np.sin(phi) * np.cos(theta)
-        y = np.sin(phi) * np.sin(theta)
-        z = np.cos(phi)
-        ax3.plot_wireframe(x, y, z, color='r', alpha=0.5, linewidth=0.1)
-        #fig3.set_figheight(400)
-        #fig3.set_figwidth(350)
-
-
-        ax3.scatter(s1List, s2List, s3List)
-        ax3.set_xlabel('s1')
-        ax3.set_ylabel('s2')
-        ax3.set_zlabel('s3')
-        ax3.set_title('Circle Trace on Sphere')
-
-         # Embed the Matplotlib graph in Tkinter
-        canvas1 = FigureCanvasTkAgg(fig3, master=frameGraphs)
-        canvas1_widget = canvas1.get_tk_widget()
-        canvas1.get_tk_widget().pack(side="left")
-
-        # # Create NavigationToolbar
-        # toolbar = NavigationToolbar2Tk(canvas1, frame)
-        # canvas1_widget = canvas1.get_tk_widget()
-        # canvas1_widget.pack(side='left', fill='both', expand=True)
-
-        #plt.show()
-
-def run():
-
-    window = Tk()
-    window.config(background="red")
-    window.title("Data GUI")
-    window.geometry("800x500")
-    frameTopMenu = Frame(window, width=1000, height=30)
-    frameTopMenu.config(bg="blue")
-    frameTopMenu.pack(side='top')
-    frameTopMenu.pack_propagate(False)
-    
-
-    quitButton = Button(frameTopMenu, text="Quit", command=lambda: [window.quit()]) 
-    quitButton.pack(side='right') 
-    micrometerControlButton = Button(frameTopMenu, text="micrometer control")
-    micrometerControlButton.pack(side="left")
-
-
-    button = Button(frameTopMenu, text="browse for data file", command=lambda: [browse_file(window)])
-    button.pack(side='left')
-
-    # Run the Tkinter event loop
-    window.mainloop()
-
-run()
 
