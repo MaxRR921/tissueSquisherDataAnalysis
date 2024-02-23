@@ -63,7 +63,7 @@ def browse_file(window):
 # analyzes data using dataAnalysisVmaster and plots data
 def plot(file_path, window):
     timeList, strain, phase, s1List, s2List, s3List = dataAnalysisVmaster.analyze_data(file_path)
-
+    
     # Write the analyzed data into a .csv file
     data = np.vstack((timeList, strain, phase)).T
     filename = 'analyzed_data.csv'
