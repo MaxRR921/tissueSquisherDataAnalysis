@@ -33,6 +33,8 @@ def topMenu(window):
     quitButton(frameTopMenu, window)
     micrometerControlButton(frameTopMenu, window)
     browseDataFileButton(frameTopMenu, window)
+    debugButton(frameTopMenu, window)
+
     
     
 
@@ -50,7 +52,9 @@ def browseDataFileButton(frameTopMenu, window):
     browseDataFileButton = Button(frameTopMenu, text="browse for data file", command=lambda: [browse_file(window)])
     browseDataFileButton.pack(side='left')
     
-
+def debugButton (frameTopMenu, window):
+    debugButton = Button(frameTopMenu, text = "debugButton", command=lambda: [debug_button(window)])
+    debugButton.pack(side="left")
 
 
 # browse file button helper method
@@ -59,6 +63,13 @@ def browse_file(window):
     if(file_path):
         plot(file_path, window)
 
+
+#put debug button method
+def debug_button(window):
+    file_path = filedialog.askopenfilename(filetypes=[('CSV Files', '*.csv')])
+    if(file_path):
+        dataAnalysisVmaster.analyze_data_test(file_path)
+    
 
 # analyzes data using dataAnalysisVmaster and plots data
 def plot(file_path, window):
