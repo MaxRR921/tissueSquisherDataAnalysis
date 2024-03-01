@@ -47,7 +47,7 @@ def analyze_data(file_path):
     #convert stokes vector to polar coordinates (radius = 1)
     #LAB: TALK TO DR. HARRISON ABOUT PRECISION
     sx = np.sqrt((s1List*s1List)+(s2List*s2List)) #tested
-   # print("sx: " + str(sx))
+    #print("sx: " + str(sx))
     theta = np.arctan2(s2List,s1List) #tested
     #print("theta: " + str(theta))
     psi = np.arctan2(s3List, sx) #tested
@@ -57,7 +57,7 @@ def analyze_data(file_path):
     wrapCount = 0 #tested
     #print("wrapcount: " + str(wrapCount))
     thetaCounter = np.zeros(len(theta)) #tested
-   # print("thetaCounter: " + str(thetaCounter))
+    print("thetaCounter: " + str(thetaCounter))
 
     # theta can have sign issues based on where it is on the sphere.
     # This code fixes those problems by making sure there isn't a sudden sign-change jump. ???
@@ -71,7 +71,7 @@ def analyze_data(file_path):
 
 
     theta = theta + thetaCounter; #tested
-   # print("theta after for loop: " + str(theta))
+    print("theta after for loop: " + str(theta))
     #print(wrapCount)
    # print("wrapCount after for loop: " + str(wrapCount))
 
@@ -80,26 +80,30 @@ def analyze_data(file_path):
     #print("n: " + str(n))
    #print("n: " + str(n))
     xx=theta*theta #tested
-   # print("xx: " + str(xx))
+    #print("xx: " + str(xx))
     yy=psi*psi #tested
-   # print("yy: " + str(yy))
+    #print("yy: " + str(yy))
     xy=theta*psi #tested
-   # print("xy " + str(xy))
+    #print("xy " + str(xy))
     #A=[sum(theta) sum(psi) n;sum(xy) sum(yy) sum(psi);sum(xx) sum(xy) sum(theta)]
-    A = np.array([[np.sum(theta), np.sum(psi), n],
-                [np.sum(xy), np.sum(yy), np.sum(psi)],
-                [np.sum(xx), np.sum(xy), np.sum(theta)]]) #tested
-   # print("A " + str(A))
+    print("THETASUM")
+    print(str(np.nansum(theta)))
+    A = np.array([[np.nansum(theta), np.nansum(psi), n],
+                [np.nansum(xy), np.nansum(yy), np.nansum(psi)],
+                [np.nansum(xx), np.nansum(xy), np.nansum(theta)]]) #tested
+    print("A " + str(A))
 
     B = np.array([
         -np.sum(xx + yy),
         -np.sum(xx * psi + yy * psi),
         -np.sum(xx * theta + xy * psi)
     ]) #tested
-    #print("B: " + str(B))
+
+    print("B: " + str(B))
 
 
     a = np.linalg.solve(A, B) #solves for x vector in Ax = B #tested
+    #print(a)
     #print("a: " + str(a))
 
 
@@ -112,8 +116,12 @@ def analyze_data(file_path):
 
 
     # Create x and y coordinates with rotation
+    #print(s1List)
+    #print(s3List)
     x = s1List * np.sin(-xc) + s2List * np.cos(-xc)
     y = s3List
+    #print(x)
+    #print(y)
 
     # Find the angle of the circle (phase)
     phase = np.arctan2(y, x) / np.pi
@@ -135,12 +143,18 @@ def analyze_data(file_path):
     phase = (phase + phaseCounter - phase[0])  # Normalize phase
 
     # Convert time to strain based on rate of micrometer motion
-    thick = 3  # thickness of the samples in mm
+    #TODO add to GUI
+    thick = 3  # thickness of the samples in mm ADD 
     rate = 0.1  # rate of the micrometer (compression rate in mm/s)
     #print(timeList)
     ttimeList = [rate*x for x in timeList]
     strain = [x/thick for x in timeList]
-
+    #print(timeList)
+    #print(strain)
+   # print(phase)
+    #print(s1List)
+    #print(s2List)
+   #print(s3List)
     return timeList, strain, phase, s1List, s2List, s3List
 
 # Function to convert the values
@@ -175,3 +189,10 @@ def convert_to_new_format(value):
     formatted_result = f"{whole_seconds}.{remaining_milliseconds}"
     return formatted_result
 
+#[0.00e+00 3.00e-02 6.00e-02 ... 3.06e+01 3.07e+01 3.07e+01]
+# [0.00000000e+00 5.68181818e-04 1.13636364e-03 ... 5.79545455e-01
+#  5.81439394e-01 5.81439394e-01]
+# [ 0.          0.00068759  0.00133802 ... -0.02194984 -0.02235562
+#  -0.02269304]
+# [0.457 0.455 0.455 ... 0.528 0.53  0.53 ]
+# [-0.247 -0.248 -0.25  ... -0.222 -0.222 -0.221]
