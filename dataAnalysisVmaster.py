@@ -12,7 +12,7 @@ def analyze_data(file_path):
     df = pd.read_csv(file_path, usecols=['Time Stamp [s]', 'Stokes 1', 'Stokes 2', 'Stokes 3'])
     pd.set_option('display.precision', 6)
     #print(df)
-
+    
     #this is all depending on the file, TODO: make standardized for many different files
     #put the data into appropriate vectors
     timeList = np.array(df['Time Stamp [s]'].values)
