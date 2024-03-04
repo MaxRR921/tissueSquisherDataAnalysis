@@ -5,25 +5,24 @@ import pandas as pd
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from tkinter import Tk, Label, Button, filedialog, Frame
+import controller
 #TODO: take out unnecessary imports
-def run():
-    window = setupWindow()
-   
+def run(ser):
+    window = setupWindow(ser)
     window.mainloop()
-   
     
-
-def setupWindow():
+   
+def setupWindow(ser):
     window = Tk()
     window.config(background="red")
     window.title("Data GUI")
     window.geometry("800x500")
-    topMenu(window)
+    topMenu(window, ser)
     
     return window
 
 
-def topMenu(window):
+def topMenu(window, ser):
     frameTopMenu = Frame(window, width=1000, height=30)
     frameTopMenu.config(bg="blue")
     frameTopMenu.pack(side='top')
@@ -31,8 +30,9 @@ def topMenu(window):
 
     #buttons
     quitButton(frameTopMenu, window)
-    micrometerControlButton(frameTopMenu, window)
+    micrometerControlButton(frameTopMenu, window, ser)
     browseDataFileButton(frameTopMenu, window)
+    micrometerEnterDisableStateButton(frameTopMenu, window, ser)
     
     
 
@@ -41,10 +41,13 @@ def quitButton(frameTopMenu, window):
     quitButton = Button(frameTopMenu, text="Quit", command=lambda: [window.quit()]) 
     quitButton.pack(side='right') 
 
-def micrometerControlButton(frameTopMenu, window):
-    micrometerControlButton = Button(frameTopMenu, text="micrometer control")
+def micrometerControlButton(frameTopMenu, window, ser):
+    micrometerControlButton = Button(frameTopMenu, text="initialize micrometer", command=lambda: [controller.goHome(ser)])
     micrometerControlButton.pack(side="left")
 
+def micrometerEnterDisableStateButton(frameTopMenu, window, ser):
+    micrometerEnterDisableStateButton = Button(frameTopMenu, text="micrometer enter disable state", command=lambda: [controller.disable(ser)])
+    micrometerEnterDisableStateButton.pack(side="left")
 
 def browseDataFileButton(frameTopMenu, window):
     browseDataFileButton = Button(frameTopMenu, text="browse for data file", command=lambda: [browse_file(window)])
