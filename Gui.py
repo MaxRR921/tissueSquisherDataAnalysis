@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
-from tkinter import Tk, Label, Button, filedialog, Frame
+import tkinter as tk
 import controller
 #TODO: take out unnecessary imports
 def run(ser):
@@ -13,7 +13,7 @@ def run(ser):
     
    
 def setupWindow(ser):
-    window = Tk()
+    window = tk.Tk()
     window.config(background="red")
     window.title("Data GUI")
     window.geometry("800x500")
@@ -23,7 +23,7 @@ def setupWindow(ser):
 
 
 def topMenu(window, ser):
-    frameTopMenu = Frame(window, width=1000, height=30)
+    frameTopMenu = tk.Frame(window, width=1000, height=30)
     frameTopMenu.config(bg="blue")
     frameTopMenu.pack(side='top')
     frameTopMenu.pack_propagate(False)
@@ -33,32 +33,35 @@ def topMenu(window, ser):
     micrometerControlButton(frameTopMenu, window, ser)
     browseDataFileButton(frameTopMenu, window)
     micrometerEnterDisableStateButton(frameTopMenu, window, ser)
-    
+    openMicrometerMenuButton(frameTopMenu, window, ser)
     
 
-#button definitions
+#button definitions - main window
 def quitButton(frameTopMenu, window):
-    quitButton = Button(frameTopMenu, text="Quit", command=lambda: [window.quit()]) 
+    quitButton = tk.Button(frameTopMenu, text="Quit", command=lambda: [window.quit()]) 
     quitButton.pack(side='right') 
 
 def micrometerControlButton(frameTopMenu, window, ser):
-    micrometerControlButton = Button(frameTopMenu, text="initialize micrometer", command=lambda: [controller.goHome(ser)])
+    micrometerControlButton = tk.Button(frameTopMenu, text="initialize micrometer", command=lambda: [controller.goHome(ser)])
     micrometerControlButton.pack(side="left")
 
 def micrometerEnterDisableStateButton(frameTopMenu, window, ser):
-    micrometerEnterDisableStateButton = Button(frameTopMenu, text="micrometer enter disable state", command=lambda: [controller.disable(ser)])
+    micrometerEnterDisableStateButton = tk.Button(frameTopMenu, text="micrometer enter disable state", command=lambda: [controller.disable(ser)])
     micrometerEnterDisableStateButton.pack(side="left")
 
 def browseDataFileButton(frameTopMenu, window):
-    browseDataFileButton = Button(frameTopMenu, text="browse for data file", command=lambda: [browse_file(window)])
+    browseDataFileButton = tk.Button(frameTopMenu, text="browse for data file", command=lambda: [browse_file(window)])
     browseDataFileButton.pack(side='left')
     
+def openMicrometerMenuButton(frameTopMenu, window, ser):
+    openMicrometerMenu = tk.Button(frameTopMenu, text="micrometer menu", command=lambda: [micromenterControlWindow(ser)])
+    openMicrometerMenu.pack(side="left")
 
 
 
 # browse file button helper method
 def browse_file(window):
-    file_path = filedialog.askopenfilename(filetypes=[('CSV Files', '*.csv')])
+    file_path = tk.filedialog.askopenfilename(filetypes=[('CSV Files', '*.csv')])
     if(file_path):
         plot(file_path, window)
 
@@ -73,7 +76,7 @@ def plot(file_path, window):
     np.savetxt(filename, data, delimiter=',', header='time (s),strain (mm/mm),phase (pi radians)', comments='')
 
     #setup tkinter frame for graphs
-    frameGraphs = Frame(window, width=800, height=400)
+    frameGraphs = tk.Frame(window, width=800, height=400)
     frameGraphs.pack()
     frameGraphs.pack_propagate(False)
 
@@ -114,3 +117,60 @@ def plot(file_path, window):
     canvas1 = FigureCanvasTkAgg(fig3, master=frameGraphs)
     canvas1_widget = canvas1.get_tk_widget()
     canvas1.get_tk_widget().pack(side="left")
+
+
+
+def micromenterControlWindow(ser):
+    
+    # Toplevel object which will 
+    # be treated as a new window
+    micrometerWindow = tk.Tk()
+
+    # sets the title of the
+    # Toplevel widget
+    micrometerWindow.title("New Window")
+
+    # sets the geometry of toplevel
+    micrometerWindow.geometry("400x400")
+
+    # A Label widget to show in toplevel
+    tk.Label(micrometerWindow, 
+            text ="micrometer controls").pack()
+    
+    micrometerButtons(micrometerWindow, ser)
+
+
+#micrometer control window buttons:
+def micrometerButtons(micrometerWindow, ser) : 
+    micrometerMenu = tk.Frame(micrometerWindow, width=1000, height=500)
+    micrometerMenu.config(bg="blue")
+    micrometerMenu.pack(side='top')
+    micrometerMenu.pack_propagate(False)
+    setHeightFrame(micrometerMenu, micrometerWindow, ser)
+
+
+
+def setHeightFrame(frame, micrometerWindow, ser):
+    heightFrame = tk.Frame(frame, width=100, height=100)
+    heightFrame.config(bg="green")
+    heightFrame.pack(side="left")
+    heightFrame.pack_propagate(False)
+
+    setHeightLabel = tk.Label(heightFrame, text="Set the height")
+    inputtxt = tk.Text(heightFrame, height = 1, width = 10) 
+     
+    setHeightButton = tk.Button(heightFrame, text="goTo", command=lambda: [controller.goToHeight(inputtxt.get("1.0", "end-1c") , ser)])
+    setHeightButton.pack(side="bottom")
+    inputtxt.pack(side="bottom")
+    setHeightLabel.pack("top")
+   
+                   
+
+
+
+
+
+
+
+
+

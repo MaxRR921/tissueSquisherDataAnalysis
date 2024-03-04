@@ -47,3 +47,13 @@ def onQuit(ser):
 
 def readResponse(response):
     print(str(response))
+
+def goToHeight(inp, ser):
+
+    theStr = "1" + "PA" + inp + "\r\n"
+    print(theStr)
+    inBytes = bytes(theStr, 'utf-8')
+    print(str(inBytes))
+    ser.write(inBytes)
+   
+
