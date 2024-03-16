@@ -28,6 +28,7 @@ def initialize():
         # print("Disconnected")
     except serial.SerialException as e:
         print("Serial connection error:", e)
+        
     return ser
 
 def goHome(ser): 
@@ -55,5 +56,6 @@ def goToHeight(inp, ser):
     inBytes = bytes(theStr, 'utf-8')
     print(str(inBytes))
     ser.write(inBytes)
+
    
 
