@@ -162,7 +162,7 @@ def setHeightFrame(frame, micrometerWindow, ser):
     setHeightButton = tk.Button(heightFrame, text="goTo", command=lambda: [controller.goToHeight(inputtxt.get("1.0", "end-1c") , ser)])
     setHeightButton.pack(side="bottom")
     inputtxt.pack(side="bottom")
-    setHeightLabel.pack("top")
+    setHeightLabel.pack(side="top")
    
                    
 

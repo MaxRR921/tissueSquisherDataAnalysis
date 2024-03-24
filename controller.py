@@ -56,6 +56,7 @@ def goToHeight(inp, ser):
     inBytes = bytes(theStr, 'utf-8')
     print(str(inBytes))
     ser.write(inBytes)
+    time.sleep(0.1)
 
    
 
