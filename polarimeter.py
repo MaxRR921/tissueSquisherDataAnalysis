@@ -1,45 +1,46 @@
-"""
-Example Application for PAX1000 Polarimeters in Python with CTypes
+# """
+# Example Application for PAX1000 Polarimeters in Python with CTypes
 
-Tested with Python 3.10.0 (64 bit)
-"""
+# Tested with Python 3.10.0 (64 bit)
+# """
 
-import os
-import time
-import ctypes
-from ctypes import *
+# import os
+# import time
+# import ctypes
+# from ctypes import *
 
-# Load DLL library
-lib = cdll.LoadLibrary("C:\Program Files\IVI Foundation\VISA\Win64\Bin\TLPAX_64.dll")
+# # Load DLL library
+# lib = cdll.LoadLibrary("C:\Program Files\IVI Foundation\VISA\Win64\Bin\TLPAX_64.dll")
 
-# Detect and initialize PAX1000 device
-instrumentHandle = c_ulong()
-IDQuery = True
-resetDevice = False
-resource = c_char_p(b"")
-deviceCount = c_int()
+# # Detect and initialize PAX1000 device
+# instrumentHandle = c_ulong()
+# IDQuery = True
+# resetDevice = False
+# resource = c_char_p(b"")
+# deviceCount = c_int()
 
-# Check how many PAX1000 are connected
-lib.TLPAX_findRsrc(instrumentHandle, byref(deviceCount))
-if deviceCount.value < 1 :
-    print("No PAX1000 device found.")
-    exit()
-else:
-    print(deviceCount.value, "PAX1000 device(s) found.")
-    print("")
+# # Check how many PAX1000 are connected
+# lib.TLPAX_findRsrc(instrumentHandle, byref(deviceCount))
+# if deviceCount.value < 1 :
+#     print("No PAX1000 device found.")
+#     exit()
+# else:
+#     print(deviceCount.value, "PAX1000 device(s) found.")
+#     print("")
 
-# Connect to the first available PAX1000
-lib.TLPAX_getRsrcName(instrumentHandle, 0, resource)
-if (0 == lib.TLPAX_init(resource.value, IDQuery, resetDevice, byref(instrumentHandle))):
-    print("Connection to first PAX1000 initialized.")
-else:
-    print("Error with initialization.")
-    exit()
-print("")
+# # Connect to the first available PAX1000
+# lib.TLPAX_getRsrcName(instrumentHandle, 0, resource)
+# if (0 == lib.TLPAX_init(resource.value, IDQuery, resetDevice, byref(instrumentHandle))):
+#     print("Connection to first PAX1000 initialized.")
+# else:
+#     print("Error with initialization.")
+#     exit()
+# print("")
 
-# Short break to make sure the device is correctly initialized
-time.sleep(2)
-
+# # Short break to make sure the device is correctly initialized
+# time.sleep(2)
+def test():
+    print("RUNS")
 # # Make settings
 # lib.TLPAX_setMeasurementMode(instrumentHandle, 9)
 # lib.TLPAX_setWavelength(instrumentHandle, c_double(633e-9))
@@ -58,7 +59,7 @@ time.sleep(2)
 # print("")
 
 # Short break
-time.sleep(5)
+#time.sleep(5)
 
 # Take 5 measurements and output values
 # for x in range (5):
@@ -78,5 +79,5 @@ time.sleep(5)
 #     time.sleep(0.5)
 
 # Close
-lib.TLPAX_close(instrumentHandle)
-print("Connection to PAX1000 closed.")
+#lib.TLPAX_close(instrumentHandle)
+#print("Connection to PAX1000 closed.")
