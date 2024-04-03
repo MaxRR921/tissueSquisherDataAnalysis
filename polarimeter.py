@@ -61,22 +61,22 @@ def test():
     # Short break
     #time.sleep(5)
 
-    # Take 5 measurements and output values
-    # for x in range (5):
-    #     revolutionCounter = c_int()
-    #     scanID = c_int()
-    #     lib.TLPAX_getLatestScan(instrumentHandle, byref(scanID))
+    #Take 5 measurements and output values
+    for x in range (5):
+        revolutionCounter = c_int()
+        scanID = c_int()
+        lib.TLPAX_getLatestScan(instrumentHandle, byref(scanID))
 
-    #     print("Measurement", (x+1))
-    #     azimuth = c_double()
-    #     ellipticity = c_double()
-    #     lib.TLPAX_getPolarization(instrumentHandle, scanID.value, byref(azimuth), byref(ellipticity))
-    #     print("Azimuth [rad]: ", azimuth.value)
-    #     print("Ellipticity [rad]: ", ellipticity.value)
-    #     print("")
+        print("Measurement", (x+1))
+        azimuth = c_double()
+        ellipticity = c_double()
+        lib.TLPAX_getPolarization(instrumentHandle, scanID.value, byref(azimuth), byref(ellipticity))
+        print("Azimuth [rad]: ", azimuth.value)
+        print("Ellipticity [rad]: ", ellipticity.value)
+        print("")
 
-    #     lib.TLPAX_releaseScan(instrumentHandle, scanID)
-    #     time.sleep(0.5)
+        lib.TLPAX_releaseScan(instrumentHandle, scanID)
+        time.sleep(0.5)
 
     # Close
     lib.TLPAX_close(instrumentHandle)
