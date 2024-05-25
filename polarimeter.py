@@ -11,14 +11,14 @@ from ctypes import *
 def test():
 # # Load DLL library
     lib = cdll.LoadLibrary("C:\Program Files\IVI Foundation\VISA\Win64\Bin\TLPAX_64.dll")
-
+    
     # Detect and initialize PAX1000 device
     instrumentHandle = c_ulong()
     IDQuery = True
     resetDevice = False
     resource = c_char_p(b"")
     deviceCount = c_int()
-
+    lib.TLPAX_
     # Check how many PAX1000 are connected
     lib.TLPAX_findRsrc(instrumentHandle, byref(deviceCount))
     if deviceCount.value < 1 :
@@ -47,16 +47,16 @@ def test():
     # lib.TLPAX_setBasicScanRate(instrumentHandle, c_double(60))
 
     # Check settings
-    # wavelength = c_double()
-    # lib.TLPAX_getWavelength(instrumentHandle, byref(wavelength))
-    # print("Set wavelength [nm]: ", wavelength.value*1e9)
-    # mode = c_int()
-    # lib.TLPAX_getMeasurementMode(instrumentHandle, byref(mode))
-    # print("Set mode: ", mode.value)
-    # scanrate = c_double()
-    # lib.TLPAX_getBasicScanRate(instrumentHandle, byref(scanrate))
-    # print("Set scanrate: ", scanrate.value)
-    # print("")
+    wavelength = c_double()
+    lib.TLPAX_getWavelength(instrumentHandle, byref(wavelength))
+    print("Set wavelength [nm]: ", wavelength.value*1e9)
+    mode = c_int()
+    lib.TLPAX_getMeasurementMode(instrumentHandle, byref(mode))
+    print("Set mode: ", mode.value)
+    scanrate = c_double()
+    lib.TLPAX_getBasicScanRate(instrumentHandle, byref(scanrate))
+    print("Set scanrate: ", scanrate.value)
+    print("")
 
     # Short break
     #time.sleep(5)
