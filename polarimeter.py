@@ -64,6 +64,7 @@ def test():
     for x in range (5):
         revolutionCounter = c_int()
         scanID = c_int()
+        print("SCAN ID IS" + scanID)
         lib.TLPAX_getLatestScan(instrumentHandle, byref(scanID))
 
         print("Measurement", (x+1))
