@@ -18,7 +18,6 @@ def test():
     resetDevice = False
     resource = c_char_p(b"")
     deviceCount = c_int()
-    lib.TLPAX_
     # Check how many PAX1000 are connected
     lib.TLPAX_findRsrc(instrumentHandle, byref(deviceCount))
     if deviceCount.value < 1 :
