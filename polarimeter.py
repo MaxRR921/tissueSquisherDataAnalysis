@@ -66,11 +66,10 @@ def test():
         scanID = c_int()
         lib.TLPAX_getLatestScan(instrumentHandle, byref(scanID))
         print("SCAN ID IS", scanID.value)
-
         print("Measurement", (x+1))
         azimuth = c_double()
         ellipticity = c_double()
-        lib.TLPAX_getPolarization(instrumentHandle, scanID.value, byref(azimuth), byref(ellipticity))
+        print(lib.TLPAX_getPolarization(instrumentHandle))
         print("Azimuth [rad]: ", azimuth.value)
         print("Ellipticity [rad]: ", ellipticity.value)
         print("")
