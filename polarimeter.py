@@ -11,7 +11,21 @@ from ctypes import *
 def test():
 # # Load DLL library
     lib = cdll.LoadLibrary("C:\Program Files\IVI Foundation\VISA\Win64\Bin\TLPAX_64.dll")
-    
+
+    #CHECK FUNCTIONS
+    dll_path = "C:\Program Files\IVI Foundation\VISA\Win64\Bin\TLPAX_64.dll"
+    if os.path.exists(dll_path):
+        pax1000_dll = ctypes.CDLL(dll_path)
+        print(f"Loaded DLL: {dll_path}")
+
+        # List the functions in the DLL
+        function_list = [func for func in dir(pax1000_dll) if not func.startswith('_')]
+        print("Functions in the DLL:")
+        for func in function_list:
+            print(func)
+    else:
+        print(f"Error: DLL not found at {dll_path}")
+
     # Detect and initialize PAX1000 device
     instrumentHandle = c_ulong()
     IDQuery = True
@@ -65,6 +79,7 @@ def test():
         revolutionCounter = c_int()
         scanID = c_int()
         lib.TLPAX_getLatestScan(instrumentHandle, byref(scanID))
+        lib.TLPAX
         print("SCAN ID IS", scanID.value)
         print("Measurement", (x+1))
         azimuth = c_double()
