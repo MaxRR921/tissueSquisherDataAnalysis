@@ -64,8 +64,8 @@ def test():
     for x in range (5):
         revolutionCounter = c_int()
         scanID = c_int()
-        print("SCAN ID IS", scanID.value)
         lib.TLPAX_getLatestScan(instrumentHandle, byref(scanID))
+        print("SCAN ID IS", scanID.value)
 
         print("Measurement", (x+1))
         azimuth = c_double()
