@@ -66,7 +66,7 @@ def test():
     #time.sleep(5)
 
     #Take 5 measurements and output values
-    for x in range (5):
+    for x in range (30):
         revolutionCounter = c_int()
         scanID = c_int()
         print("SCAN ID IS BEFORE", scanID.value)
