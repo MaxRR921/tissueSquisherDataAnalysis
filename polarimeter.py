@@ -20,6 +20,8 @@ def test():
     resource = c_char_p(b"")
     deviceCount = c_int()
     # Check how many PAX1000 are connected
+
+
     lib.TLPAX_findRsrc(instrumentHandle, byref(deviceCount))
     if deviceCount.value < 1 :
         print("No PAX1000 device found.")
@@ -65,6 +67,7 @@ def test():
     for x in range (5):
         revolutionCounter = c_int()
         scanID = c_int()
+        print("SCAN ID IS BEFORE", scanID.value)
         lib.TLPAX_getLatestScan(instrumentHandle, byref(scanID))
         print("SCAN ID IS", scanID.value)
         print("Measurement", (x+1))
