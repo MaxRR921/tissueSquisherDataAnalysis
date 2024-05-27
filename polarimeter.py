@@ -89,7 +89,7 @@ def test():
         print("")
 
         lib.TLPAX_releaseScan(instrumentHandle, scanID)
-        time.sleep(0.5)
+        time.sleep(3)
 
     # Close
     lib.TLPAX_close(instrumentHandle)
