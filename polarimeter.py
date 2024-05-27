@@ -23,6 +23,7 @@ def test():
 
 
     lib.TLPAX_findRsrc(instrumentHandle, byref(deviceCount))
+
     if deviceCount.value < 1 :
         print("No PAX1000 device found.")
         exit()
@@ -31,6 +32,7 @@ def test():
     #     print("")
 
     # # Connect to the first available PAX1000
+    print("INSTRUMENT HANDLE BEFORE IS ", instrumentHandle.value)
     lib.TLPAX_getRsrcName(instrumentHandle, 0, resource)
     if (0 == lib.TLPAX_init(resource.value, IDQuery, resetDevice, byref(instrumentHandle))):
         print("Connection to first PAX1000 initialized.")
@@ -38,7 +40,7 @@ def test():
         print("Error with initialization.")
         exit()
     print("")
-    print("INSTRUMENT HANDLE IS", instrumentHandle)
+    print("INSTRUMENT HANDLE IS", instrumentHandle.value)
     # # Short break to make sure the device is correctly initialized
     time.sleep(2)
 
@@ -46,7 +48,7 @@ def test():
     # # Make settings
     lib.TLPAX_setMeasurementMode(instrumentHandle, 9)
     # lib.TLPAX_setWavelength(instrumentHandle, c_double(633e-9))
-    # lib.TLPAX_setBasicScanRate(instrumentHandle, c_double(60))
+    lib.TLPAX_setBasicScanRate(instrumentHandle, c_double(60))
 
     # Check settings
     wavelength = c_double()
