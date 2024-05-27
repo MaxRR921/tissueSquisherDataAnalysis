@@ -36,7 +36,7 @@ def test():
         print("Error with initialization.")
         exit()
     print("")
-
+    print("INSTRUMENT HANDLE IS", instrumentHandle)
     # # Short break to make sure the device is correctly initialized
     time.sleep(2)
 
