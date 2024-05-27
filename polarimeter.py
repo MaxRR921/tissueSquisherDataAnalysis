@@ -44,7 +44,7 @@ def test():
 
 
     # # Make settings
-    # lib.TLPAX_setMeasurementMode(instrumentHandle, 9)
+    lib.TLPAX_setMeasurementMode(instrumentHandle, 9)
     # lib.TLPAX_setWavelength(instrumentHandle, c_double(633e-9))
     # lib.TLPAX_setBasicScanRate(instrumentHandle, c_double(60))
 
