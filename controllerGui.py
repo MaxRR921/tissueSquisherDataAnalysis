@@ -2,6 +2,7 @@ import dataAnalysisVmaster
 import numpy as np
 import tkinter as tk
 import controller
+from threading import Thread
 #TODO: take out unnecessary imports
 
 #WARNING DOESNT CLOSE MICROMETER UNTIL MAIN GUI WINDOW IS CLOSED
@@ -61,11 +62,13 @@ def setHeightFrame(frame, window, ser):
 
 
 def startMicrometerButton(frameTopMenu, window, ser):
-    micrometerControlButton = tk.Button(frameTopMenu, text="Start micrometer", command=lambda: [controller.goHome(ser)])
+    def start_micrometer():
+        thread = Thread(target = controller.goHome(ser))
+        thread.start()
+    micrometerControlButton = tk.Button(frameTopMenu, text="Start micrometer", command=lambda: [start_micrometer()])
     micrometerControlButton.pack(side="left")
 
 def micrometerEnterDisableStateButton(frameTopMenu, window, ser):
     micrometerEnterDisableStateButton = tk.Button(frameTopMenu, text="micrometer enter disable state", command=lambda: [controller.disable(ser)])
     micrometerEnterDisableStateButton.pack(side="left")
-
 
