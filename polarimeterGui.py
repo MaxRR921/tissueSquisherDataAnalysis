@@ -2,6 +2,7 @@ import dataAnalysisVmaster
 import numpy as np
 import tkinter as tk
 import polarimeter
+from threading import Thread
 #TODO: take out unnecessary imports
 
 #WARNING DOESNT CLOSE MICROMETER UNTIL MAIN GUI WINDOW IS CLOSED
@@ -44,5 +45,6 @@ def topMenu(window):
 
 
 def startPolarimeterButton(frameTopMenu, window):
-    micrometerControlButton = tk.Button(frameTopMenu, text="Start polarimeter", command=lambda: [polarimeter.test()])
+    thread = Thread(target = polarimeter.start(), args=[1])
+    micrometerControlButton = tk.Button(frameTopMenu, text="Start polarimeter", command=lambda: [thread.start()])
     micrometerControlButton.pack(side="left")

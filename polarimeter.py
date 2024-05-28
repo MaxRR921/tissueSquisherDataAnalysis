@@ -8,7 +8,10 @@ import os
 import time
 import ctypes
 from ctypes import *
-def test():
+from threading import Thread
+
+
+def start(num):
 # # Load DLL library
     lib = cdll.LoadLibrary("C:\Program Files\IVI Foundation\VISA\Win64\Bin\TLPAX_64.dll")
 
@@ -19,9 +22,9 @@ def test():
     resetDevice = False
     resource = c_char_p(b"")
     deviceCount = c_int()
+
+
     # Check how many PAX1000 are connected
-
-
     lib.TLPAX_findRsrc(instrumentHandle, byref(deviceCount))
 
     if deviceCount.value < 1 :
@@ -29,7 +32,7 @@ def test():
         exit()
     else:
         print(deviceCount.value, "PAX1000 device(s) found.")
-    #     print("")
+
 
     # # Connect to the first available PAX1000
     print("INSTRUMENT HANDLE BEFORE IS ", instrumentHandle.value)
@@ -41,13 +44,14 @@ def test():
         exit()
     print("")
     print("INSTRUMENT HANDLE IS", instrumentHandle.value)
+
+
     # # Short break to make sure the device is correctly initialized
-    time.sleep(2)
+    time.sleep(.1)
 
 
     # # Make settings
     lib.TLPAX_setMeasurementMode(instrumentHandle, 9)
-    # lib.TLPAX_setWavelength(instrumentHandle, c_double(633e-9))
     lib.TLPAX_setBasicScanRate(instrumentHandle, c_double(60))
 
     # Check settings
@@ -63,10 +67,10 @@ def test():
     print("")
 
     # Short break
-    #time.sleep(5)
+    time.sleep(.1)
 
-    #Take 5 measurements and output values
-    for x in range (30):
+
+    for x in range (num):
         revolutionCounter = c_int()
         scanID = c_int()
         print("SCAN ID IS BEFORE", scanID.value)
@@ -87,10 +91,12 @@ def test():
         print("S2 Normalized: ", s2.value)
         print("S3 Normalized: ", s3.value)
         print("")
-
-        lib.TLPAX_releaseScan(instrumentHandle, scanID)
         time.sleep(3)
-
+        lib.TLPAX_releaseScan(instrumentHandle, scanID)
     # Close
     lib.TLPAX_close(instrumentHandle)
     print("Connection to PAX1000 closed.")
+
+
+    
+    
