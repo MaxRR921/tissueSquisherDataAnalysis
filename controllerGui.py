@@ -21,10 +21,6 @@ def micromenterControlWindowSetup():
     
     micrometerButtons(window, ser)
     topMenu(window,ser)
-    def start_micrometer():
-        thread = Thread(target = controller.goHome(ser))
-        thread.start()
-    start_micrometer()
     return window, ser
 
 
