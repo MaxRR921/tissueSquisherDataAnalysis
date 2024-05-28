@@ -32,7 +32,7 @@ def initialize():
     return ser
 
 def goHome(ser): 
-    ser.write(b'1OR?\r\n')
+    #ser.write(b'1OR?\r\n')
     readResponse(ser.readline().decode().strip())
 
 
