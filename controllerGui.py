@@ -15,9 +15,11 @@ def run():
 def micromenterControlWindowSetup():
     ser = controller.initialize()
     window = tk.Tk()
-
     window.title("New Window")
-
+    def start_micrometer():
+        thread = Thread(target = controller.goHome(ser))
+        thread.start()
+    start_micrometer()
     window.geometry("400x400")
     
     micrometerButtons(window, ser)
