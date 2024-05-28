@@ -47,7 +47,7 @@ def start(num):
 
 
     # # Short break to make sure the device is correctly initialized
-    time.sleep(.1)
+    time.sleep(5)
 
 
     # # Make settings
