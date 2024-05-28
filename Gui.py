@@ -6,6 +6,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 import tkinter as tk
 import controllerGui
+import polarimeterGui
 #TODO: take out unnecessary imports
 def run():
     window = setupWindow()
