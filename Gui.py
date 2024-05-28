@@ -36,6 +36,8 @@ def topMenu(window):
    
     openMicrometerMenuButton(frameTopMenu, window)
     
+    openPolarimeterMenuButton(frameTopMenu, window)
+    
 
 #button definitions - main window
 def quitButton(frameTopMenu, window):
@@ -50,6 +52,9 @@ def openMicrometerMenuButton(frameTopMenu, window):
     openMicrometerMenu = tk.Button(frameTopMenu, text="micrometer menu", command=lambda: [controllerGui.run()])
     openMicrometerMenu.pack(side="left")
 
+def openPolarimeterMenuButton(frameTopMenu, window):
+    openPolarimeterMenu = tk.Button(frameTopMenu, text="polarimeter menu", command=lambda: [polarimeterGui.run()])
+    openPolarimeterMenu.pack(side="left")
     
 # browse file button helper method
 def browse_file(window):
