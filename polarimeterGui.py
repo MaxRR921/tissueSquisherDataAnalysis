@@ -18,13 +18,13 @@ def polarimeterControlWindowSetup():
 
     window.geometry("400x400")
     
-    micrometerButtons(window)
+    poalrimeterButtons(window)
     topMenu(window)
     return window
 
 
 #micrometer control window buttons:
-def micrometerButtons(window) : 
+def poalrimeterButtons(window) : 
     menu = tk.Frame(window, width=100, height=200)
     menu.config(bg="blue")
     menu.pack(side='bottom')
