@@ -40,8 +40,7 @@ def topMenu(window, ser):
     frameTopMenu.config(bg="red")
     frameTopMenu.pack(side='top')
     frameTopMenu.pack_propagate(False)
-    startMicrometerButton(frameTopMenu, window, ser)
-    micrometerEnterDisableStateButton(frameTopMenu, window, ser)
+   
 
 
 def setHeightFrame(frame, window, ser):
@@ -57,6 +56,8 @@ def setHeightFrame(frame, window, ser):
     setHeightButton.pack(side="bottom")
     inputtxt.pack(side="bottom")
     setHeightLabel.pack(side="top")
+    startMicrometerButton(heightFrame, window, ser)
+    micrometerEnterDisableStateButton(heightFrame, window, ser)
 
 
 
