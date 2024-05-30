@@ -33,12 +33,14 @@ def initialize():
 
 def goHome(ser): 
     ser.write(b'1OR?\r\n')
-    readResponse(ser.readline().decode().strip())
+    #readResponse(ser.readline().decode().strip())
+    time.sleep(0.1)
 
 
 def disable(ser):
     ser.write(b'1MM0\r\n')
-    readResponse(ser.readline().decode().strip())
+    #readResponse(ser.readline().decode().strip())
+    time.sleep(0.1)
 
 
 def onQuit(ser):
