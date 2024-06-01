@@ -23,7 +23,7 @@ class data_analyzer:
         cls.s1List = np.concatenate((cls.s1List, s1_temp))
         cls.s2List = np.concatenate((cls.s2List, s2_temp))
         cls.s3List = np.concatenate((cls.s3List, s3_temp))
-        timeList = np.concatenate((timeList, time_temp))
+        timeList = np.concatenate((cls.timeList, time_temp))
 
         print(cls.s1List)
         print(cls.s2List)
