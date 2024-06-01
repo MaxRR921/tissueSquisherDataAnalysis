@@ -12,7 +12,7 @@ class data_analyzer:
     s3List = np.array([])
     timeList = np.array([])
 
-    def analyze_data(s1, s2, s3, time):
+    def analyze_data(self, s1, s2, s3, time):
         #this is bad. will later need to use a different data structure
         s1_temp = np.array([s1])
         s2_temp = np.array([s2])
