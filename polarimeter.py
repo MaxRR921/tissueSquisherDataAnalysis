@@ -9,7 +9,7 @@ import time
 import ctypes
 from ctypes import *
 from threading import Thread
-
+import dataAnalysisVmaster
 
 def start(num):
 # # Load DLL library
@@ -69,6 +69,8 @@ def start(num):
     # Short break
     time.sleep(.1)
 
+    data_analyzer = dataAnalysisVmaster.data_analyzer()
+
 
     for x in range (num):
         revolutionCounter = c_int()
@@ -93,6 +95,9 @@ def start(num):
         print("")
         time.sleep(3)
         lib.TLPAX_releaseScan(instrumentHandle, scanID)
+        data_analyzer.analyze_data(s1.value, s2.value, s3.value, timeStamp)
+
+        
     # Close
     lib.TLPAX_close(instrumentHandle)
     print("Connection to PAX1000 closed.")
