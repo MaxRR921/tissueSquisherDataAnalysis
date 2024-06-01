@@ -93,9 +93,9 @@ def start(num):
         print("S2 Normalized: ", s2.value)
         print("S3 Normalized: ", s3.value)
         print("")
-        time.sleep(3)
         lib.TLPAX_releaseScan(instrumentHandle, scanID)
-        data_analyzer.analyze_data(s1.value, s2.value, s3.value, timeStamp)
+        data_analyzer.analyze_data(s1.value, s2.value, s3.value, timeStamp.value)
+        time.sleep(3)
 
         
     # Close
