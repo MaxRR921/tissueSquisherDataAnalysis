@@ -6,6 +6,29 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolb
 from tkinter import Tk, Label, Button, filedialog, Frame
 #TODO TAke out unnecessary imports 
 
+class data_analyzer:
+    s1List = np.array([])
+    s2List = np.array([])
+    s3List = np.array([])
+    timeList = np.array([])
+
+    def analyze_data(s1, s2, s3, time):
+        #this is bad. will later need to use a different data structure
+        s1_temp = np.array([s1])
+        s2_temp = np.array([s2])
+        s3_temp = np.array([s3])
+        time_temp = np.array([time])
+
+        s1List = np.concatenate(s1List, s1_temp)
+        s2List = np.concatenate(s2List, s2_temp)
+        s3List = np.concatenate(s3List, s3_temp)
+        timeList = np.concatenate(timeList, time_temp)
+
+        print(s1List)
+        print(s2List)
+        print(s3List)
+        print(timeList) 
+    
 
 def analyze_data(file_path):
     # Read CSV file
@@ -122,4 +145,6 @@ def analyze_data(file_path):
     print(s1List)
     print(s2List)
     return timeList, strain, phase, s1List, s2List, s3List
+
+
 
