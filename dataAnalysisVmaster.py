@@ -72,7 +72,9 @@ class data_analyzer:
                     [np.sum(xx), np.sum(xy), np.sum(theta)]]) #tested
         print("A " + str(A))
         det = np.linalg.det(A)
+        print("determinant is:")
         print(det)
+        print("that was det")
 
     #     B = np.array([
     #         -np.sum(xx + yy),
