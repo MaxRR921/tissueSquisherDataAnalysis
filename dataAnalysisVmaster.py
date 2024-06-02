@@ -75,60 +75,63 @@ class data_analyzer:
         print("determinant is:")
         print(det)
         print("that was det")
+        
+        B = np.array([
+            -np.sum(xx + yy),
+            -np.sum(xx * psi + yy * psi),
+            -np.sum(xx * theta + xy * psi)
+        ]) #tested
+        #print("B: " + str(B))
 
-    #     B = np.array([
-    #         -np.sum(xx + yy),
-    #         -np.sum(xx * psi + yy * psi),
-    #         -np.sum(xx * theta + xy * psi)
-    #     ]) #tested
-    #     #print("B: " + str(B))
+        if(np.linalg(det(A)) != 0):
+            a = np.linalg.solve(A, B) #solves for x vector in Ax = B #tested
 
-
-    #     a = np.linalg.solve(A, B) #solves for x vector in Ax = B #tested
-    # # print("a: " + str(a))
-
-
-    #     xc = -0.5 * a[0] #tested
-    # # print("xc " + str(xc))
-    #     yc = -0.5 * a[1] #tested
-    # # print("yc " + str(yc))
-    #     R = np.sqrt((a[0] ** 2 + a[1] ** 2) / 4 - a[2]) #tested
-    # # print("R " + str(R))
+        # print("a: " + str(a))
 
 
-    #     # Create x and y coordinates with rotation
-    #     x = cls.s1List * np.sin(-xc) + cls.s2List * np.cos(-xc)
-    #     y = cls.s3List
+            xc = -0.5 * a[0] #tested
+        # print("xc " + str(xc))
+            yc = -0.5 * a[1] #tested
+        # print("yc " + str(yc))
+            R = np.sqrt((a[0] ** 2 + a[1] ** 2) / 4 - a[2]) #tested
+        # print("R " + str(R))
 
-    #     # Find the angle of the circle (phase)
-    #     phase = np.arctan2(y, x) / np.pi
 
-    #     # Normalize the phase
-    #     k = len(phase)
-    #     phaseCounter = np.zeros(k)
-    #     wrapCount = 0
+            # Create x and y coordinates with rotation
+            x = cls.s1List * np.sin(-xc) + cls.s2List * np.cos(-xc)
+            y = cls.s3List
 
-    #     # Check for sign changes and update phaseCounter
-    #     for i in range(k-1):
-    #         if np.sign(x[i]) == -1:
-    #             if (np.sign(y[i]) == 1) and (np.sign(y[i+1]) == -1):
-    #                 wrapCount += 2
-    #             elif (np.sign(y[i]) == -1) and (np.sign(y[i+1]) == 1):
-    #                 wrapCount -= 2
-    #         phaseCounter[i+1] = wrapCount
+            # Find the angle of the circle (phase)
+            phase = np.arctan2(y, x) / np.pi
 
-    #     phase = (phase + phaseCounter - phase[0])  # Normalize phase
+            # Normalize the phase
+            k = len(phase)
+            phaseCounter = np.zeros(k)
+            wrapCount = 0
 
-    #     # Convert time to strain based on rate of micrometer motion
-    #     thick = 5.28  # thickness of the samples in mm
-    #     rate = 0.1  # rate of the micrometer (compression rate in mm/s)
-    #     strain = (cls.timeList * rate) / thick
-    #     print(cls.timeList)
-    #     print(strain)
-    #     print(phase)
-    #     print(cls.s1List)
-    #     print(cls.s2List)
-    #     return cls.timeList, strain, phase, cls.s1List, cls.s2List, cls.s3List
+            # Check for sign changes and update phaseCounter
+            for i in range(k-1):
+                if np.sign(x[i]) == -1:
+                    if (np.sign(y[i]) == 1) and (np.sign(y[i+1]) == -1):
+                        wrapCount += 2
+                    elif (np.sign(y[i]) == -1) and (np.sign(y[i+1]) == 1):
+                        wrapCount -= 2
+                phaseCounter[i+1] = wrapCount
+
+            phase = (phase + phaseCounter - phase[0])  # Normalize phase
+
+            # Convert time to strain based on rate of micrometer motion
+            thick = 5.28  # thickness of the samples in mm
+            rate = 0.1  # rate of the micrometer (compression rate in mm/s)
+            strain = (cls.timeList * rate) / thick
+            print(cls.timeList)
+            print(strain)
+            print(phase)
+            print(cls.s1List)
+            print(cls.s2List)
+            return cls.timeList, strain, phase, cls.s1List, cls.s2List, cls.s3List
+        else:
+            return "error"
 
 
 
