@@ -131,6 +131,7 @@ class data_analyzer:
             print(cls.s2List)
             return cls.timeList, strain, phase, cls.s1List, cls.s2List, cls.s3List
         else:
+            print("ERRORRR")
             return "error"
 
 
