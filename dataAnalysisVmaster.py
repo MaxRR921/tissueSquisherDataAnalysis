@@ -83,7 +83,7 @@ class data_analyzer:
         ]) #tested
         #print("B: " + str(B))
 
-        if(det.value != 0.0):
+        if(det != 0.0):
             a = np.linalg.solve(A, B) #solves for x vector in Ax = B #tested
 
         # print("a: " + str(a))
