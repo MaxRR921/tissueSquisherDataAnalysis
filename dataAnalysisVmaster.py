@@ -71,6 +71,8 @@ class data_analyzer:
                     [np.sum(xy), np.sum(yy), np.sum(psi)],
                     [np.sum(xx), np.sum(xy), np.sum(theta)]]) #tested
         print("A " + str(A))
+        det = np.linalg.det(A)
+        print(det)
 
     #     B = np.array([
     #         -np.sum(xx + yy),
