@@ -61,7 +61,7 @@ def setHeightFrame(frame, window, ser):
 
 
 def startMicrometerButton(frameTopMenu, window, ser):
-    def start_micrometer():
+    def startMicrometer():
         thread = Thread(target = controller.goHome, args=[ser])
         thread.start()
     micrometerControlButton = tk.Button(frameTopMenu, text="Start micrometer", command=lambda: [controller.goHome(ser)])

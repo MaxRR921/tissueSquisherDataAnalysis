@@ -6,21 +6,21 @@ import time
 
 def initialize(): 
    # Replace 'COM1' with the appropriate serial port identifier
-    serial_port = '/dev/cu.usbserial-FT82MKCO'
+    serialPort = '/dev/cu.usbserial-FT82MKCO'
 
 
     #port=None, baudrate=9600, bytesize=EIGHTBITS, parity=PARITY_NONE, 
     #stopbits=STOPBITS_ONE, timeout=None, xonxoff=False, rtscts=False, write_timeout=None, dsrdtr=False, inter_byte_timeout=None, exclusive=None)
     # Replace the baudrate and other parameters with those specific to your Conex-CC controller
-    baud_rate = 921600
+    baudRate = 921600
     parity = serial.PARITY_NONE
-    stop_bits = serial.STOPBITS_ONE
-    data_bits = serial.EIGHTBITS
+    stopBits = serial.STOPBITS_ONE
+    dataBits = serial.EIGHTBITS
     
 
     try:
         # Open serial port
-        ser = serial.Serial(serial_port, baud_rate, parity=parity, stopbits=stop_bits, bytesize=data_bits, timeout=1, xonxoff=True)
+        ser = serial.Serial(serialPort, baudRate, parity=parity, stopbits=stopBits, bytesize=dataBits, timeout=1, xonxoff=True)
         print("Connected to", ser.name)
         
         # Close serial port

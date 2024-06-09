@@ -69,7 +69,7 @@ def start(num):
     # Short break
     time.sleep(.1)
 
-    data_analyzer = dataAnalysisVmaster.data_analyzer()
+    dataAnalyzer = dataAnalysisVmaster.DataAnalyzer()
 
 
     for x in range (num):
@@ -94,7 +94,7 @@ def start(num):
         print("S3 Normalized: ", s3.value)
         print("")
         lib.TLPAX_releaseScan(instrumentHandle, scanID)
-        data_analyzer.analyze_data(s1.value, s2.value, s3.value, timeStamp.value)
+        dataAnalyzer.analyzeData(s1.value, s2.value, s3.value, timeStamp.value)
         time.sleep(3)
 
         

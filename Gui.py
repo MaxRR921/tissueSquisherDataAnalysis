@@ -45,7 +45,7 @@ def quitButton(frameTopMenu, window):
     quitButton.pack(side='right') 
 
 def browseDataFileButton(frameTopMenu, window):
-    browseDataFileButton = tk.Button(frameTopMenu, text="browse for data file", command=lambda: [browse_file(window)])
+    browseDataFileButton = tk.Button(frameTopMenu, text="browse for data file", command=lambda: [browseFile(window)])
     browseDataFileButton.pack(side='left')
 
 def openMicrometerMenuButton(frameTopMenu, window):
@@ -57,15 +57,15 @@ def openPolarimeterMenuButton(frameTopMenu, window):
     openPolarimeterMenu.pack(side="left")
     
 # browse file button helper method
-def browse_file(window):
-    file_path = tk.filedialog.askopenfilename(filetypes=[('CSV Files', '*.csv')])
-    if(file_path):
-        plot(file_path, window)
+def browseFile(window):
+    filePath = tk.filedialog.askopenfilename(filetypes=[('CSV Files', '*.csv')])
+    if(filePath):
+        plot(filePath, window)
 
 
 # analyzes data using dataAnalysisVmaster and plots data
-def plot(file_path, window):
-    timeList, strain, phase, s1List, s2List, s3List = dataAnalysisVmaster.analyze_data(file_path)
+def plot(filePath, window):
+    timeList, strain, phase, s1List, s2List, s3List = dataAnalysisVmaster.analyzeData(filePath)
     
     # Write the analyzed data into a .csv file
     data = np.vstack((timeList, strain, phase)).T
@@ -112,7 +112,7 @@ def plot(file_path, window):
 
     # Embed the Matplotlib graph in Tkinter
     canvas1 = FigureCanvasTkAgg(fig3, master=frameGraphs)
-    canvas1_widget = canvas1.get_tk_widget()
+    canvas1Widget = canvas1.get_tk_widget()
     canvas1.get_tk_widget().pack(side="left")
 
 

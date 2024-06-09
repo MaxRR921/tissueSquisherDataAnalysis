@@ -6,7 +6,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolb
 from tkinter import Tk, Label, Button, filedialog, Frame
 #TODO TAke out unnecessary imports 
 
-class data_analyzer:
+class DataAnalyzer:
 
     s1List = np.array([])
     s2List = np.array([])
@@ -14,16 +14,16 @@ class data_analyzer:
     timeList = np.array([])
 
     @classmethod
-    def analyze_data(cls, s1, s2, s3, time):
+    def analyzeData(cls, s1, s2, s3, time):
         #this is bad. will later need to use a different data structure
-        s1_temp = np.array([s1])
-        s2_temp = np.array([s2])
-        s3_temp = np.array([s3])
-        time_temp = np.array([time])
-        cls.s1List = np.concatenate((cls.s1List, s1_temp))
-        cls.s2List = np.concatenate((cls.s2List, s2_temp))
-        cls.s3List = np.concatenate((cls.s3List, s3_temp))
-        cls.timeList = np.concatenate((cls.timeList, time_temp))
+        s1Temp = np.array([s1])
+        s2Temp = np.array([s2])
+        s3Temp = np.array([s3])
+        timeTemp = np.array([time])
+        cls.s1List = np.concatenate((cls.s1List, s1Temp))
+        cls.s2List = np.concatenate((cls.s2List, s2Temp))
+        cls.s3List = np.concatenate((cls.s3List, s3Temp))
+        cls.timeList = np.concatenate((cls.timeList, timeTemp))
 
          #convert stokes vector to polar coordinates (radius = 1)
         #LAB: TALK TO DR. HARRISON ABOUT PRECISION

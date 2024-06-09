@@ -45,11 +45,11 @@ def topMenu(window):
 
 
 def startPolarimeterButton(frameTopMenu, window):
-    def start_polarimeter():
+    def startPolarimeter():
         thread = Thread(target = polarimeter.start, args=[10])
         thread.start()
        
-    micrometerControlButton = tk.Button(frameTopMenu, text="Start polarimeter", command=lambda: [start_polarimeter()])
+    micrometerControlButton = tk.Button(frameTopMenu, text="Start polarimeter", command=lambda: [startPolarimeter()])
     micrometerControlButton.pack(side="left")
 
 
