@@ -40,5 +40,5 @@ class PolarimeterGui():
             thread = Thread(target = self.pol.start, args=[10])
             thread.start()
         
-        micrometerControlButton = tk.Button(frameTopMenu, text="Start polarimeter", command=lambda: [self.__startPolarimeter()])
+        micrometerControlButton = tk.Button(frameTopMenu, text="Start polarimeter", command=lambda: [__startPolarimeter()])
         micrometerControlButton.pack(side="left")
