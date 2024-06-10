@@ -16,7 +16,6 @@ class ControllerGui:
         self.__micrometerButtons()
         self.__topMenu()
 
-        self.__run()
 
 
 
@@ -27,7 +26,7 @@ class ControllerGui:
         frameMicrometerMenu.pack_propagate(False)
         self.__setHeightFrame(frameMicrometerMenu)
             
-    def __run(self):
+    def run(self):
         self. window.mainloop()
                 
     def __setHeightFrame(self, frameMicrometerMenu):
