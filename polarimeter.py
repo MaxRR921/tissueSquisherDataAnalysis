@@ -14,7 +14,7 @@ import dataAnalysisVmaster
 
 class Polarimeter():
 
-    def start(numIterations):
+    def start(self, numIterations):
         #load dll library
         lib = cdll.LoadLibrary("C:\Program Files\IVI Foundation\VISA\Win64\Bin\TLPAX_64.dll")
 
