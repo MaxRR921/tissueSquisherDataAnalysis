@@ -8,7 +8,7 @@ from threading import Thread
 #WARNING DOESNT CLOSE MICROMETER UNTIL MAIN GUI WINDOW IS CLOSED
 class PolarimeterGui():
     def __init__(self):
-        polar = polarimeter.Polarimeter()
+        self.polar = polarimeter.Polarimeter()
 
     def run(self):
         self.window = tk.Tk()
