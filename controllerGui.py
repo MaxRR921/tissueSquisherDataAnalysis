@@ -13,9 +13,7 @@ class ControllerGui:
         self.window.title = ("Micrometer Control")
         self.window.geometry = ("400x400")
         self.ser = self.micrometerController.getSerialPort()
-        self.__micrometerButtons()
-        self.__topMenu()
-
+       
 
 
 
@@ -27,6 +25,8 @@ class ControllerGui:
         self.__setHeightFrame(frameMicrometerMenu)
             
     def run(self):
+        self.__micrometerButtons()
+        self.__topMenu()
         self. window.mainloop()
                 
     def __setHeightFrame(self, frameMicrometerMenu):
