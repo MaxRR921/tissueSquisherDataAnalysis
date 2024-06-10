@@ -59,7 +59,7 @@ class ControllerGui:
         micrometerControlButton = tk.Button(frameTopMenu, text="Start micrometer", command=lambda: [controller.goHome(self.ser)])
         micrometerControlButton.pack(side="left")
 
-    def micrometerEnterDisableStateButton(self, frameTopMenu):
+    def __micrometerEnterDisableStateButton(self, frameTopMenu):
         micrometerEnterDisableStateButton = tk.Button(frameTopMenu, text="micrometer enter disable state", command=lambda: [controller.disable(self.ser)])
         micrometerEnterDisableStateButton.pack(side="left")
 
