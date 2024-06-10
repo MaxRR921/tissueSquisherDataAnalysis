@@ -110,13 +110,3 @@ class Gui:
         canvas1 = FigureCanvasTkAgg(fig3, master=frameGraphs)
         canvas1Widget = canvas1.get_tk_widget()
         canvas1.get_tk_widget().pack(side="left")
-            
-
-
-
-
-
-
-
-
-
