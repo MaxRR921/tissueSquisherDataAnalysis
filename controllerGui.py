@@ -8,11 +8,11 @@ from threading import Thread
 #WARNING DOESNT CLOSE MICROMETER UNTIL MAIN GUI WINDOW IS CLOSED
 class ControllerGui:
     def __init__(self):
-        micrometerController = controller.Controller()
+        self.micrometerController = controller.Controller()
         self.window = tk.Tk()
         self.window.title = ("Micrometer Control")
         self.window.geometry = ("400x400")
-        self.ser = micrometerController.getSerialPort()
+        self.ser = self.micrometerController.getSerialPort()
         self.__micrometerButtons()
         self.__topMenu()
 
@@ -39,7 +39,7 @@ class ControllerGui:
         setHeightLabel = tk.Label(heightFrame, text="Set the height")
         inputtxt = tk.Text(heightFrame, height = 1, width = 10) 
         
-        setHeightButton = tk.Button(heightFrame, text="goTo", command=lambda: [controller.goToHeight(inputtxt.get("1.0", "end-1c") , self.ser)])
+        setHeightButton = tk.Button(heightFrame, text="goTo", command=lambda: [self.micrometerController.goToHeight(inputtxt.get("1.0", "end-1c") , self.ser)])
         setHeightButton.pack(side="bottom")
         inputtxt.pack(side="bottom")
         setHeightLabel.pack(side="top")
@@ -56,11 +56,11 @@ class ControllerGui:
         # def __startMicrometer(self):
         #     thread = Thread(target = controller.goHome, args=[self.ser])
         #     thread.start()
-        micrometerControlButton = tk.Button(frameTopMenu, text="Start micrometer", command=lambda: [controller.goHome(self.ser)])
+        micrometerControlButton = tk.Button(frameTopMenu, text="Start micrometer", command=lambda: [self.micrometerController.goHome(self.ser)])
         micrometerControlButton.pack(side="left")
 
     def __micrometerEnterDisableStateButton(self, frameTopMenu):
-        micrometerEnterDisableStateButton = tk.Button(frameTopMenu, text="micrometer enter disable state", command=lambda: [controller.disable(self.ser)])
+        micrometerEnterDisableStateButton = tk.Button(frameTopMenu, text="micrometer enter disable state", command=lambda: [self.micrometerController.disable(self.ser)])
         micrometerEnterDisableStateButton.pack(side="left")
 
 
