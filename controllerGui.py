@@ -39,8 +39,8 @@ class ControllerGui:
         setHeightLabel = tk.Label(heightFrame, text="Set the height")
         inputtxt = tk.Text(heightFrame, height = 1, width = 10) 
         
-        
-        setHeightButton = tk.Button(heightFrame, text="goTo", command=lambda: [self.micrometerController.goToHeight(inputtxt.get("1.0", "end-1c") , self.ser)])
+
+        setHeightButton = tk.Button(heightFrame, text="goTo", command=lambda: [self.micrometerController.goToHeight(inputtxt.get("1.0", "end-1c"))])
         setHeightButton.pack(side="bottom")
         inputtxt.pack(side="bottom")
         setHeightLabel.pack(side="top")
@@ -51,7 +51,7 @@ class ControllerGui:
         frameTopMenu.pack(side='top')
         frameTopMenu.pack_propagate(False)
         self.__startMicrometerButton(frameTopMenu)
-        self.__micrometerEnterDisableStateButton(frameTopMenu)
+        self.__disableMicrometerButton(frameTopMenu)
 
     def __startMicrometerButton(self, frameTopMenu):
         # def __startMicrometer(self):
@@ -60,7 +60,7 @@ class ControllerGui:
         micrometerControlButton = tk.Button(frameTopMenu, text="Start micrometer", command=lambda: [self.micrometerController.goHome()])
         micrometerControlButton.pack(side="left")
 
-    def __micrometerEnterDisableStateButton(self, frameTopMenu):
+    def __disableMicrometerButton(self, frameTopMenu):
         micrometerEnterDisableStateButton = tk.Button(frameTopMenu, text="micrometer enter disable state", command=lambda: [self.micrometerController.disable(self.ser)])
         micrometerEnterDisableStateButton.pack(side="left")
 
