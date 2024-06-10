@@ -9,10 +9,6 @@ from threading import Thread
 class ControllerGui:
     def __init__(self):
         self.micrometerController = controller.Controller()
-        self.window = tk.Tk()
-        self.window.title = ("Micrometer Control")
-        self.window.geometry = ("400x400")
-        self.ser = self.micrometerController.getSerialPort()
        
 
 
@@ -25,6 +21,11 @@ class ControllerGui:
         self.__setHeightFrame(frameMicrometerMenu)
             
     def run(self):
+        self.window = tk.Tk()
+        self.window.title = ("Micrometer Control")
+        self.window.geometry = ("400x400")
+        self.ser = self.micrometerController.getSerialPort()
+       
         self.__micrometerButtons()
         self.__topMenu()
         self. window.mainloop()
@@ -37,6 +38,7 @@ class ControllerGui:
 
         setHeightLabel = tk.Label(heightFrame, text="Set the height")
         inputtxt = tk.Text(heightFrame, height = 1, width = 10) 
+        
         
         setHeightButton = tk.Button(heightFrame, text="goTo", command=lambda: [self.micrometerController.goToHeight(inputtxt.get("1.0", "end-1c") , self.ser)])
         setHeightButton.pack(side="bottom")
