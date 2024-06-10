@@ -17,6 +17,7 @@ class Gui:
         self.window.title("Data GUI")
         self.window.geometry("800x500")
         self.contGui = controllerGui.ControllerGui()
+        self.polGui = polarimeterGui.PolarimeterGui()
 
     def run(self):
         self.__topMenu()
@@ -51,7 +52,7 @@ class Gui:
         openMicrometerMenu.pack(side="left")
 
     def __openPolarimeterMenuButton(self, frameTopMenu):
-        openPolarimeterMenu = tk.Button(frameTopMenu, text="polarimeter menu", command=lambda: [polarimeterGui.run()])
+        openPolarimeterMenu = tk.Button(frameTopMenu, text="polarimeter menu", command=lambda: [self.polGui.run()])
         openPolarimeterMenu.pack(side="left")
 
     # browse file button helper method
