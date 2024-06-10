@@ -31,7 +31,7 @@ class ControllerGui:
         self. window.mainloop()
                 
     def __setHeightFrame(self, frameMicrometerMenu):
-        heightFrame = tk.Frame(self.frame, width=100, height=100)
+        heightFrame = tk.Frame(frameMicrometerMenu, width=100, height=100)
         heightFrame.config(bg="green")
         heightFrame.pack(side="left")
         heightFrame.pack_propagate(False)
