@@ -66,6 +66,7 @@ class Controller:
             getPositionCommand = "1" + "PA" + inputHeight + "?" + "\r\n"
             inBytes = bytes(positionCommand, 'utf-8')
             micrometerPosition = self.ser.write(inBytes)
+            print(micrometerPosition)
             time.sleep(0.1)
             c = c+1
 
