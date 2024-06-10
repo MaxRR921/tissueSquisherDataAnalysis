@@ -1,6 +1,7 @@
 import dataAnalysisVmaster as analysis
-import Gui as gui
+import gui
 import controller
 
-gui.run()
+programGui = gui.Gui()
+programGui.run()
 #controller.initialize()
