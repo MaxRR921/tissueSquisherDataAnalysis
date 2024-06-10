@@ -36,10 +36,10 @@ class ControllerGui:
         heightFrame.pack(side="left")
         heightFrame.pack_propagate(False)
 
-        setHeightLabel = tk.Label(self.heightFrame, text="Set the height")
+        setHeightLabel = tk.Label(heightFrame, text="Set the height")
         inputtxt = tk.Text(heightFrame, height = 1, width = 10) 
         
-        setHeightButton = tk.Button(self.heightFrame, text="goTo", command=lambda: [controller.goToHeight(inputtxt.get("1.0", "end-1c") , self.ser)])
+        setHeightButton = tk.Button(heightFrame, text="goTo", command=lambda: [controller.goToHeight(inputtxt.get("1.0", "end-1c") , self.ser)])
         setHeightButton.pack(side="bottom")
         inputtxt.pack(side="bottom")
         setHeightLabel.pack(side="top")
