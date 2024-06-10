@@ -50,7 +50,7 @@ class ControllerGui:
         frameTopMenu.pack(side='top')
         frameTopMenu.pack_propagate(False)
         self.__startMicrometerButton(frameTopMenu)
-        self.__micrometerEnterDisableStateButton(frameTopMenu, self.window, self.ser)
+        self.__micrometerEnterDisableStateButton(frameTopMenu)
 
     def __startMicrometerButton(self, frameTopMenu):
         # def __startMicrometer(self):
