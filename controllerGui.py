@@ -56,7 +56,7 @@ class ControllerGui:
         # def __startMicrometer(self):
         #     thread = Thread(target = controller.goHome, args=[self.ser])
         #     thread.start()
-        micrometerControlButton = tk.Button(frameTopMenu, text="Start micrometer", command=lambda: [self.micrometerController.goHome(self.ser)])
+        micrometerControlButton = tk.Button(frameTopMenu, text="Start micrometer", command=lambda: [self.micrometerController.goHome()])
         micrometerControlButton.pack(side="left")
 
     def __micrometerEnterDisableStateButton(self, frameTopMenu):
