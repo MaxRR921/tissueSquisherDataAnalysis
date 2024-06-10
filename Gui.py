@@ -50,7 +50,7 @@ def browseDataFileButton(frameTopMenu, window):
 
 def openMicrometerMenuButton(frameTopMenu, window):
     contGui = controllerGui.ControllerGui()
-    openMicrometerMenu = tk.Button(frameTopMenu, text="micrometer menu", command=lambda: [contGui.__run()])
+    openMicrometerMenu = tk.Button(frameTopMenu, text="micrometer menu", command=lambda: [contGui.run()])
     openMicrometerMenu.pack(side="left")
 
 def openPolarimeterMenuButton(frameTopMenu, window):
