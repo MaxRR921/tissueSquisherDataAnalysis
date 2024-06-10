@@ -49,7 +49,8 @@ def browseDataFileButton(frameTopMenu, window):
     browseDataFileButton.pack(side='left')
 
 def openMicrometerMenuButton(frameTopMenu, window):
-    openMicrometerMenu = tk.Button(frameTopMenu, text="micrometer menu", command=lambda: [controllerGui.run()])
+    contGui = controllerGui.ControllerGui()
+    openMicrometerMenu = tk.Button(frameTopMenu, text="micrometer menu", command=lambda: [contGui.__run()])
     openMicrometerMenu.pack(side="left")
 
 def openPolarimeterMenuButton(frameTopMenu, window):
