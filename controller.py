@@ -65,7 +65,7 @@ class Controller:
 
 
         timeStamp = time.time()
-        getPositionCommand = "1" + "TP" + "\r\n"
+        getPositionCommand = "1" + "TP" + "?" + "\r\n"
         inBytes = bytes(positionCommand, 'utf-8')
         self.ser.write(inBytes)
         print(str(self.ser.readline()))
