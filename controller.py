@@ -62,7 +62,6 @@ class Controller:
         checkError = "1" + "TE" + "\r\n"
         inBytes = bytes(checkError, 'utf-8')
         self.ser.write(inBytes)
-        return str(self.ser.readline())
     
         micrometerPosition = 0
 
