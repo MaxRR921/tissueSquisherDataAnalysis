@@ -66,7 +66,7 @@ class Controller:
         getPositionCommand = "1" + "TP" + "\r\n"
         inBytes = bytes(getPositionCommand, 'utf-8')
 
-        while(micrometerPosition <= float(inputHeight)):
+        while(float(micrometerPosition) <= float(inputHeight)):
             timeStamp = time.time()
             self.ser.write(inBytes)
             micrometerPosition = self.ser.readline()
