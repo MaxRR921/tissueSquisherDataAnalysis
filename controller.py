@@ -74,7 +74,6 @@ class Controller:
             micrometerPosition = micrometerPosition[3:]
             float(micrometerPosition)
             print(micrometerPosition)
-            print("\n")
             print(timeStamp)
             print("\n")
             #micrometerPosition = float(micrometerPosition)
