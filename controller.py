@@ -68,7 +68,7 @@ class Controller:
         getPositionCommand = "1" + "TP" + "\r\n"
         inBytes = bytes(positionCommand, 'utf-8')
         self.ser.write(inBytes)
-        print(self.ser.readline())
+        print(str(self.ser.readline()))
         self.checkError()
 
 
