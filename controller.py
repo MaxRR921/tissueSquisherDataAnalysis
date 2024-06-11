@@ -43,6 +43,11 @@ class Controller:
         #readResponse(ser.readline().decode().strip())
         time.sleep(0.1)
 
+    def checkError(self):
+        checkError = "1" + "TE" + "\r\n"
+        inBytes = bytes(checkError, 'utf-8')
+        self.ser.write(inBytes)
+        return str(self.ser.readline())
 
     def onQuit(self):
         self.ser.close()
@@ -54,20 +59,16 @@ class Controller:
         inBytes = bytes(positionCommand, 'utf-8')
         self.ser.write(inBytes)
         time.sleep(5)
-        checkError = "1" + "TE" + "\r\n"
-        inBytes = bytes(checkError, 'utf-8')
-        self.ser.write(inBytes)
-        print(str(self.ser.readline()))
+        self.checkError()
         micrometerPosition = 0
-        c = 0
-        while(c <= 5):
-            timeStamp = time.time()
-            getPositionCommand = "1" + "TP" + "\r\n"
-            inBytes = bytes(positionCommand, 'utf-8')
-            self.ser.write(inBytes)
-            print(self.ser.readline())
-            time.sleep(0.1)
-            c = c+1
+
+
+        timeStamp = time.time()
+        getPositionCommand = "1" + "TP" + "\r\n"
+        inBytes = bytes(positionCommand, 'utf-8')
+        self.ser.write(inBytes)
+        print(self.ser.readline())
+        self.checkError()
 
 
         time.sleep(0.1)
