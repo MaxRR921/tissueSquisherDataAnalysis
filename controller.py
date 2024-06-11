@@ -58,8 +58,8 @@ class Controller:
         #print(positionCommand)
         inBytes = bytes(positionCommand, 'utf-8')
         #print(str(inBytes))
-        self.ser.write(inBytes)
-        print(self.ser.read())
+        h = self.ser.write(inBytes)
+        print(str(h))
         micrometerPosition = 0
         c = 0
         while(c <= 5):
