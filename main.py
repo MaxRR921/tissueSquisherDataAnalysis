@@ -4,4 +4,3 @@ import controller
 
 programGui = gui.Gui()
 programGui.run()
-#controller.initialize()

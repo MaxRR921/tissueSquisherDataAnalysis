@@ -8,7 +8,7 @@ import tkinter as tk
 import controllerGui
 import polarimeterGui
 #TODO: take out unnecessary imports
-
+#README: Gui is the main menu for the program. 
 
 class Gui:
     def __init__(self):
