@@ -48,10 +48,6 @@ class Controller:
         self.ser.close()
         print("disconnected")
 
-
-    def readResponse(response):
-        print(str(response))
-
     def goToHeight(self, inputHeight):
         ts1 = time.time()
         positionCommand = "1" + "PA" + inputHeight + "\r\n"
@@ -59,8 +55,7 @@ class Controller:
         inBytes = bytes(positionCommand, 'utf-8')
         #print(str(inBytes))
         self.ser.write(inBytes)
-        h = self.ser.readline()
-        print(str(h))
+        self.readResponse(self.ser.readline().decode().strip())
         micrometerPosition = 0
         c = 0
         while(c <= 5):
@@ -76,3 +71,8 @@ class Controller:
 
         time.sleep(0.1)
         ts2 = time.time()
+
+    def readResponse(self, response):
+        print(str(response))
+
+    
