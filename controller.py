@@ -66,12 +66,15 @@ class Controller:
         getPositionCommand = "1" + "TP" + "\r\n"
         inBytes = bytes(getPositionCommand, 'utf-8')
 
-        self.ser.write(inBytes)
-        print(str(self.ser.readline()))
-        self.checkError()
-
-        time.sleep(0.1)
-        ts2 = time.time()
+        while(micrometerPosition <= inputHeight):
+            timeStamp = time.time()
+            self.ser.write(inBytes)
+            micrometerPosition = str(self.ser.readline())
+            micrometerPosition = micrometerPosition.decode('utf-8')
+            micrometerPosition = micrometerPosition[2:]
+            micrometerPosition = float(micrometerPosition)
+            self.checkError()
+            time.sleep(0.1)
 
     def readResponse(self, response):
         print(str(response))
