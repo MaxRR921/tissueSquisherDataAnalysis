@@ -76,7 +76,6 @@ class Controller:
             print(micrometerPosition)
             print(timeStamp)
             #micrometerPosition = float(micrometerPosition)
-            self.checkError()
             time.sleep(0.1)
         print("done")
     def readResponse(self, response):
