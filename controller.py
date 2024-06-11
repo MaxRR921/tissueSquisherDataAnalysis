@@ -62,11 +62,10 @@ class Controller:
         c = 0
         while(c <= 5):
             timeStamp = time.time()
-            getPositionCommand = "1" + "TP" + "0" + "\r\n"
+            getPositionCommand = "1" + "TP" + "\r\n"
             inBytes = bytes(positionCommand, 'utf-8')
             self.ser.write(inBytes)
-            micrometerPosition = self.ser.readline()
-            # print(str(micrometerPosition))
+            print(self.ser.readline)
             time.sleep(0.1)
             c = c+1
 
