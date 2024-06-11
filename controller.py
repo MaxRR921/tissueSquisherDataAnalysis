@@ -47,7 +47,7 @@ class Controller:
         checkError = "1" + "TE" + "\r\n"
         inBytes = bytes(checkError, 'utf-8')
         self.ser.write(inBytes)
-        return str(self.ser.readline())
+        print(str(self.ser.readline()))
 
     def onQuit(self):
         self.ser.close()
@@ -59,9 +59,7 @@ class Controller:
         inBytes = bytes(positionCommand, 'utf-8')
         self.ser.write(inBytes)
         time.sleep(5)
-        checkError = "1" + "TE" + "\r\n"
-        inBytes = bytes(checkError, 'utf-8')
-        self.ser.write(inBytes)
+        self.checkError()
     
         micrometerPosition = 0
 
