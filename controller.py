@@ -6,7 +6,7 @@ import time
 class Controller:
     def __init__(self):
         # Replace 'COM1' with the appropriate serial port identifier
-        serialPort = '/dev/cu.usbserial-FT82MKCO'
+        serialPort = 'COM4'
 
 
         #port=None, baudrate=9600, bytesize=EIGHTBITS, parity=PARITY_NONE, 
@@ -68,7 +68,7 @@ class Controller:
             inBytes = bytes(positionCommand, 'utf-8')
             self.ser.write(inBytes)
             micrometerPosition = self.ser.read()
-            print(str(micrometerPosition))
+           # print(str(micrometerPosition))
             time.sleep(0.1)
             c = c+1
 
