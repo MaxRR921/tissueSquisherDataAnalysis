@@ -54,17 +54,17 @@ class Controller:
         #print(positionCommand)
         inBytes = bytes(positionCommand, 'utf-8')
         #print(str(inBytes))
-        self.ser.write(inBytes)
-        self.readResponse(self.ser.readline().decode().strip())
+        #self.ser.write(inBytes)
+        #self.readResponse(self.ser.readline().decode().strip())
         micrometerPosition = 0
         c = 0
         while(c <= 5):
             timeStamp = time.time()
-            getPositionCommand = "1" + "TP" + "\r\n"
+            getPositionCommand = "1" + "TP" + "0" + "\r\n"
             inBytes = bytes(positionCommand, 'utf-8')
             self.ser.write(inBytes)
             micrometerPosition = self.ser.read()
-           # print(str(micrometerPosition))
+            print(str(micrometerPosition))
             time.sleep(0.1)
             c = c+1
 
