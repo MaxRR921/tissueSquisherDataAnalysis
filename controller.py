@@ -75,7 +75,6 @@ class Controller:
             float(micrometerPosition)
             print(micrometerPosition)
             print(timeStamp)
-            print("\n")
             #micrometerPosition = float(micrometerPosition)
             self.checkError()
             time.sleep(0.1)
