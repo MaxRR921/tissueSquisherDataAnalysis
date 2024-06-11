@@ -69,7 +69,7 @@ class Controller:
         while(micrometerPosition <= float(inputHeight)):
             timeStamp = time.time()
             self.ser.write(inBytes)
-            micrometerPosition = str(self.ser.readline())
+            micrometerPosition = self.ser.readline()
             micrometerPosition = micrometerPosition.decode('utf-8')
             micrometerPosition = micrometerPosition[2:]
             micrometerPosition = float(micrometerPosition)
