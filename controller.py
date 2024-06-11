@@ -73,8 +73,10 @@ class Controller:
             micrometerPosition = micrometerPosition.decode('utf-8')
             micrometerPosition = micrometerPosition[3:]
             float(micrometerPosition)
-            print(micrometerPosition + "\n")
-            print(timeStamp + "\n")
+            print(micrometerPosition)
+            print("/n")
+            print(timeStamp)
+            print("/n")
             #micrometerPosition = float(micrometerPosition)
             self.checkError()
             time.sleep(0.1)
