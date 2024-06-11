@@ -7,7 +7,7 @@ class Controller:
     def __init__(self):
         # Replace 'COM1' with the appropriate serial port identifier
         serialPort = 'COM4'
-
+        self.micrometerPosition = 0.0
 
         #port=None, baudrate=9600, bytesize=EIGHTBITS, parity=PARITY_NONE, 
         #stopbits=STOPBITS_ONE, timeout=None, xonxoff=False, rtscts=False, write_timeout=None, dsrdtr=False, inter_byte_timeout=None, exclusive=None)
@@ -61,23 +61,38 @@ class Controller:
         self.ser.write(inBytes)
         self.checkError()
 
-        micrometerPosition = 0.0
+        
         timeStamp = time.time()
         getPositionCommand = "1" + "TP" + "\r\n"
         inBytes = bytes(getPositionCommand, 'utf-8')
+        if(float(self.micrometerPosition) < float(inputHeight)):
+            while(float(micrometerPosition) <= float(inputHeight)):
+                self.ser.write(inBytes)
+                micrometerPosition = self.ser.readline()
+                timeStamp = time.time()
+                micrometerPosition = micrometerPosition.decode('utf-8')
+                micrometerPosition = micrometerPosition[3:]
+                float(micrometerPosition)
+                print(micrometerPosition)
+                print(timeStamp)
+                #micrometerPosition = float(micrometerPosition)
+                time.sleep(0.1)
+            print("done")
 
-        while(float(micrometerPosition) <= float(inputHeight)):
-            self.ser.write(inBytes)
-            micrometerPosition = self.ser.readline()
-            timeStamp = time.time()
-            micrometerPosition = micrometerPosition.decode('utf-8')
-            micrometerPosition = micrometerPosition[3:]
-            float(micrometerPosition)
-            print(micrometerPosition)
-            print(timeStamp)
-            #micrometerPosition = float(micrometerPosition)
-            time.sleep(0.1)
-        print("done")
+        if(float(self.micrometerPosition) > float(inputHeight)):
+            while(float(micrometerPosition) >= float(inputHeight)):
+                self.ser.write(inBytes)
+                micrometerPosition = self.ser.readline()
+                timeStamp = time.time()
+                micrometerPosition = micrometerPosition.decode('utf-8')
+                micrometerPosition = micrometerPosition[3:]
+                float(micrometerPosition)
+                print(micrometerPosition)
+                print(timeStamp)
+                #micrometerPosition = float(micrometerPosition)
+                time.sleep(0.1)
+            print("done")
+            
     def readResponse(self, response):
         print(str(response))
 
