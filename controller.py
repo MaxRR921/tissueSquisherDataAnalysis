@@ -71,7 +71,6 @@ class Controller:
         self.ser.write(inBytes)
         micrometerPosition = self.ser.readline()
         micrometerPosition = micrometerPosition.decode('utf-8')
-        micrometerPosition = micrometerPosition[3:]
         print(micrometerPosition)
         #micrometerPosition = float(micrometerPosition)
         self.checkError()
