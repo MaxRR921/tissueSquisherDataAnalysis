@@ -1,7 +1,7 @@
 import serial
 import time
 
-
+#NOTE: EACH COMMAND SENT TO THE CONTROLLER TAKES ABOUT 10 ms from command sent to result returned to computer. (for error)
 
 class Controller:
     def __init__(self):
@@ -54,23 +54,21 @@ class Controller:
         print("disconnected")
 
     def goToHeight(self, inputHeight):
-        ts1 = time.time()
+
+        #send command to go to position
         positionCommand = "1" + "PA" + inputHeight + "\r\n"
         inBytes = bytes(positionCommand, 'utf-8')
         self.ser.write(inBytes)
-        time.sleep(5)
         self.checkError()
-    
+
         micrometerPosition = 0
-
-
         timeStamp = time.time()
         getPositionCommand = "1" + "TP" + "\r\n"
         inBytes = bytes(getPositionCommand, 'utf-8')
+
         self.ser.write(inBytes)
         print(str(self.ser.readline()))
         self.checkError()
-
 
         time.sleep(0.1)
         ts2 = time.time()
