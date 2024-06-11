@@ -66,28 +66,28 @@ class Controller:
         getPositionCommand = "1" + "TP" + "\r\n"
         inBytes = bytes(getPositionCommand, 'utf-8')
         if(float(self.micrometerPosition) < float(inputHeight)):
-            while(float(micrometerPosition) <= float(inputHeight)):
+            while(float(self.micrometerPosition) <= float(inputHeight)):
                 self.ser.write(inBytes)
-                micrometerPosition = self.ser.readline()
+                self.micrometerPosition = self.ser.readline()
                 timeStamp = time.time()
-                micrometerPosition = micrometerPosition.decode('utf-8')
-                micrometerPosition = micrometerPosition[3:]
-                float(micrometerPosition)
-                print(micrometerPosition)
+                self.micrometerPosition = self.micrometerPosition.decode('utf-8')
+                self.micrometerPosition = self.micrometerPosition[3:]
+                float(self.micrometerPosition)
+                print(self.micrometerPosition)
                 print(timeStamp)
                 #micrometerPosition = float(micrometerPosition)
                 time.sleep(0.1)
             print("done")
 
         if(float(self.micrometerPosition) > float(inputHeight)):
-            while(float(micrometerPosition) >= float(inputHeight)):
+            while(float(self.micrometerPosition) >= float(inputHeight)):
                 self.ser.write(inBytes)
-                micrometerPosition = self.ser.readline()
+                self.micrometerPosition = self.ser.readline()
                 timeStamp = time.time()
-                micrometerPosition = micrometerPosition.decode('utf-8')
-                micrometerPosition = micrometerPosition[3:]
-                float(micrometerPosition)
-                print(micrometerPosition)
+                self.micrometerPosition = self.micrometerPosition.decode('utf-8')
+                self.micrometerPosition = self.micrometerPosition[3:]
+                float(self.micrometerPosition)
+                print(self.micrometerPosition)
                 print(timeStamp)
                 #micrometerPosition = float(micrometerPosition)
                 time.sleep(0.1)
