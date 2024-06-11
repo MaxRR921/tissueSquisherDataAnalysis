@@ -55,15 +55,15 @@ class Controller:
     def goToHeight(self, inputHeight):
         ts1 = time.time()
         positionCommand = "1" + "PA" + inputHeight + "\r\n"
-        print(positionCommand)
+        #print(positionCommand)
         inBytes = bytes(positionCommand, 'utf-8')
-        print(str(inBytes))
+        #print(str(inBytes))
         self.ser.write(inBytes)
         micrometerPosition = 0
         c = 0
-        while(c <= 20):
+        while(c <= 5):
             timeStamp = time.time()
-            getPositionCommand = "1" + "TP" + "?" + "\r\n"
+            getPositionCommand = "1" + "TP" + "\r\n"
             inBytes = bytes(positionCommand, 'utf-8')
             self.ser.write(inBytes)
             micrometerPosition = self.ser.read()
