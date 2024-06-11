@@ -59,7 +59,11 @@ class Controller:
         inBytes = bytes(positionCommand, 'utf-8')
         self.ser.write(inBytes)
         time.sleep(5)
-        self.checkError()
+        checkError = "1" + "TE" + "\r\n"
+        inBytes = bytes(checkError, 'utf-8')
+        self.ser.write(inBytes)
+        return str(self.ser.readline())
+    
         micrometerPosition = 0
 
 
