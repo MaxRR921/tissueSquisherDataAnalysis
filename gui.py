@@ -1,14 +1,12 @@
-import dataAnalysisVmaster
-import matplotlib.pyplot as plt
+import tkinter as tk
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 import numpy as np
 import pandas as pd
 from mpl_toolkits.mplot3d import Axes3D
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
-import tkinter as tk
+import dataAnalysisVmaster
 import controllerGui
 import polarimeterGui
-#TODO: take out unnecessary imports
-#README: Gui is the main menu for the program. 
 
 class Gui:
     def __init__(self):
@@ -106,8 +104,6 @@ class Gui:
         ax3.set_zlabel('s3')
         ax3.set_title('Circle Trace on Sphere')
 
-
         # Embed the Matplotlib graph in Tkinter
-        canvas1 = FigureCanvasTkAgg(fig3, master=frameGraphs)
-        canvas1Widget = canvas1.get_tk_widget()
-        canvas1.get_tk_widget().pack(side="left")
+        canvas2 = FigureCanvasTkAgg(fig3, master=frameGraphs)
+        canvas2.get_tk_widget().pack(side="left")
