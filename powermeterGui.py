@@ -41,5 +41,5 @@ class PowermeterGui():
         micrometerControlButton.pack(side="left")
 
     def __startPowerMeter(self):
-        thread = Thread(target = self.power.start, args=[10])
+        thread = Thread(target = self.power.start, args=[])
         thread.start()
