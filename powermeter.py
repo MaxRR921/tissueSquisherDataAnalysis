@@ -3,12 +3,14 @@
 # Uses pywin32
 import win32gui
 import win32com.client
+import pythoncom
 import time
 import traceback
 
 class PowerMeter:
 
     def start(self):
+        pythoncom.CoInitialize()
         print("hello")
         try:
             OphirCOM = win32com.client.Dispatch("OphirLMMeasurement.CoLMMeasurement")
