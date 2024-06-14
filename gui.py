@@ -60,7 +60,8 @@ class Gui:
         openPolarimeterMenu.pack(side="left")
 
     def __openPowermeterMenuButton(self, frameTopMenu):
-        openPowerMeter = tk.Button(frameTopMenu, text="powermeter menu", command= lambda: [self.powGui.run()])
+        openPowermeterMenu = tk.Button(frameTopMenu, text="powermeter menu", command= lambda: [self.powGui.run()])
+        openPowermeterMenu.pack(side="left")
 
     # browse file button helper method
     def __browseFile(self):
