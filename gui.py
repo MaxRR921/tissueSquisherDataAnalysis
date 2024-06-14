@@ -7,6 +7,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolb
 import tkinter as tk
 import controllerGui
 import polarimeterGui
+import powermeterGui
 #TODO: take out unnecessary imports
 #README: Gui is the main menu for the program. 
 
@@ -18,6 +19,7 @@ class Gui:
         self.window.geometry("800x500")
         self.contGui = controllerGui.ControllerGui()
         self.polGui = polarimeterGui.PolarimeterGui()
+        self.powGui = powermeterGui.PowermeterGui
 
     def run(self):
         self.__topMenu()
@@ -38,6 +40,8 @@ class Gui:
         
         self.__openPolarimeterMenuButton(frameTopMenu)
 
+        self.__openPowermeterMenuButton(frameTopMenu)
+
     
     def __quitButton(self, frameTopMenu):
         quitButton = tk.Button(frameTopMenu, text="Quit", command=lambda: [self.window.quit()]) 
@@ -54,6 +58,9 @@ class Gui:
     def __openPolarimeterMenuButton(self, frameTopMenu):
         openPolarimeterMenu = tk.Button(frameTopMenu, text="polarimeter menu", command=lambda: [self.polGui.run()])
         openPolarimeterMenu.pack(side="left")
+
+    def __openPowermeterMenuButton(self, frameTopMenu):
+        openPowerMeter = tk.Button(frameTopMenu, text="powermeter menu", command= lambda: [self.powGui.run()])
 
     # browse file button helper method
     def __browseFile(self):
