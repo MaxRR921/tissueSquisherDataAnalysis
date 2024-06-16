@@ -49,6 +49,7 @@ class Powermeter:
     def __collectData(self, device):
         deviceHandle = self.OphirCOM.OpenUSBdevice(device)# open first device
         exists = self.OphirCOM.IsSensorExists(deviceHandle, 0)
+        print("collectdata runs")
         if exists:
             print('\n----------Data for S/N {0} ---------------'.format(device))
             # An Example for data retrieving
