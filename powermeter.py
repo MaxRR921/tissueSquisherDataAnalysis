@@ -23,6 +23,8 @@ class Powermeter:
             # if any device is connected
             self.device1Data = np.empty((0,3))
             self.device2Data = np.empty((0,3))
+            self.device1PrevTime = 0.0
+            self.device2PrevTime = 0.0
             power1 = Thread(target = self.__runDevice1, args=[self.deviceList[0]])
             power2 = Thread(target = self.__runDevice2, args=[self.deviceList[1]])
             power1.start()
@@ -78,8 +80,16 @@ class Powermeter:
                 data = self.OphirCom.GetData(deviceHandle, 0)
                 if len(data[0]) > 0: # if any data available, print the first one from the batch
                     print('Reading = {0}, TimeStamp = {1}, Status = {2} '.format(data[0][0] ,data[1][0] ,data[2][0]))
-                    newData = np.array([[data[0][0], data[1][0], data[2][0]]])
-                    self.device1Data = np.append(self.device1Data, newData, axis=0)
+                    if(i==0):
+                        self.device1PrevTime = data[1][0]
+                        deltaTime = 0   
+                    else:
+                        deltaTime = data[1][0] - self.device1PrevTime
+                        self.device1PrevTime = data[1][0]
+                    newData = np.array([[data[0][0], deltaTime, data[2][0]]])
+                    self.device1Data = np.append(self.device1Data, newData, axis=0) 
+
+                   
         else:
             print('\nNo Sensor attached to {0} !!!'.format(device))
 
@@ -96,8 +106,14 @@ class Powermeter:
                 data = self.OphirCom.GetData(deviceHandle, 0)
                 if len(data[0]) > 0: # if any data available, print the first one from the batch
                     print('Reading = {0}, TimeStamp = {1}, Status = {2} '.format(data[0][0] ,data[1][0] ,data[2][0]))
-                    newData = np.array([[data[0][0], data[1][0], data[2][0]]])
-                    self.device2Data = np.append(self.device2Data, newData, axis=0)
+                    if(i==0):
+                        self.device2PrevTime = data[1][0]
+                        deltaTime = 0   
+                    else:
+                        deltaTime = data[1][0] - self.device2PrevTime
+                        self.device2PrevTime = data[1][0]
+                    newData = np.array([[data[0][0], deltaTime, data[2][0]]])
+                    self.device2Data = np.append(self.device2Data, newData, axis=0) 
         else:
             print('\nNo Sensor attached to {0} !!!'.format(device))
 
