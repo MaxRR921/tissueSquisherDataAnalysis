@@ -5,7 +5,7 @@ import pythoncom
 import time
 import traceback
 
-class Powereter:
+class Powermeter:
 
     def start(self):
         pythoncom.CoInitialize()
