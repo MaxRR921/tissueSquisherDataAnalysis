@@ -22,7 +22,7 @@ class Powermeter:
             self.deviceList = self.OphirCOM.ScanUSB()
             print(self.deviceList)
             # if any device is connected
-
+            print("bar")
             # there are two devices
             power1 = Thread(target = self.__collectData, args=[self.deviceList[0]])
             power2 = Thread(target= self.__collectData, args=[self.deviceList[1]])
