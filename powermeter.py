@@ -20,7 +20,8 @@ class Powermeter:
             print(self.deviceList[0])
             print(self.deviceList[1])
             # if any device is connected
-            
+            self.device1Data = []
+            self.device2Data = []
             power1 = Thread(target = self.__runDevice1, args=[self.deviceList[0]])
             power2 = Thread(target = self.__runDevice2, args=[self.deviceList[1]])
             power1.start()
@@ -50,7 +51,7 @@ class Powermeter:
             deviceHandle = self.OphirCom.OpenUSBDevice(device)# open first device
             exists = self.OphirCom.IsSensorExists(deviceHandle, 0)
             if exists:
-                print('\n----------Data for S/N {0} ---------------'.format(device))
+                #print('\n----------Data for S/N {0} ---------------'.format(device))
                 # An Example for data retrieving
                 self.OphirCom.StartStream(deviceHandle, 0)# start measuring
                 for i in range(10):
@@ -76,6 +77,7 @@ class Powermeter:
                 data = self.OphirCom.GetData(deviceHandle, 0)
                 if len(data[0]) > 0: # if any data available, print the first one from the batch
                     print('Reading = {0}, TimeStamp = {1}, Status = {2} '.format(data[0][0] ,data[1][0] ,data[2][0]))
+                    self.device1Data = data
         else:
             print('\nNo Sensor attached to {0} !!!'.format(device))
 
@@ -92,5 +94,6 @@ class Powermeter:
                 data = self.OphirCom.GetData(deviceHandle, 0)
                 if len(data[0]) > 0: # if any data available, print the first one from the batch
                     print('Reading = {0}, TimeStamp = {1}, Status = {2} '.format(data[0][0] ,data[1][0] ,data[2][0]))
+                    self.device2Data = data
         else:
             print('\nNo Sensor attached to {0} !!!'.format(device))
