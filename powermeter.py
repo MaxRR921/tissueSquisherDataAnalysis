@@ -20,7 +20,7 @@ class Powermeter:
             self.OphirCOM.CloseAll()
             # Scan for connected Devices
             self.deviceList = self.OphirCOM.ScanUSB()
-            print(self.DeviceList)
+            print(self.deviceList)
             # if any device is connected
 
             # there are two devices
