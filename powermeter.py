@@ -103,11 +103,9 @@ class Powermeter:
 
 
     def __printData(self):
-        print("device 1 data:")
-        for i in range(len(self.device1Data)):
-            print('Reading = {0}, TimeStamp = {1}, Status = {2} '.format(self.device1Data[0][i] ,self.device1Data[1][i] ,self.device1Data[2][i]))
-        print("device 2 data:")
-        for i in range(len(self.device2Data)):
-            print('Reading = {0}, TimeStamp = {1}, Status = {2} '.format(self.device2Data[0][i] ,self.device2Data[1][i] ,self.device2Data[2][i]))
-
-    
+        print('\n----------Data for S/N {0} ---------------'.format(self.deviceList[0]))
+        for reading in self.device1Data:
+            print('Reading = {0}, TimeStamp = {1}, Status = {2} '.format(reading[0], reading[1], reading[2]))
+        print('\n----------Data for S/N {0} ---------------'.format(self.deviceList[1]))
+        for reading in self.device2Data:
+            print('Reading = {0}, TimeStamp = {1}, Status = {2} '.format(reading[0], reading[1], reading[2]))
