@@ -24,7 +24,9 @@ class Powermeter:
             power1 = Thread(target = self.__runDevice, args=[self.deviceList[0]])
             power2 = Thread(target = self.__runDevice, args=[self.deviceList[1]])
             power1.start()
+            power1.join()
             power2.start()
+            power2.join()
 
 
             
