@@ -16,10 +16,10 @@ class Powermeter:
         try:
             self.OphirCOM = win32com.client.Dispatch("OphirLMMeasurement.CoLMMeasurement")
             # Stop & Close all devices
-            OphirCOM.StopAllStreams() 
-            OphirCOM.CloseAll()
+            self.OphirCOM.StopAllStreams() 
+            self.OphirCOM.CloseAll()
             # Scan for connected Devices
-            self.deviceList = OphirCOM.ScanUSB()
+            self.deviceList = self.OphirCOM.ScanUSB()
             print(self.DeviceList)
             # if any device is connected
 
@@ -39,10 +39,10 @@ class Powermeter:
 
         win32gui.MessageBox(0, 'finished', '', 0)
         # Stop & Close all devices
-        OphirCOM.StopAllStreams()
-        OphirCOM.CloseAll()
+        self.OphirCOM.StopAllStreams()
+        self.OphirCOM.CloseAll()
         # Release the object
-        OphirCOM = None
+        self.OphirCOM = None
 
 
 
