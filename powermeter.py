@@ -20,8 +20,8 @@ class Powermeter:
             print(DeviceList)
             # if any device is connected
             
-            thread = Thread(target = self.power.start, args=[])
-            thread.start()
+            # thread = Thread(target = self.power.start, args=[])
+            # thread.start()
 
 
             for Device in DeviceList:   
