@@ -23,6 +23,7 @@ class Powermeter:
             
             thread = Thread(target = self.__runDevices, args=[])
             thread.start()
+            thread.join()
 
 
             
