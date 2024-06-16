@@ -22,7 +22,7 @@ class Powermeter:
             print(self.deviceList[1])
             # if any device is connected
             self.device1Data = np.empty((0,3))
-            self.device1Data = np.empty((0,3))
+            self.device2Data = np.empty((0,3))
             power1 = Thread(target = self.__runDevice1, args=[self.deviceList[0]])
             power2 = Thread(target = self.__runDevice2, args=[self.deviceList[1]])
             power1.start()
