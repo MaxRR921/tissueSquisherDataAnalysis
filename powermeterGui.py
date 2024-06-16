@@ -8,7 +8,7 @@ from threading import Thread
 #WARNING DOESNT CLOSE MICROMETER UNTIL MAIN GUI WINDOW IS CLOSED
 class PowermeterGui():
     def __init__(self):
-        self.power = powermeter.PowerMeter()
+        self.power = powermeter.Powermeter()
 
     def run(self):
         self.window = tk.Tk()
