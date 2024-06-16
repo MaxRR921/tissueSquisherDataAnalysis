@@ -5,6 +5,7 @@ import pythoncom
 import time
 import traceback
 from threading import Thread
+import numpy as np
 class Powermeter:
 
     def start(self):
@@ -20,15 +21,15 @@ class Powermeter:
             print(self.deviceList[0])
             print(self.deviceList[1])
             # if any device is connected
-            self.device1Data = []
-            self.device2Data = []
+            self.device1Data = None
+            self.device2Data = None
             power1 = Thread(target = self.__runDevice1, args=[self.deviceList[0]])
             power2 = Thread(target = self.__runDevice2, args=[self.deviceList[1]])
             power1.start()
             power2.start()
             power1.join()
             power2.join()
-
+            self.__printData()
 
             
         except OSError as err:
@@ -77,7 +78,7 @@ class Powermeter:
                 data = self.OphirCom.GetData(deviceHandle, 0)
                 if len(data[0]) > 0: # if any data available, print the first one from the batch
                     print('Reading = {0}, TimeStamp = {1}, Status = {2} '.format(data[0][0] ,data[1][0] ,data[2][0]))
-                    self.device1Data = data
+                    self.device1Data = np.array(data)
         else:
             print('\nNo Sensor attached to {0} !!!'.format(device))
 
@@ -94,6 +95,17 @@ class Powermeter:
                 data = self.OphirCom.GetData(deviceHandle, 0)
                 if len(data[0]) > 0: # if any data available, print the first one from the batch
                     print('Reading = {0}, TimeStamp = {1}, Status = {2} '.format(data[0][0] ,data[1][0] ,data[2][0]))
-                    self.device2Data = data
+                    self.device2Data = np.array(data)
         else:
             print('\nNo Sensor attached to {0} !!!'.format(device))
+
+
+    def __printData(self):
+        print("device 1 data:")
+        for i in range(len(self.device1Data)):
+            print('Reading = {0}, TimeStamp = {1}, Status = {2} '.format(self.device1Data[0][i] ,self.device1Data[1][i] ,self.device1Data[2][i]))
+        print("device 2 data:")
+        for i in range(len(self.device2Data)):
+            print('Reading = {0}, TimeStamp = {1}, Status = {2} '.format(self.device2Data[0][i] ,self.device2Data[1][i] ,self.device2Data[2][i]))
+
+    
