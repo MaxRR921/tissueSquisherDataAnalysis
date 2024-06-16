@@ -20,11 +20,27 @@ class Powermeter:
             print(self.deviceList)
             # if any device is connected
             
-            # thread = Thread(target = self.power.start, args=[])
-            # thread.start()
+            thread = Thread(target = self.__runDevices, args=[])
+            thread.start()
 
 
-            for device in self.deviceList:   
+            
+        except OSError as err:
+            print("OS error: {0}".format(err))
+        except:
+            traceback.print_exc()
+        win32gui.MessageBox(0, 'finished', '', 0)
+        # Stop & Close all devices
+        self.OphirCom.StopAllStreams()
+        self.OphirCom.CloseAll()
+        # Release the object
+        self.OphirCom = None
+
+
+
+
+    def __runDevices(self):
+        for device in self.deviceList:   
             
                 deviceHandle = self.OphirCom.OpenUSBDevice(device)# open first device
                 exists = self.OphirCom.IsSensorExists(deviceHandle, 0)
@@ -39,13 +55,3 @@ class Powermeter:
                             print('Reading = {0}, TimeStamp = {1}, Status = {2} '.format(data[0][0] ,data[1][0] ,data[2][0]))
                 else:
                     print('\nNo Sensor attached to {0} !!!'.format(device))
-        except OSError as err:
-            print("OS error: {0}".format(err))
-        except:
-            traceback.print_exc()
-        win32gui.MessageBox(0, 'finished', '', 0)
-        # Stop & Close all devices
-        self.OphirCom.StopAllStreams()
-        self.OphirCom.CloseAll()
-        # Release the object
-        self.OphirCom = None
