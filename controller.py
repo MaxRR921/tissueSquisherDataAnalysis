@@ -1,6 +1,6 @@
 import serial
 import time
-
+import plotter
 #NOTE: EACH COMMAND SENT TO THE CONTROLLER TAKES ABOUT 10 ms from command sent to result returned to computer. (for error)
 
 class Controller:
@@ -16,6 +16,7 @@ class Controller:
         parity = serial.PARITY_NONE
         stopBits = serial.STOPBITS_ONE
         dataBits = serial.EIGHTBITS
+        self.plot = plotter.Plot2D('micrometer plot', 'time', 'distance')
         
 
         try:
@@ -75,7 +76,10 @@ class Controller:
                 float(self.micrometerPosition)
                 print(self.micrometerPosition)
                 print(timeStamp)
-                #micrometerPosition = float(micrometerPosition)
+
+                micrometerPosition = float(micrometerPosition)
+                timeStamp = float(timeStamp)
+                self.plot.updatePlot(timeStamp, micrometerPosition)
                 time.sleep(0.1)
             print("done")
 
