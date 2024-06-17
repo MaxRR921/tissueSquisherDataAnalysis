@@ -76,7 +76,7 @@ class Powermeter:
             print('\n----------Data for S/N {0} ---------------'.format(device))
             # An Example for data retrieving
             self.OphirCom.StartStream(deviceHandle, 0)# start measuring
-            for i in range(10):
+            for i in range(1000):
                 time.sleep(.2)# wait a little for data
                 data = self.OphirCom.GetData(deviceHandle, 0)
                 if len(data[0]) > 0: # if any data available, print the first one from the batch
@@ -103,7 +103,7 @@ class Powermeter:
             print('\n----------Data for S/N {0} ---------------'.format(device))
             # An Example for data retrieving
             self.OphirCom.StartStream(deviceHandle, 0)# start measuring
-            for i in range(10):
+            for i in range(10000):
                 time.sleep(.2)# wait a little for data
                 data = self.OphirCom.GetData(deviceHandle, 0)
                 if len(data[0]) > 0: # if any data available, print the first one from the batch
