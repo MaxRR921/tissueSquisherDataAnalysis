@@ -22,7 +22,7 @@ class Controller:
         stopBits = serial.STOPBITS_ONE
         dataBits = serial.EIGHTBITS
 
-        self.root.after(100, lambda: self.updatePlotFromQueue())
+        self.root.after(100, self.updatePlotFromQueue)
         
         
 
@@ -99,13 +99,13 @@ class Controller:
                 time.sleep(0.1)
             print("done")
         
-        
-        def updatePlotFromQueue(self):
-            self.plot.updatePlot(self.timeStamp, self.micrometerPosition)
-            if self.updating:
-                self.root.after(100, lambda: self.updatePlotFromQueue())
 
+       
 
+    def updatePlotFromQueue(self):
+        self.plot.updatePlot(self.timeStamp, self.micrometerPosition)
+        if self.updating:
+            self.root.after(100, self.updatePlotFromQueue)
 
     
     def readResponse(self, response):                                                                                                                                    
