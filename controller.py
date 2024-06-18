@@ -77,7 +77,7 @@ class Controller:
                 print(self.micrometerPosition)
                 print(timeStamp)
 
-                micrometerPosition = float(micrometerPosition)
+                micrometerPosition = float(self.micrometerPosition)
                 timeStamp = float(timeStamp)
                 self.plot.updatePlot(timeStamp, micrometerPosition)
                 time.sleep(0.1)
