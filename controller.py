@@ -98,7 +98,7 @@ class Controller:
                 time.sleep(0.1)
             print("done")
             
-    def readResponse(self, response):
+    def readResponse(self, response):                                                                                                                                    
         print(str(response))
 
     
