@@ -48,6 +48,7 @@ class Plot2D:
             xData = xData[3:]
             float(xData)
         if not isinstance(yData, float):
+            print("Y DATA:")
             print(yData)
             #yData = yData.decode('utf-8')
             yData = yData[3:]
