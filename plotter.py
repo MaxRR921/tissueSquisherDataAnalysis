@@ -42,6 +42,7 @@ class Plot2D:
         self.canvas.draw()
 
     def updatePlot(self, xData, yData):
+        print("RUNS")
         if not isinstance(xData, float):
             xData = xData.decode('utf-8')
             xData = xData[3:]
