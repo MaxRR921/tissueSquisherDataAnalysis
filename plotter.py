@@ -44,24 +44,19 @@ class Plot2D:
     def updatePlot(self, xData, yData):
         
         if not isinstance(xData, float):
-            xData = xData.decode('utf-8')
-            xData = xData[3:]
-            float(xData)
+            print("not float")
         if not isinstance(yData, float):
-            print("Y DATA:")
-            print(yData)
-            #yData = yData.decode('utf-8')
-            yData = yData[3:]
-            float(yData)
-        self.data['xAxis'].append(xData)
-        self.data['yAxis'].append(yData)
-        self.ax.clear()
-        self.ax.plot(self.data['xAxis'], self.data['yAxis'])
-        self.ax.set_xlabel(self.xAxisTitle)
-        self.ax.set_ylabel(self.yAxisTitle)
-        self.ax.set_title(self.title)
-        self.ax.relim()
-        self.ax.autoscale_view()
-        self.canvas.draw()
+            print("not float")
+        else:
+            self.data['xAxis'].append(xData)
+            self.data['yAxis'].append(yData)
+            self.ax.clear()
+            self.ax.plot(self.data['xAxis'], self.data['yAxis'])
+            self.ax.set_xlabel(self.xAxisTitle)
+            self.ax.set_ylabel(self.yAxisTitle)
+            self.ax.set_title(self.title)
+            self.ax.relim()
+            self.ax.autoscale_view()
+            self.canvas.draw()
         
         
