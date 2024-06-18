@@ -43,13 +43,8 @@ class Plot2D:
 
     def updatePlot(self, xData, yData):
         
-        if not isinstance(xData, float):
-            print("not float")
-            print(xData)
-        if not isinstance(yData, float):
-            print("not float")
-            print(yData)
-        else:
+        
+        try:
             self.data['xAxis'].append(xData)
             self.data['yAxis'].append(yData)
             self.ax.clear()
@@ -61,4 +56,5 @@ class Plot2D:
             self.ax.autoscale_view()
             self.canvas.draw()
         
-        
+        except:
+            print("invalid data")
