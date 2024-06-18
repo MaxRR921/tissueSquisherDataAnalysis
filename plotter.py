@@ -42,6 +42,12 @@ class Plot2D:
         self.canvas.draw()
 
     def updatePlot(self, xData, yData):
+        if not isinstance(xData, float):
+            xData = xData.decode('utf-8')
+            xData = xData[3:]
+            float(xData)
+        if not isinstance(yData, float):
+            float(yData)
         self.data['xAxis'].append(xData)
         self.data['yAxis'].append(yData)
         self.ax.clear()

@@ -1,14 +1,17 @@
 import serial
 import time
 from plotter import Plot2D
+import tkinter as tk
 #NOTE: EACH COMMAND SENT TO THE CONTROLLER TAKES ABOUT 10 ms from command sent to result returned to computer. (for error)
 
 class Controller:
     def __init__(self):
+        self.root = tk._default_root
         self.plot = Plot2D('micrometer plot', 'time', 'distance')
         # Replace 'COM1' with the appropriate serial port identifier
         serialPort = 'COM4'
         self.micrometerPosition = 0.0
+        self.timeStamp = 0.0
 
         #port=None, baudrate=9600, bytesize=EIGHTBITS, parity=PARITY_NONE, 
         #stopbits=STOPBITS_ONE, timeout=None, xonxoff=False, rtscts=False, write_timeout=None, dsrdtr=False, inter_byte_timeout=None, exclusive=None)
@@ -17,6 +20,8 @@ class Controller:
         parity = serial.PARITY_NONE
         stopBits = serial.STOPBITS_ONE
         dataBits = serial.EIGHTBITS
+
+        self.root.after(100, lambda: self.plot.updatePlot(self.timeStamp, self.micrometerPosition))
         
         
 
@@ -71,16 +76,9 @@ class Controller:
             while(float(self.micrometerPosition) <= float(inputHeight)):
                 self.ser.write(inBytes)
                 self.micrometerPosition = self.ser.readline()
-                timeStamp = time.time()
-                self.micrometerPosition = self.micrometerPosition.decode('utf-8')
-                self.micrometerPosition = self.micrometerPosition[3:]
-                float(self.micrometerPosition)
+                self.timeStamp = time.time()
                 print(self.micrometerPosition)
                 print(timeStamp)
-
-                micrometerPosition = float(self.micrometerPosition)
-                timeStamp = float(timeStamp)
-                self.plot.updatePlot(timeStamp, micrometerPosition)
                 time.sleep(0.1)
             print("done")
 
@@ -88,16 +86,14 @@ class Controller:
             while(float(self.micrometerPosition) >= float(inputHeight)):
                 self.ser.write(inBytes)
                 self.micrometerPosition = self.ser.readline()
-                timeStamp = time.time()
-                self.micrometerPosition = self.micrometerPosition.decode('utf-8')
-                self.micrometerPosition = self.micrometerPosition[3:]
-                float(self.micrometerPosition)
+                timeStamp = time.time() 
                 print(self.micrometerPosition)
                 print(timeStamp)
-                #micrometerPosition = float(micrometerPosition)
                 time.sleep(0.1)
             print("done")
-            
+        
+
+    
     def readResponse(self, response):                                                                                                                                    
         print(str(response))
 
