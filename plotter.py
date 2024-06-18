@@ -45,8 +45,10 @@ class Plot2D:
         
         if not isinstance(xData, float):
             print("not float")
+            print(xData)
         if not isinstance(yData, float):
             print("not float")
+            print(yData)
         else:
             self.data['xAxis'].append(xData)
             self.data['yAxis'].append(yData)
