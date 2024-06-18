@@ -49,7 +49,7 @@ class Plot2D:
             float(xData)
         if not isinstance(yData, float):
             print(yData)
-            yData = yData.decode('utf-8')
+            #yData = yData.decode('utf-8')
             yData = yData[3:]
             float(yData)
         self.data['xAxis'].append(xData)
