@@ -5,6 +5,7 @@ from plotter import Plot2D
 
 class Controller:
     def __init__(self):
+        self.plot = Plot2D('micrometer plot', 'time', 'distance')
         # Replace 'COM1' with the appropriate serial port identifier
         serialPort = 'COM4'
         self.micrometerPosition = 0.0
@@ -55,7 +56,7 @@ class Controller:
         print("disconnected")
 
     def goToHeight(self, inputHeight):
-        self.plot = Plot2D('micrometer plot', 'time', 'distance')
+        
         #send command to go to position
         positionCommand = "1" + "PA" + inputHeight + "\r\n"
         inBytes = bytes(positionCommand, 'utf-8')
