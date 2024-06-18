@@ -12,6 +12,7 @@ class Controller:
         serialPort = 'COM4'
         self.micrometerPosition = 0.0
         self.timeStamp = 0.0
+        self.updating = True
 
         #port=None, baudrate=9600, bytesize=EIGHTBITS, parity=PARITY_NONE, 
         #stopbits=STOPBITS_ONE, timeout=None, xonxoff=False, rtscts=False, write_timeout=None, dsrdtr=False, inter_byte_timeout=None, exclusive=None)
@@ -21,7 +22,7 @@ class Controller:
         stopBits = serial.STOPBITS_ONE
         dataBits = serial.EIGHTBITS
 
-        self.root.after(100, lambda: self.plot.updatePlot(self.timeStamp, self.micrometerPosition))
+        self.root.after(100, lambda: self.plot.updatePlotFromQueue())
         
         
 
@@ -98,6 +99,12 @@ class Controller:
                 time.sleep(0.1)
             print("done")
         
+        def updatePlotFromQueue(self):
+            self.plot.updatePlot(self.timeStamp, self.micrometerPosition)
+            if self.updating:
+                self.root.after(100, lambda: self.plot.updatePlotFromQueue())
+
+
 
     
     def readResponse(self, response):                                                                                                                                    
