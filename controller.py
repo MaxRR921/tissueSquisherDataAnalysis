@@ -105,7 +105,7 @@ class Controller:
     def updatePlotFromData(self):
         self.plot.updatePlot(self.timeStamp, self.micrometerPosition)
         if self.updating:
-            self.root.after(100, self.updatePlotFromQueue)
+            self.root.after(100, self.updatePlotFromData)
 
     
     def readResponse(self, response):                                                                                                                                    
