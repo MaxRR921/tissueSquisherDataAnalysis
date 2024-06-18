@@ -90,7 +90,7 @@ class Controller:
             while(float(self.micrometerPosition) >= float(inputHeight)):
                 self.ser.write(inBytes)
                 self.micrometerPosition = self.ser.readline()
-                timeStamp = time.time() 
+                self.timeStamp = time.time() 
                 self.micrometerPosition = self.micrometerPosition.decode('utf-8')
                 self.micrometerPosition = self.micrometerPosition[3:]
                 float(self.micrometerPosition)
@@ -103,6 +103,7 @@ class Controller:
        
 
     def updatePlotFromData(self):
+        self.timeStamp = time.time()
         self.plot.updatePlot(self.timeStamp, self.micrometerPosition)
         if self.updating:
             self.root.after(100, self.updatePlotFromData)
