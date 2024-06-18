@@ -1,6 +1,6 @@
 import serial
 import time
-import plotter
+from plotter import Plot2D
 #NOTE: EACH COMMAND SENT TO THE CONTROLLER TAKES ABOUT 10 ms from command sent to result returned to computer. (for error)
 
 class Controller:
@@ -16,7 +16,7 @@ class Controller:
         parity = serial.PARITY_NONE
         stopBits = serial.STOPBITS_ONE
         dataBits = serial.EIGHTBITS
-        self.plot = plotter.Plot2D('micrometer plot', 'time', 'distance')
+        self.plot = Plot2D('micrometer plot', 'time', 'distance')
         
 
         try:
