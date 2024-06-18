@@ -22,7 +22,7 @@ class Controller:
         stopBits = serial.STOPBITS_ONE
         dataBits = serial.EIGHTBITS
 
-        self.root.after(100, self.updatePlotFromQueue)
+        self.root.after(100, self.updatePlotFromData)
         
         
 
@@ -102,7 +102,7 @@ class Controller:
 
        
 
-    def updatePlotFromQueue(self):
+    def updatePlotFromData(self):
         self.plot.updatePlot(self.timeStamp, self.micrometerPosition)
         if self.updating:
             self.root.after(100, self.updatePlotFromQueue)
