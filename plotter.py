@@ -44,17 +44,17 @@ class Plot2D:
     def updatePlot(self, xData, yData):
         
         
-        try:
-            self.data['xAxis'].append(xData)
-            self.data['yAxis'].append(yData)
-            self.ax.clear()
-            self.ax.plot(self.data['xAxis'], self.data['yAxis'])
-            self.ax.set_xlabel(self.xAxisTitle)
-            self.ax.set_ylabel(self.yAxisTitle)
-            self.ax.set_title(self.title)
-            self.ax.relim()
-            self.ax.autoscale_view()
-            self.canvas.draw()
+        print("ydata")
+        print(yData)
+        self.data['xAxis'].append(xData)
+        self.data['yAxis'].append(yData)
+        self.ax.clear()
+        self.ax.plot(self.data['xAxis'], self.data['yAxis'])
+        self.ax.set_xlabel(self.xAxisTitle)
+        self.ax.set_ylabel(self.yAxisTitle)
+        self.ax.set_title(self.title)
+        self.ax.relim()
+        self.ax.autoscale_view()
+        self.canvas.draw()
         
-        except:
-            print("invalid data")
+        
