@@ -77,6 +77,9 @@ class Controller:
                 self.ser.write(inBytes)
                 self.micrometerPosition = self.ser.readline()
                 self.timeStamp = time.time()
+                self.micrometerPosition = self.micrometerPosition.decode('utf-8')
+                self.micrometerPosition = self.micrometerPosition[3:]
+                float(self.micrometerPosition)
                 print(self.micrometerPosition)
                 print(timeStamp)
                 time.sleep(0.1)
@@ -87,6 +90,9 @@ class Controller:
                 self.ser.write(inBytes)
                 self.micrometerPosition = self.ser.readline()
                 timeStamp = time.time() 
+                self.micrometerPosition = self.micrometerPosition.decode('utf-8')
+                self.micrometerPosition = self.micrometerPosition[3:]
+                float(self.micrometerPosition)
                 print(self.micrometerPosition)
                 print(timeStamp)
                 time.sleep(0.1)
