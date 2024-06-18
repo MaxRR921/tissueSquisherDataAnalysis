@@ -50,7 +50,7 @@ class Plot2D:
         self.ax.set_ylabel(self.yAxisTitle)
         self.ax.set_title(self.title)
         self.ax.relim()
-        self.ax.autoscaleView()
+        self.ax.autoscale_view()
         self.canvas.draw()
         
         
