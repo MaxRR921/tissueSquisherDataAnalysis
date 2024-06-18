@@ -17,7 +17,7 @@ class Plot2D:
 
         self.fig = Figure(figsize=(6, 4), dpi=100)
         self.ax = self.fig.add_subplot(111)
-        self.resetPlot()
+        
 
         self.window = tk.Tk()
         self.window.title("Graph")
@@ -27,6 +27,7 @@ class Plot2D:
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.framePlot)
         self.canvas.draw()
         self.canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        self.resetPlot()
 
 
 
