@@ -16,7 +16,7 @@ class Controller:
         parity = serial.PARITY_NONE
         stopBits = serial.STOPBITS_ONE
         dataBits = serial.EIGHTBITS
-        self.plot = Plot2D('micrometer plot', 'time', 'distance')
+        
         
 
         try:
@@ -55,7 +55,7 @@ class Controller:
         print("disconnected")
 
     def goToHeight(self, inputHeight):
-
+        self.plot = Plot2D('micrometer plot', 'time', 'distance')
         #send command to go to position
         positionCommand = "1" + "PA" + inputHeight + "\r\n"
         inBytes = bytes(positionCommand, 'utf-8')
