@@ -24,7 +24,7 @@ class Plot2D:
         self.window.geometry("400x400")
         self.framePlot = tk.Frame(self.window, bg='white')
         self.framePlot.pack(fill=tk.BOTH, expand=True)
-        self.canvas = FigureCanvasTkAgg(self.plotter.fig, master=self.framePlot)
+        self.canvas = FigureCanvasTkAgg(self.fig, master=self.framePlot)
         self.canvas.draw()
         self.canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
 
