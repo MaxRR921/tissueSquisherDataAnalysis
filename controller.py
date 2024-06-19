@@ -81,8 +81,6 @@ class Controller:
                 self.micrometerPosition = self.micrometerPosition.decode('utf-8')
                 self.micrometerPosition = self.micrometerPosition[3:]
                 float(self.micrometerPosition)
-                print(self.micrometerPosition)
-                print(timeStamp)
                 time.sleep(0.1)
             print("done")
 
@@ -94,8 +92,6 @@ class Controller:
                 self.micrometerPosition = self.micrometerPosition.decode('utf-8')
                 self.micrometerPosition = self.micrometerPosition[3:]
                 float(self.micrometerPosition)
-                print(self.micrometerPosition)
-                print(timeStamp)
                 time.sleep(0.1)
             print("done")
         
@@ -104,6 +100,8 @@ class Controller:
 
     def updatePlotFromData(self):
         self.timeStamp = time.time()
+        print("MICROMETER POSITION")
+        print(self.micrometerPosition)
         self.plot.updatePlot(self.timeStamp, self.micrometerPosition)
         if self.updating:
             self.root.after(100, self.updatePlotFromData)
