@@ -100,8 +100,6 @@ class Controller:
 
     def updatePlotFromData(self):
         self.timeStamp = time.time()
-        print("MICROMETER POSITION")
-        print(self.micrometerPosition)
         self.plot.updatePlot(self.timeStamp, self.micrometerPosition)
         if self.updating:
             self.root.after(100, self.updatePlotFromData)
