@@ -48,7 +48,7 @@ class ControllerGui:
     def __topMenu(self):
         self.frameTopMenu = tk.Frame(self.frameMicrometerMenu, width=500, height=80)
         self.frameTopMenu.config(bg="grey")
-        self.frameTopMenu.pack(side='top', anchor="nw")
+        self.frameTopMenu.pack(side=tk.TOP, anchor=tk.NW)
         self.frameTopMenu.pack_propagate(False)
         self.__startMicrometerButton()
         self.__disableMicrometerButton()
