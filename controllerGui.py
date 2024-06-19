@@ -9,11 +9,12 @@ from threading import Thread
 class ControllerGui:
     def __init__(self):
         self.micrometerController = controller.Controller()
-       
+        self.root = tk._default_root
+
     def __micrometerButtons(self):
-        frameMicrometerMenu = tk.Frame(self.window, width=100, height=200)
+        frameMicrometerMenu = tk.Frame(self.root, width=100, height=200)
         frameMicrometerMenu.config(bg="blue")
-        frameMicrometerMenu.pack(side='bottom')
+        frameMicrometerMenu.pack(side='right')
         frameMicrometerMenu.pack_propagate(False)
         self.__setHeightFrame(frameMicrometerMenu)
             
