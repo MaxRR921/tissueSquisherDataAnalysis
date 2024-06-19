@@ -21,6 +21,9 @@ class Gui:
         self.polGui = polarimeterGui.PolarimeterGui()
         self.powGui = powermeterGui.PowermeterGui()
 
+        #run seperate gui windows
+        self.contGui.run()
+
     def run(self):
         self.__topMenu()
         self.window.mainloop()
