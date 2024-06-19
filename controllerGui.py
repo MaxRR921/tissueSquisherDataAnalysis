@@ -12,11 +12,11 @@ class ControllerGui:
         self.root = tk._default_root
 
     def __micrometerButtons(self):
-        frameMicrometerMenu = tk.Frame(self.root, width=100, height=200)
-        frameMicrometerMenu.config(bg="blue")
-        frameMicrometerMenu.pack(side='right')
-        frameMicrometerMenu.pack_propagate(False)
-        self.__setHeightFrame(frameMicrometerMenu)
+        self.frameMicrometerMenu = tk.Frame(self.root, width=100, height=200)
+        self.frameMicrometerMenu.config(bg="blue")
+        self.frameMicrometerMenu.pack(side='left')
+        self.frameMicrometerMenu.pack_propagate(False)
+        self.__setHeightFrame()
             
     def run(self):
         self.window = tk.Tk()
@@ -28,9 +28,9 @@ class ControllerGui:
         self.__topMenu()
         self. window.mainloop()
                 
-    def __setHeightFrame(self, frameMicrometerMenu):
+    def __setHeightFrame(self):
      
-        heightFrame = tk.Frame(frameMicrometerMenu, width=100, height=100)
+        heightFrame = tk.Frame(self.frameMicrometerMenu, width=100, height=100)
         heightFrame.config(bg="green")
         heightFrame.pack(side="left")
         heightFrame.pack_propagate(False)
@@ -50,21 +50,21 @@ class ControllerGui:
         thread.start()
 
     def __topMenu(self):
-        frameTopMenu = tk.Frame(self.window, width=500, height=80)
-        frameTopMenu.config(bg="red")
-        frameTopMenu.pack(side='top')
-        frameTopMenu.pack_propagate(False)
-        self.__startMicrometerButton(frameTopMenu)
-        self.__disableMicrometerButton(frameTopMenu)
+        self.frameTopMenu = tk.Frame(self.frameMicrometerMenu, width=500, height=80)
+        self.frameTopMenu.config(bg="red")
+        self.frameTopMenu.pack(side='top')
+        self.frameTopMenu.pack_propagate(False)
+        self.__startMicrometerButton()
+        self.__disableMicrometerButton()
 
-    def __startMicrometerButton(self, frameTopMenu):
+    def __startMicrometerButton(self):
         # def __startMicrometer(self):
         #     thread = Thread(target = controller.goHome, args=[self.ser])
         #     thread.start()
-        micrometerControlButton = tk.Button(frameTopMenu, text="Start micrometer", command=lambda: [self.micrometerController.goHome()])
+        micrometerControlButton = tk.Button(self.frameTopMenu, text="Start micrometer", command=lambda: [self.micrometerController.goHome()])
         micrometerControlButton.pack(side="left")
 
-    def __disableMicrometerButton(self, frameTopMenu):
-        micrometerEnterDisableStateButton = tk.Button(frameTopMenu, text="micrometer enter disable state", command=lambda: [self.micrometerController.disable()])
+    def __disableMicrometerButton(self):
+        micrometerEnterDisableStateButton = tk.Button(self.frameTopMenu, text="micrometer enter disable state", command=lambda: [self.micrometerController.disable()])
         micrometerEnterDisableStateButton.pack(side="left")
 
