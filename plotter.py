@@ -45,7 +45,7 @@ class Plot2D:
         
         # makes sure it's a float
         yData = float(yData)
-        
+        xData = float(xData)
         self.data['xAxis'].append(xData)
         self.data['yAxis'].append(yData)
         self.ax.clear()
