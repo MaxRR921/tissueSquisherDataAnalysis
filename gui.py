@@ -142,5 +142,5 @@ class Gui:
     def updatePlotFromData(self):
             self.timeStamp = time.time()
             self.micrometerPlot.updatePlot(self.timeStamp, self.contGui.micrometerController.micrometerPosition)
-            if self.updating:
+            if self.updatingPlots:
                 self.root.after(100, self.updatePlotFromData)
