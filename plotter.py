@@ -44,7 +44,7 @@ class Plot2D:
     def updatePlot(self, xData, yData):
         
         #removes the newline characters
-        yData = yData.strip()
+        
         print("ydata")
         print(yData)
         self.data['xAxis'].append(xData)
