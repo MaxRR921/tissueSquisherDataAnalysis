@@ -27,7 +27,7 @@ class Gui:
         self.contGui.run()
 
         #initialize plots
-        micrometerPlot = Plot2D('micrometer plot', 'time', 'distance')
+        self.micrometerPlot = Plot2D('micrometer plot', 'time', 'distance')
 
         #update plots
         self.root.after(100, self.updatePlotFromData)
