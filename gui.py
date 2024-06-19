@@ -33,7 +33,7 @@ class Gui:
         self.micrometerPlot = Plot2D('micrometer plot', 'time', 'distance')
 
         #update plots
-        self.root.after(100, self.updatePlotFromData)
+        self.root.after(100, self.updatePlotsFromData)
         
 
         
