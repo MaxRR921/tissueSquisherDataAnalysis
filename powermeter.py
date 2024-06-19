@@ -27,7 +27,6 @@ class Powermeter:
             print("OS error: {0}".format(err))
         except:
             traceback.print_exc()
-        win32gui.MessageBox(0, 'finished', '', 0)
         # Stop & Close all devices
 
     def start(self):
