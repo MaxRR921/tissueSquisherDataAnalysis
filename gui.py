@@ -139,7 +139,7 @@ class Gui:
         canvas1Widget = canvas1.get_tk_widget()
         canvas1.get_tk_widget().pack(side="left")
 
-    def updatePlotFromData(self):
+    def updatePlotsFromData(self):
             self.timeStamp = time.time()
             self.micrometerPlot.updatePlot(self.timeStamp, self.contGui.micrometerController.micrometerPosition)
             if self.updatingPlots:
