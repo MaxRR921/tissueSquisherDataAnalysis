@@ -7,13 +7,9 @@ import traceback
 from threading import Thread
 import numpy as np
 class Powermeter:
-
-    def start(self):
-        pythoncom.CoInitialize()
-        print("hello")
-        self.device1Data = 0.0
-        self.device2Data = 0.0
+    def __init__(self):
         try:
+            pythoncom.CoInitialize()
             self.OphirCom = win32com.client.Dispatch("OphirLMMeasurement.CoLMMeasurement")
             # Stop & Close all devices
             self.OphirCom.StopAllStreams() 
@@ -25,21 +21,23 @@ class Powermeter:
             # if any device is connected
             self.device1ZeroTime = 0.0
             self.device2ZeroTime = 0.0
-            power1 = Thread(target = self.__runDevice1, args=[self.deviceList[0]])
-            power2 = Thread(target = self.__runDevice2, args=[self.deviceList[1]])
-            power1.start()
-            power2.start()
-            power1.join()
-            power2.join()
-            #self.__printData()
-
-            
+            self.device1Data = 0.0
+            self.device2Data = 0.0
         except OSError as err:
             print("OS error: {0}".format(err))
         except:
             traceback.print_exc()
         win32gui.MessageBox(0, 'finished', '', 0)
         # Stop & Close all devices
+
+    def start(self):
+        power1 = Thread(target = self.__runDevice1, args=[self.deviceList[0]])
+        power2 = Thread(target = self.__runDevice2, args=[self.deviceList[1]])
+        power1.start()
+        power2.start()
+        power1.join()
+        power2.join()
+        #self.__printData()
         self.OphirCom.StopAllStreams()
         self.OphirCom.CloseAll()
         # Release the object
