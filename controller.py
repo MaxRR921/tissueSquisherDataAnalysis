@@ -7,7 +7,7 @@ import tkinter as tk
 class Controller:
     def __init__(self):
         self.root = tk._default_root
-        self.plot = Plot2D('micrometer plot', 'time', 'distance')
+        #self.plot = Plot2D('micrometer plot', 'time', 'distance')
         # Replace 'COM1' with the appropriate serial port identifier
         serialPort = 'COM4'
         self.micrometerPosition = 0.0
@@ -22,7 +22,7 @@ class Controller:
         stopBits = serial.STOPBITS_ONE
         dataBits = serial.EIGHTBITS
 
-        self.root.after(100, self.updatePlotFromData)
+        #self.root.after(100, self.updatePlotFromData)
         
         
 
@@ -98,11 +98,11 @@ class Controller:
 
        
 
-    def updatePlotFromData(self):
-        self.timeStamp = time.time()
-        self.plot.updatePlot(self.timeStamp, self.micrometerPosition)
-        if self.updating:
-            self.root.after(100, self.updatePlotFromData)
+    # def updatePlotFromData(self):
+    #     self.timeStamp = time.time()
+    #     self.plot.updatePlot(self.timeStamp, self.micrometerPosition)
+    #     if self.updating:
+    #         self.root.after(100, self.updatePlotFromData)
 
     
     def readResponse(self, response):                                                                                                                                    
