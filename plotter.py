@@ -43,8 +43,8 @@ class Plot2D:
 
     def updatePlot(self, xData, yData):
         
-        #removes the newline cha
-
+        # makes sure it's a float
+        yData = float(yData)
         
         print("ydata")
         print(yData)
