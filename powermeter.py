@@ -11,6 +11,8 @@ class Powermeter:
     def start(self):
         pythoncom.CoInitialize()
         print("hello")
+        self.device1Data = 0.0
+        self.device2Data = 0.0
         try:
             self.OphirCom = win32com.client.Dispatch("OphirLMMeasurement.CoLMMeasurement")
             # Stop & Close all devices
@@ -21,8 +23,6 @@ class Powermeter:
             print(self.deviceList[0])
             print(self.deviceList[1])
             # if any device is connected
-            self.device1Data = 0.0
-            self.device2Data = 0.0
             self.device1ZeroTime = 0.0
             self.device2ZeroTime = 0.0
             power1 = Thread(target = self.__runDevice1, args=[self.deviceList[0]])
