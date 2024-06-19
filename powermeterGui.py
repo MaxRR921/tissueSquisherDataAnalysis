@@ -10,6 +10,7 @@ class PowermeterGui():
     def __init__(self):
         self.power = powermeter.Powermeter()
         self.root = tk._default_root
+        self.power.start()
 
     def run(self): 
         self.__powermeterButtons()
