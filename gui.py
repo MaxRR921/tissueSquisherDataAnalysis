@@ -23,10 +23,13 @@ class Gui:
         self.contGui = controllerGui.ControllerGui()
         self.polGui = polarimeterGui.PolarimeterGui()
         self.powGui = powermeterGui.PowermeterGui()
+
+        self.updatingPlots = True
+
         #run seperate gui windows
         self.contGui.run()
 
-        #initialize plots
+        #initialize plots   
         self.micrometerPlot = Plot2D('micrometer plot', 'time', 'distance')
 
         #update plots
