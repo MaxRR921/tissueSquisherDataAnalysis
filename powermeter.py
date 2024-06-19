@@ -21,8 +21,8 @@ class Powermeter:
             print(self.deviceList[0])
             print(self.deviceList[1])
             # if any device is connected
-            self.device1Data = np.empty((0,3))
-            self.device2Data = np.empty((0,3))
+            self.device1Data = 0.0
+            self.device2Data = 0.0
             self.device1ZeroTime = 0.0
             self.device2ZeroTime = 0.0
             power1 = Thread(target = self.__runDevice1, args=[self.deviceList[0]])
@@ -31,7 +31,7 @@ class Powermeter:
             power2.start()
             power1.join()
             power2.join()
-            self.__printData()
+            #self.__printData()
 
             
         except OSError as err:
@@ -89,7 +89,9 @@ class Powermeter:
                         deltaTime = data[1][0] - self.device1ZeroTime
 
                     newData = np.array([[data[0][0], deltaTime, data[2][0]]])
-                    self.device1Data = np.append(self.device1Data, newData, axis=0) 
+                    #self.device1Data = np.append(self.device1Data, newData, axis=0) 
+                    self.device1Data = data[0][0]
+
 
                    
         else:
@@ -116,7 +118,7 @@ class Powermeter:
                         deltaTime = data[1][0] - self.device2ZeroTime
 
                     newData = np.array([[data[0][0], deltaTime, data[2][0]]])
-                    self.device2Data = np.append(self.device2Data, newData, axis=0) 
+                    self.device2Data = data[0][0]
         else:
             print('\nNo Sensor attached to {0} !!!'.format(device))
 

@@ -31,7 +31,7 @@ class Gui:
 
         #initialize plots   
         self.micrometerPlot = Plot2D('micrometer plot', 'time', 'distance')
-
+        self.powerPlot = Plot2D('power plot', 'distance (no idea)', 'power (um)')
         #update plots
         self.root.after(100, self.updatePlotsFromData)
         
@@ -142,5 +142,6 @@ class Gui:
     def updatePlotsFromData(self):
             self.timeStamp = time.time()
             self.micrometerPlot.updatePlot(self.timeStamp, self.contGui.micrometerController.micrometerPosition)
+            self.powerPlot.updatePlot(self.timeStamp, abs(self.powGui.power.device1Data - self.powGui.power.device2Data))
             if self.updatingPlots:
                 self.root.after(100, self.updatePlotsFromData)
