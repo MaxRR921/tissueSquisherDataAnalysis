@@ -8,21 +8,34 @@ import tkinter as tk
 import controllerGui
 import polarimeterGui
 import powermeterGui
+from plotter import Plot2D
+import time
 #TODO: take out unnecessary imports
 #README: Gui is the main menu for the program. 
 
 class Gui:
     def __init__(self):
         self.window = tk.Tk()
+        self.root = tk._default_root #same as window!
         self.window.config(background="red")
         self.window.title("Data GUI")
         self.window.geometry("800x500")
         self.contGui = controllerGui.ControllerGui()
         self.polGui = polarimeterGui.PolarimeterGui()
         self.powGui = powermeterGui.PowermeterGui()
-
         #run seperate gui windows
         self.contGui.run()
+
+        #initialize plots
+        micrometerPlot = Plot2D()
+
+        #update plots
+        self.root.after(100, self.updatePlotFromData)
+        
+
+        
+
+
 
     def run(self):
         self.__topMenu()
@@ -122,3 +135,9 @@ class Gui:
         canvas1 = FigureCanvasTkAgg(fig3, master=frameGraphs)
         canvas1Widget = canvas1.get_tk_widget()
         canvas1.get_tk_widget().pack(side="left")
+
+    def updatePlotFromData(self):
+            self.timeStamp = time.time()
+            self.micrometerPlot.updatePlot(self.timeStamp, self.contGui.micrometerController.micrometerPosition)
+            if self.updating:
+                self.root.after(100, self.updatePlotFromData)
