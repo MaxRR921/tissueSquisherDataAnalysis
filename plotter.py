@@ -47,6 +47,8 @@ class Plot2D:
         print("ydata")
         print(yData)
         self.data['xAxis'].append(xData)
+        print("DATA")
+        print(self.data)
         self.data['yAxis'].append(yData)
         self.ax.clear()
         self.ax.plot(self.data['xAxis'], self.data['yAxis'])
