@@ -46,13 +46,7 @@ class Controller:
 
     def setHome(self):
         self.ser.write(b'1HT1\r\n')
-        time.sleep(0.1)
         self.ser.write(b'1HT?\r\n')
-        time.sleep(1)
-        print("ERROR:")
-        checkError = "1" + "TE" + "\r\n"
-        inBytes = bytes(checkError, 'utf-8')
-        self.ser.write(inBytes)
         print(str(self.ser.readline()))
 
     def disable(self):
