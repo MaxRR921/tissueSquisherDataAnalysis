@@ -45,9 +45,9 @@ class Controller:
         time.sleep(0.1)
 
     def setHome(self):
-        self.ser.write(b'1HT1')
+        self.ser.write(b'1HT1\r\n')
         time.sleep(0.1)
-        self.ser.write(b'1HT?')
+        self.ser.write(b'1HT?\r\n')
         time.sleep(1)
         print("ERROR:")
         self.checkError()
