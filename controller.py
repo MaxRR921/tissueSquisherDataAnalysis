@@ -52,6 +52,7 @@ class Controller:
         print("SET HOME:")
         print(read)
         time.sleep(0.1)
+        print("ERROR:")
         self.checkError()
 
     def disable(self):
@@ -75,7 +76,6 @@ class Controller:
         positionCommand = "1" + "PA" + inputHeight + "\r\n"
         inBytes = bytes(positionCommand, 'utf-8')
         self.ser.write(inBytes)
-        self.checkError()
 
         
         timeStamp = time.time()
