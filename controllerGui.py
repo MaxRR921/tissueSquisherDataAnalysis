@@ -51,11 +51,6 @@ class ControllerGui:
         self.frameTopMenu.pack_propagate(False)
         self.__startMicrometerButton()
         self.__disableMicrometerButton()
-        self.__setMicrometerHomeButton()
-
-    def __setMicrometerHomeButton(self):
-        setMicrometerHomeButton = tk.Button(self.frameTopMenu, text="Set position as home", command=lambda: [self.micrometerController.setHome()])
-        setMicrometerHomeButton.pack(side="left")
 
     def __startMicrometerButton(self):
         micrometerControlButton = tk.Button(self.frameTopMenu, text="Start micrometer", command=lambda: [self.__startMicrometer()])

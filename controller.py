@@ -44,10 +44,6 @@ class Controller:
         self.ser.write(b'1OR?\r\n')
         time.sleep(0.1)
 
-    def setHome(self):
-        self.ser.write(b'1HT1\r\n')
-        self.ser.write(b'1HT?\r\n')
-        print(str(self.ser.readline()))
 
     def disable(self):
         self.ser.write(b'1MM0\r\n')
