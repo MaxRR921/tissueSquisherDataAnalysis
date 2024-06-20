@@ -49,10 +49,6 @@ class Controller:
         time.sleep(0.1)
         self.ser.write(b'1HT?')
         time.sleep(1)
-        read = self.ser.readline()
-        print("SET HOME:")
-        print(read)
-        time.sleep(0.1)
         print("ERROR:")
         self.checkError()
 
