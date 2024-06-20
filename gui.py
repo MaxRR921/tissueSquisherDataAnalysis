@@ -143,13 +143,13 @@ class Gui:
 
     def updatePlotsFromData(self):
             self.timeStamp = time.time()
-            
-            # if(self.triedMicrometer == False):
-            #     try:
-            self.micrometerPlot.updatePlot(self.timeStamp, self.contGui.micrometerController.micrometerPosition)
-                # except:
-                #     print("micrometer not detected.")
-                #     self.triedMicrometer = True
+            if(self.triedMicrometer == False):
+                try:
+                    self.micrometerPlot.updatePlot(self.timeStamp, self.contGui.micrometerController.micrometerPosition)
+                except:
+                    print("micrometer not found")
+                    self.triedMicrometer = True
+              
 
             if(self.triedPowermeters == False):
                 try:
