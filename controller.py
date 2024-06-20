@@ -50,7 +50,9 @@ class Controller:
         self.ser.write(b'1HT?\r\n')
         time.sleep(1)
         print("ERROR:")
-        self.checkError()
+        checkError = "1" + "TE" + "\r\n"
+        inBytes = bytes(checkError, 'utf-8')
+        self.ser.write(inBytes)
 
     def disable(self):
         self.ser.write(b'1MM0\r\n')
@@ -61,7 +63,6 @@ class Controller:
         checkError = "1" + "TE" + "\r\n"
         inBytes = bytes(checkError, 'utf-8')
         self.ser.write(inBytes)
-        time.sleep(.2)
         print(str(self.ser.readline()))
 
     def onQuit(self):
