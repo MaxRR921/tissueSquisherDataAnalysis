@@ -103,13 +103,6 @@ class Controller:
                 time.sleep(0.1)
             print("done")
         
-
-    # def updatePlotFromData(self):
-    #     self.timeStamp = time.time()
-    #     self.plot.updatePlot(self.timeStamp, self.micrometerPosition)
-    #     if self.updating:
-    #         self.root.after(100, self.updatePlotFromData)
-
     
     def readResponse(self, response):                                                                                                                                    
         print(str(response))
