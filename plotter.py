@@ -42,7 +42,7 @@ class Plot2D:
         self.canvas.draw()
 
     def updatePlot(self, xData, yData):
-        
+        #NEED TO FIX THREADING ISSUE
         # makes sure it's a float
         yData = float(yData)
         xData = float(xData)
