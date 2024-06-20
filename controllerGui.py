@@ -45,7 +45,7 @@ class ControllerGui:
         thread.start()
 
     def __topMenu(self):
-        self.frameTopMenu = tk.Frame(self.frameMicrometerMenu, width=400, height=80)
+        self.frameTopMenu = tk.Frame(self.frameMicrometerMenu, width=500, height=80)
         self.frameTopMenu.config(bg="grey")
         self.frameTopMenu.pack(side='top', anchor='nw')
         self.frameTopMenu.pack_propagate(False)
