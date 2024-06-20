@@ -74,6 +74,7 @@ class Controller:
         positionCommand = "1" + "PA" + inputHeight + "\r\n"
         inBytes = bytes(positionCommand, 'utf-8')
         self.ser.write(inBytes)
+        time.sleep(0.2)
         self.checkError()
 
         
