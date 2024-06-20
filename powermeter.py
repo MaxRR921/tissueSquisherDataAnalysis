@@ -78,7 +78,7 @@ class Powermeter:
                 data = self.OphirCom.GetData(deviceHandle, 0)
                 if len(data[0]) > 0: # if any data available, print the first one from the batch
                     # print('Reading = {0}, TimeStamp = {1}, Status = {2} '.format(data[0][0] ,data[1][0] ,data[2][0]))
-                    print(time.time())
+                    # print(time.time())
                     if(i==0):
                         self.device1ZeroTime = data[1][0]
                         deltaTime = 0   
@@ -107,7 +107,7 @@ class Powermeter:
                 data = self.OphirCom.GetData(deviceHandle, 0)
                 if len(data[0]) > 0: # if any data available, print the first one from the batch
                     # print('Reading = {0}, TimeStamp = {1}, Status = {2} '.format(data[0][0] ,data[1][0] ,data[2][0]))
-                    print(time.time())
+                    # print(time.time())
                     if(i==0):
                         self.device2ZeroTime = data[1][0]
                         deltaTime = 0   
