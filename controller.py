@@ -61,6 +61,7 @@ class Controller:
         checkError = "1" + "TE" + "\r\n"
         inBytes = bytes(checkError, 'utf-8')
         self.ser.write(inBytes)
+        time.sleep(.2)
         print(str(self.ser.readline()))
 
     def onQuit(self):
