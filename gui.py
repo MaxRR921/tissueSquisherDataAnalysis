@@ -26,7 +26,7 @@ class Gui:
 
         self.updatingPlots = True
         self.triedPowermeters = False
-        self.triedMicrometer = True
+        self.triedMicrometer = False
 
         #run seperate gui windows
         self.contGui.run()
