@@ -45,6 +45,11 @@ class Controller:
         time.sleep(0.1)
 
 
+    def setVelocity(self, inputVelocity):
+        velocityCommand = "1" + "VA" + inputVelocity + "\r\n"
+        inBytes = bytes(velocityCommand, 'utf-8')
+        self.ser.write(inBytes)
+
     def disable(self):
         self.ser.write(b'1MM0\r\n')
         #readResponse(ser.readline().decode().strip())

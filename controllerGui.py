@@ -33,13 +33,32 @@ class ControllerGui:
         setHeightLabel = tk.Label(heightFrame, text="Set the height")
         inputtxt = tk.Text(heightFrame, height = 1, width = 10) 
         
-        
-
         setHeightButton = tk.Button(heightFrame, text="goTo", command=lambda: [self.__goToHeight(inputtxt.get("1.0", "end-1c"))])
         setHeightButton.pack(side="bottom")
         inputtxt.pack(side="bottom")
         setHeightLabel.pack(side="top")
+
+
+    def __setVelocityFrame(self):
+     
+        heightFrame = tk.Frame(self.frameMicrometerMenu, width=100, height=100)
+        heightFrame.config(bg="green")
+        heightFrame.pack(side="left")
+        heightFrame.pack_propagate(False)
+
+        setHeightLabel = tk.Label(heightFrame, text="Set the velocity")
+        inputtxt = tk.Text(heightFrame, height = 1, width = 10) 
+        
+        setVelocityButton = tk.Button(heightFrame, text="goTo", command=lambda: [self.__setVelocity(inputtxt.get("1.0", "end-1c"))])
+        setVelocityButton.pack(side="bottom")
+        inputtxt.pack(side="bottom")
+        setHeightLabel.pack(side="top")
     
+
+    def __setVelocity(self, inputVelocity):
+        thread = Thread(target = self.micrometerController.setVelocity, args=[inputVelocity])
+        thread.start()
+
     def __goToHeight(self, inputHeight):
         thread = Thread(target = self.micrometerController.goToHeight, args=[inputHeight])
         thread.start()
