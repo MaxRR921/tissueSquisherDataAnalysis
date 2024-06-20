@@ -46,6 +46,8 @@ class Controller:
 
 
     def setVelocity(self, inputVelocity):
+        print("input is")
+        print(inputVelocity)
         velocityCommand = "1" + "VA" + inputVelocity + "\r\n"
         inBytes = bytes(velocityCommand, 'utf-8')
         self.ser.write(inBytes)

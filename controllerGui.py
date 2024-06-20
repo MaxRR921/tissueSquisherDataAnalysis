@@ -50,7 +50,7 @@ class ControllerGui:
         setHeightLabel = tk.Label(heightFrame, text="Set the velocity")
         inputtxt = tk.Text(heightFrame, height = 1, width = 10) 
         
-        setVelocityButton = tk.Button(heightFrame, text="goTo", command=lambda: [self.__setVelocity(inputtxt.get("1.0", "end-1c"))])
+        setVelocityButton = tk.Button(heightFrame, text="set", command=lambda: [self.__setVelocity(inputtxt.get("1.0", "end-1c"))])
         setVelocityButton.pack(side="bottom")
         inputtxt.pack(side="bottom")
         setHeightLabel.pack(side="top")
