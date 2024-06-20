@@ -5,7 +5,6 @@ import controller
 from threading import Thread
 #TODO: take out unnecessary imports
 
-#WARNING DOESNT CLOSE MICROMETER UNTIL MAIN GUI WINDOW IS CLOSED
 class ControllerGui:
     def __init__(self):
         self.micrometerController = controller.Controller()
@@ -54,11 +53,14 @@ class ControllerGui:
         self.__disableMicrometerButton()
 
     def __startMicrometerButton(self):
-        # def __startMicrometer(self):
-        #     thread = Thread(target = controller.goHome, args=[self.ser])
-        #     thread.start()
-        micrometerControlButton = tk.Button(self.frameTopMenu, text="Start micrometer", command=lambda: [self.micrometerController.goHome()])
+        
+        micrometerControlButton = tk.Button(self.frameTopMenu, text="Start micrometer", command=lambda: [self.__startMicrometer()])
         micrometerControlButton.pack(side="left")
+
+
+    def __startMicrometer(self):
+            thread = Thread(target = self.micrometerController.goHome, args=[])
+            thread.start()
 
     def __disableMicrometerButton(self):
         micrometerEnterDisableStateButton = tk.Button(self.frameTopMenu, text="micrometer enter disable state", command=lambda: [self.micrometerController.disable()])
