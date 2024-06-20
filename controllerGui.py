@@ -45,7 +45,7 @@ class ControllerGui:
         thread.start()
 
     def __topMenu(self):
-        self.frameTopMenu = tk.Frame(self.frameMicrometerMenu, width=250, height=80)
+        self.frameTopMenu = tk.Frame(self.frameMicrometerMenu, width=400, height=80)
         self.frameTopMenu.config(bg="grey")
         self.frameTopMenu.pack(side='top', anchor='nw')
         self.frameTopMenu.pack_propagate(False)
@@ -56,8 +56,8 @@ class ControllerGui:
     def __setMicrometerHomeButton(self):
         setMicrometerHomeButton = tk.Button(self.frameTopMenu, text="Set position as home", command=lambda: [self.micrometerController.setHome()])
         setMicrometerHomeButton.pack(side="left")
+
     def __startMicrometerButton(self):
-        
         micrometerControlButton = tk.Button(self.frameTopMenu, text="Start micrometer", command=lambda: [self.__startMicrometer()])
         micrometerControlButton.pack(side="left")
 
