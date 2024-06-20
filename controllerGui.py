@@ -16,6 +16,7 @@ class ControllerGui:
         self.frameMicrometerMenu.pack(side='left')
         self.frameMicrometerMenu.pack_propagate(False)
         self.__setHeightFrame()
+        self.__setVelocityFrame()
             
     def run(self):
         self.ser = self.micrometerController.getSerialPort()
