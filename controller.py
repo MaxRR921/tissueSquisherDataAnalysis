@@ -42,17 +42,11 @@ class Controller:
 
     def goHome(self): 
         self.ser.write(b'1OR?\r\n')
-        getPositionCommand = "1" + "TP" + "\r\n"
-        inBytes = bytes(getPositionCommand, 'utf-8')
-        while(self.micrometerPosition > abs(.001)):
-            self.ser.write(inBytes)
-            self.micrometerPosition = self.ser.readline()
-            self.micrometerPosition = self.micrometerPosition.decode('utf-8')
-            self.micrometerPosition = self.micrometerPosition[3:]
-            float(self.micrometerPosition)
-
         time.sleep(0.1)
 
+    def setHome(self):
+        self.ser.write(b'1HT1')
+        time.sleep(0.1)
 
     def disable(self):
         self.ser.write(b'1MM0\r\n')
