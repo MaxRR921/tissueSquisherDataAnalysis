@@ -9,7 +9,7 @@ class Controller:
         self.root = tk._default_root
         #self.plot = Plot2D('micrometer plot', 'time', 'distance')
         # Replace 'COM1' with the appropriate serial port identifier
-        serialPort = 'COM4'
+        serialPort = 'COM3'
         self.micrometerPosition = 0.0
         self.timeStamp = 0.0
         self.updating = True

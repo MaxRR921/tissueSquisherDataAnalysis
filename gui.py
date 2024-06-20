@@ -22,9 +22,11 @@ class Gui:
         self.window.geometry("800x500")
         self.contGui = controllerGui.ControllerGui()
         self.polGui = polarimeterGui.PolarimeterGui()
-        self.powGui = powermeterGui.PowermeterGui()
+        # self.powGui = powermeterGui.PowermeterGui()
 
         self.updatingPlots = True
+        self.triedPowermeters = False
+        self.triedMicrometer = True
 
         #run seperate gui windows
         self.contGui.run()
@@ -141,10 +143,20 @@ class Gui:
 
     def updatePlotsFromData(self):
             self.timeStamp = time.time()
-            self.micrometerPlot.updatePlot(self.timeStamp, self.contGui.micrometerController.micrometerPosition)
-            try:
-                self.powerPlot.updatePlot(self.contGui.micrometerController.micrometerPosition, abs(self.powGui.power.device1Data - self.powGui.power.device2Data))
-            except:
-                print("not enough powermeters connected.")
+            
+            if(self.triedMicrometer == False):
+                try:
+                    self.micrometerPlot.updatePlot(self.timeStamp, self.contGui.micrometerController.micrometerPosition)
+                except:
+                    print("micrometer not detected.")
+                    self.triedMicrometer = True
+
+            if(self.triedPowermeters == False):
+                try:
+                    self.powerPlot.updatePlot(self.contGui.micrometerController.micrometerPosition, abs(self.powGui.power.device1Data - self.powGui.power.device2Data))
+                except:
+                    print("not enough powermeters connected.")
+                    self.triedPowermeters = True
+                
             if self.updatingPlots:
                 self.root.after(100, self.updatePlotsFromData)
