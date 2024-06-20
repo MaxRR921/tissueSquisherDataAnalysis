@@ -46,6 +46,8 @@ class Controller:
 
     def setHome(self):
         self.ser.write(b'1HT1')
+        time.sleep(0.1)
+        self.ser.write(b'1HT?')
         read = self.ser.readline()
         print("SET HOME:")
         print(read)
