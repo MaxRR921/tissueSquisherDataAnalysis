@@ -22,7 +22,7 @@ class Gui:
         self.window.geometry("800x500")
         self.contGui = controllerGui.ControllerGui()
         self.polGui = polarimeterGui.PolarimeterGui()
-        # self.powGui = powermeterGui.PowermeterGui()
+        self.powGui = powermeterGui.PowermeterGui()
 
         self.updatingPlots = True
         self.triedPowermeters = False
