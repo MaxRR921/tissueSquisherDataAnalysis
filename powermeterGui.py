@@ -10,6 +10,7 @@ class PowermeterGui():
     def __init__(self):
         self.power = powermeter.Powermeter()
         self.root = tk._default_root
+        
         #start taking data on init
         thread = Thread(target = self.power.start, args=[])
         thread.start()

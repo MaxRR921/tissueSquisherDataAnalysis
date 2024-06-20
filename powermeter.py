@@ -26,7 +26,7 @@ class Powermeter:
         except OSError as err:
             print("OS error: {0}".format(err))
         except:
-            traceback.print_exc()
+            print("no powermeters connected. Note: you must be on windows.")
         # Stop & Close all devices
 
     def start(self):
