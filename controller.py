@@ -53,6 +53,7 @@ class Controller:
         checkError = "1" + "TE" + "\r\n"
         inBytes = bytes(checkError, 'utf-8')
         self.ser.write(inBytes)
+        print(str(self.ser.readline()))
 
     def disable(self):
         self.ser.write(b'1MM0\r\n')
