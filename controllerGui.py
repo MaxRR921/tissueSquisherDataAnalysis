@@ -11,7 +11,7 @@ class ControllerGui:
         self.root = tk._default_root
 
     def __micrometerButtons(self):
-        self.frameMicrometerMenu = tk.Frame(self.root, width=300, height=300)
+        self.frameMicrometerMenu = tk.Frame(self.root, width=500, height=300)
         self.frameMicrometerMenu.config(bg="blue")
         self.frameMicrometerMenu.pack(side='left')
         self.frameMicrometerMenu.pack_propagate(False)
