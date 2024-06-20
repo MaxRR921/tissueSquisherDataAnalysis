@@ -142,6 +142,9 @@ class Gui:
     def updatePlotsFromData(self):
             self.timeStamp = time.time()
             self.micrometerPlot.updatePlot(self.timeStamp, self.contGui.micrometerController.micrometerPosition)
-            self.powerPlot.updatePlot(self.contGui.micrometerController.micrometerPosition, abs(self.powGui.power.device1Data - self.powGui.power.device2Data))
+            try:
+                self.powerPlot.updatePlot(self.contGui.micrometerController.micrometerPosition, abs(self.powGui.power.device1Data - self.powGui.power.device2Data))
+            except:
+                print("not enough powermeters connected.")
             if self.updatingPlots:
                 self.root.after(100, self.updatePlotsFromData)
