@@ -20,7 +20,7 @@ class Gui:
         self.root = tk._default_root #same as window!
         self.window.config(background="red")
         self.window.title("Data GUI")
-        self.window.geometry("800x500")
+        self.window.geometry("1000x1000")
         self.contGui = controllerGui.ControllerGui()
         self.polGui = polarimeterGui.PolarimeterGui()
         self.powGui = powermeterGui.PowermeterGui()
