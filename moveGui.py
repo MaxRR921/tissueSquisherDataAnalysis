@@ -1,6 +1,6 @@
 import move
 import tkinter as tk
-
+from threading import Thread
 class MoveGui:
     
 
@@ -56,7 +56,7 @@ class MoveGui:
         ))
         saveButton.grid(row=2, column=2, padx=10, pady=10)
 
-        executeButton = tk.Button(self.moveFrame, text="Execute", command=self.execute)
+        executeButton = tk.Button(self.moveFrame, text="Execute", command=self.__execute)
         executeButton.grid(row=2, column=3, padx=10, pady=10)
 
     def __saveInputs(self, velocity, height, frontDelay, backDelay):
@@ -65,7 +65,8 @@ class MoveGui:
         self.move.saveInputs(velocity, height, frontDelay, backDelay)
         print(f"Velocity: {velocity}, Height: {height}, Front Delay: {frontDelay}, Back Delay: {backDelay}")
 
-    def execute(self):
-        self.move.execute()
+    def __execute(self):
+        thread = Thread(target = self.move.execute, args=[])
+        thread.start()
         print("Execute button pressed")
 
