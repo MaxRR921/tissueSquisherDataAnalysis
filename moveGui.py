@@ -12,10 +12,24 @@ class MoveGui:
         self.moveFrame.pack(side="top")
         self.moveFrame.pack_propagate(False)
         self.move = move.Move(self.micrometerController)
+        self.__setHeightFrame()
 
     def run(self):
         
         self.mainloop()
 
      
-            
+    def __setHeightFrame(self):
+     
+        heightFrame = tk.Frame(self.frameMicrometerMenu, width=100, height=100)
+        heightFrame.config(bg="green")
+        heightFrame.pack(side="left")
+        heightFrame.pack_propagate(False)
+
+        setHeightLabel = tk.Label(heightFrame, text="Set the height")
+        inputtxt = tk.Text(heightFrame, height = 1, width = 10) 
+        
+        setHeightButton = tk.Button(heightFrame, text="goTo", command=lambda: [self.micrometerController.goToHeight(inputtxt.get("1.0", "end-1c"))])
+        setHeightButton.pack(side="bottom")
+        inputtxt.pack(side="bottom")
+        setHeightLabel.pack(side="top")
