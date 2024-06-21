@@ -73,12 +73,22 @@ class Gui:
         frameMoveList.config(bg="orange")
         frameMoveList.pack(side="top", anchor="nw")
         frameMoveList.pack_propagate(False)
+        self.__addMoveButton(frameMoveList)
+
+
         
     
     def __quitButton(self, frameTopMenu):
         quitButton = tk.Button(frameTopMenu, text="Quit", command=lambda: [self.window.quit()]) 
         quitButton.pack(side='right') 
 
+
+    def __addMoveButton(self, frameMoveList):
+        addMoveButton = tk.Button(frameMoveList, text="add move", command=lambda: [moveGui.MoveGui(frameMoveList)])
+        addMoveButton.pack(side='top')
+
+    
+    
     def __browseDataFileButton(self, frameTopMenu):
         browseDataFileButton = tk.Button(frameTopMenu, text="browse for data file", command=lambda: [self.__browseFile(self.window)])
         browseDataFileButton.pack(side='left')
