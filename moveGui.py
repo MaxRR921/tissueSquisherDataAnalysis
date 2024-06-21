@@ -59,9 +59,13 @@ class MoveGui:
         executeButton = tk.Button(self.moveFrame, text="Execute", command=self.execute)
         executeButton.grid(row=2, column=3, padx=10, pady=10)
 
-    def __saveInputs(self, velocity, height, front_delay, back_delay):
-        self.move.saveInputs(self, velocity, height, front_delay, back_delay)
-        print(f"Velocity: {velocity}, Height: {height}, Front Delay: {front_delay}, Back Delay: {back_delay}")
+    def __saveInputs(self, velocity, height, frontDelay, backDelay):
+        velocity = float(velocity)
+        height = float(height)
+        frontDelay = float(frontDelay)
+        backDelay = float(backDelay)
+        self.move.saveInputs(velocity, height, frontDelay, backDelay)
+        print(f"Velocity: {velocity}, Height: {height}, Front Delay: {frontDelay}, Back Delay: {backDelay}")
 
     def execute(self):
         self.move.execute()
