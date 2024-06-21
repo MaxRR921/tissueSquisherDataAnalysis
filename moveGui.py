@@ -21,7 +21,7 @@ class MoveGui:
      
     def __setHeightFrame(self):
      
-        heightFrame = tk.Frame(self.frameMicrometerMenu, width=100, height=100)
+        heightFrame = tk.Frame(self.moveFrame, width=100, height=100)
         heightFrame.config(bg="green")
         heightFrame.pack(side="left")
         heightFrame.pack_propagate(False)
