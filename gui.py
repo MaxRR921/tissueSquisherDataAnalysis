@@ -76,11 +76,8 @@ class Gui:
         frameMoveList.pack(side="top", anchor="nw")
         frameMoveList.pack_propagate(False)
         self.__addMoveButton(frameMoveList)
-        # self.__executeAllMovesButton(frameMoveList)
         executeAllMovesButton = tk.Button(frameMoveList, text="execute all moves", command=lambda: [self.__startExecuteThread()]) 
         executeAllMovesButton.pack(side='left') 
-
-
 
     def __startExecuteThread(self):
         thread = Thread(target = self.__executeAllMoves(), args=[])
