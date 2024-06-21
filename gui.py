@@ -164,17 +164,17 @@ class Gui:
 
     def updatePlotsFromData(self):
             self.timeStamp = time.time()
-            if(self.triedMicrometer == False):
-                try:
-                    self.micrometerPlot.updatePlot(self.timeStamp, self.contGui.micrometerController.micrometerPosition)
-                except:
-                    print("micrometer not found")
-                    self.triedMicrometer = True
+            # if(self.triedMicrometer == False):
+            #     try:
+            #         self.micrometerPlot.updatePlot(self.timeStamp, self.contGui.micrometerController.micrometerPosition)
+            #     except:
+            #         print("micrometer not found")
+            #         self.triedMicrometer = True
               
 
             if(self.triedPowermeters == False):
                 try:
-                    self.powerPlot.updatePlot(self.contGui.micrometerController.micrometerPosition, abs(self.powGui.power.device1Data - self.powGui.power.device2Data))
+                    self.powerPlot.updatePlot(time.time(), abs(self.powGui.power.device1Data - self.powGui.power.device2Data))
                 except:
                     print("not enough powermeters connected.")
                     self.triedPowermeters = True
