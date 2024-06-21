@@ -87,6 +87,8 @@ class Gui:
         thread.start()
 
     def __executeAllMoves(self):
+        print("MICROMETER HEIGHT")
+        print(self.micrometerController.micrometerPosition)
         for move in self.moveList:
             move.move.execute()
         
