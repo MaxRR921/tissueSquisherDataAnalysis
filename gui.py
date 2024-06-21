@@ -32,6 +32,7 @@ class Gui:
 
         self.moveList = []
 
+        self.micrometerController.goHome()
         #run seperate gui windows
 
         #initialize plots   
