@@ -5,7 +5,7 @@ import pandas as pd
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 import tkinter as tk
-import controllerGui
+import controller
 import polarimeterGui
 import powermeterGui
 from plotter import Plot2D
@@ -21,7 +21,8 @@ class Gui:
         self.window.config(background="red")
         self.window.title("Data GUI")
         self.window.geometry("1000x1000")
-        self.contGui = controllerGui.ControllerGui()
+        
+        self.micrometerController = controller.Controller()
         self.polGui = polarimeterGui.PolarimeterGui()
         self.powGui = powermeterGui.PowermeterGui()
 
@@ -84,7 +85,7 @@ class Gui:
 
 
     def __addMoveButton(self, frameMoveList):
-        addMoveButton = tk.Button(frameMoveList, text="add move", command=lambda: [moveGui.MoveGui(frameMoveList)])
+        addMoveButton = tk.Button(frameMoveList, text="add move", command=lambda: [moveGui.MoveGui(frameMoveList, self.micrometerController)])
         addMoveButton.pack(side='top')
 
     
