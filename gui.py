@@ -87,8 +87,6 @@ class Gui:
         thread.start()
 
     def __executeAllMoves(self):
-        print("MICROMETER HEIGHT")
-        print(self.micrometerController.micrometerPosition)
         for move in self.moveList:
             move.move.execute()
         
@@ -183,6 +181,7 @@ class Gui:
 
     def updatePlotsFromData(self):
             self.timeStamp = time.time()
+            print("RUNNING")
             if(self.triedMicrometer == False):
                 try:
                     self.micrometerPlot.updatePlot(self.timeStamp, self.micrometerController.micrometerPosition)
@@ -197,6 +196,6 @@ class Gui:
                 except:
                     print("not enough powermeters connected.")
                     self.triedPowermeters = True
-                
+            
             if self.updatingPlots:
                 self.root.after(100, self.updatePlotsFromData)
