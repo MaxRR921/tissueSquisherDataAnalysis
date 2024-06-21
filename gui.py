@@ -11,6 +11,7 @@ import powermeterGui
 from plotter import Plot2D
 import time
 import moveGui
+from threading import Thread
 #TODO: take out unnecessary imports
 #README: Gui is the main menu for the program. 
 
@@ -75,8 +76,19 @@ class Gui:
         frameMoveList.pack(side="top", anchor="nw")
         frameMoveList.pack_propagate(False)
         self.__addMoveButton(frameMoveList)
+        self.__executeAllMovesButton(frameMoveList)
 
+    def __executeAllMovesButton(self):
+        quitButton = tk.Button(self.window, text="execute all moves", command=lambda: [self.__startExecuteThread()]) 
+        quitButton.pack(side='left') 
 
+    def __startExecuteThread(self):
+        thread = Thread(target = self.__executeAllMoves(), args=[])
+        thread.start()
+
+    def __executeAllMoves(self):
+        for move in self.moveList:
+            move.move.execute()
         
     
     def __quitButton(self, frameTopMenu):
@@ -85,11 +97,15 @@ class Gui:
 
 
     def __addMoveButton(self, frameMoveList):
-        addMoveButton = tk.Button(frameMoveList, text="add move", command=lambda: [moveGui.MoveGui(frameMoveList, self.micrometerController)])
+        addMoveButton = tk.Button(frameMoveList, text="add move", command=lambda: [self.__addMove(frameMoveList)])
         addMoveButton.pack(side='top')
 
     
-    
+    def __addMove(self, frameMoveList):
+        moveToAdd = moveGui.MoveGui(frameMoveList, self.micrometerController)
+        self.moveList.append(moveToAdd)
+
+
     def __browseDataFileButton(self, frameTopMenu):
         browseDataFileButton = tk.Button(frameTopMenu, text="browse for data file", command=lambda: [self.__browseFile(self.window)])
         browseDataFileButton.pack(side='left')
