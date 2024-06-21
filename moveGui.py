@@ -60,8 +60,6 @@ class MoveGui:
         executeButton.grid(row=2, column=3, padx=10, pady=10)
 
     def __saveInputs(self, velocity, height, frontDelay, backDelay):
-        velocity = float(velocity)
-        height = float(height)
         frontDelay = float(frontDelay)
         backDelay = float(backDelay)
         self.move.saveInputs(velocity, height, frontDelay, backDelay)
