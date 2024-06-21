@@ -77,10 +77,10 @@ class Gui:
         frameMoveList.pack_propagate(False)
         self.__addMoveButton(frameMoveList)
         self.__executeAllMovesButton(frameMoveList)
+        executeAllMovesButton = tk.Button(frameMoveList, text="execute all moves", command=lambda: [self.__startExecuteThread()]) 
+        executeAllMovesButton.pack(side='left') 
 
-    def __executeAllMovesButton(self, frameMoveList):
-        quitButton = tk.Button(frameMoveList, text="execute all moves", command=lambda: [self.__startExecuteThread()]) 
-        quitButton.pack(side='left') 
+
 
     def __startExecuteThread(self):
         thread = Thread(target = self.__executeAllMoves(), args=[])
