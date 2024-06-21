@@ -10,6 +10,7 @@ import polarimeterGui
 import powermeterGui
 from plotter import Plot2D
 import time
+import moveGui
 #TODO: take out unnecessary imports
 #README: Gui is the main menu for the program. 
 
@@ -28,6 +29,8 @@ class Gui:
         self.triedPowermeters = False
         self.triedMicrometer = False
 
+        self.moveList = []
+
         #run seperate gui windows
         self.contGui.run()
 
@@ -44,6 +47,7 @@ class Gui:
 
     def run(self):
         self.__topMenu()
+        self.__moveList()
         self.window.mainloop()
     
     def __topMenu(self):
@@ -63,6 +67,13 @@ class Gui:
 
         self.__openPowermeterMenuButton(frameTopMenu)
 
+
+    def __moveList(self):  
+        frameMoveList = tk.Frame(self.window, width=500, height=800)
+        frameMoveList.config(bg="orange")
+        frameMoveList.pack(side="top", anchor="nw")
+        frameMoveList.pack_propagate(False)
+        
     
     def __quitButton(self, frameTopMenu):
         quitButton = tk.Button(frameTopMenu, text="Quit", command=lambda: [self.window.quit()]) 
