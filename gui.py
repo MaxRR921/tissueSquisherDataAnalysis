@@ -33,7 +33,6 @@ class Gui:
         self.moveList = []
 
         #run seperate gui windows
-        self.contGui.run()
 
         #initialize plots   
         self.micrometerPlot = Plot2D('micrometer plot', 'time', 'distance')
