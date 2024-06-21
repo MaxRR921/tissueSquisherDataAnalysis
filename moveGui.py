@@ -7,10 +7,10 @@ class MoveGui:
     def __init__(self, frameMoveList, controller):
         self.micrometerController = controller
         self.root = frameMoveList
-        self.moveFrame = tk.Frame(self.root, width=1, height=1)
-        frameMoveList.config(bg="grey")
-        frameMoveList.pack(side="top")
-        frameMoveList.pack_propagate(False)
+        self.moveFrame = tk.Frame(self.root, width=300, height=100)
+        self.moveFrame.config(bg="grey")
+        self.moveFrame.pack(side="top")
+        self.moveFrame.pack_propagate(False)
         self.move = move.Move(self.micrometerController)
 
     def run(self):
