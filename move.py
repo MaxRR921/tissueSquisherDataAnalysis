@@ -16,4 +16,10 @@ class Move:
         self.controller.goToHeight(self.targetHeight)
         time.sleep(self.backDelay)
 
+    def saveInputs(self, velocity, height, frontWait, backWait):
+        self.velocity = velocity
+        self.targetHeight = height
+        self.frontDelay = frontWait
+        self.backDelay = backWait
+
     

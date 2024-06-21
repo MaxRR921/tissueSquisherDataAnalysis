@@ -12,24 +12,37 @@ class MoveGui:
         self.moveFrame.pack(side="top")
         self.moveFrame.pack_propagate(False)
         self.move = move.Move(self.micrometerController)
-        self.__setHeightFrame()
+        self.__setMoveAttributesFrame()
 
     def run(self):
         
         self.mainloop()
 
-     
-    def __setHeightFrame(self):
-     
-        heightFrame = tk.Frame(self.moveFrame, width=100, height=100)
-        heightFrame.config(bg="green")
-        heightFrame.pack(side="left")
-        heightFrame.pack_propagate(False)
 
-        setHeightLabel = tk.Label(heightFrame, text="Set the height")
-        inputtxt = tk.Text(heightFrame, height = 1, width = 10) 
-        
-        setHeightButton = tk.Button(heightFrame, text="goTo", command=lambda: [self.micrometerController.goToHeight(inputtxt.get("1.0", "end-1c"))])
-        setHeightButton.pack(side="bottom")
-        inputtxt.pack(side="bottom")
+    def __setMoveAttributesFrame(self):
+     
+        setVelocityLabel = tk.Label(self.moveFrame, text="set velocity")
+        inputTxtVelocity = tk.Text(self.moveFrame, height = 1, width = 10) 
+        inputTxtVelocity.pack(side="bottom")
+        setVelocityLabel.pack(side="top")
+
+        setHeightLabel = tk.Label(self.moveFrame, text="Set the target height")
+        inputTxtHeight = tk.Text(self.moveFrame, height = 1, width = 10) 
+        inputTxtHeight.pack(side="bottom")
         setHeightLabel.pack(side="top")
+
+        setFrontDelayLabel = tk.Label(self.moveFrame, text="set front delay")
+        inputTxtFrontDelay = tk.Text(self.moveFrame, height = 1, width = 10) 
+        inputTxtFrontDelay.pack(side="bottom")
+        setFrontDelayLabel.pack(side="top")
+
+        setBackDelayLabel = tk.Label(self.moveFrame, text="set back delay")
+        inputTxtBackDelay = tk.Text(self.moveFrame, height = 1, width = 10) 
+        inputTxtBackDelay.pack(side="bottom")
+        setBackDelayLabel.pack(side="top")
+
+    
+        
+        saveButton = tk.Button(self.moveFrame, text="save", command=lambda: [self.move.saveInputs(inputTxtVelocity.get("1.0", "end-1c"), inputTxtHeight.get("1.0", "end-1c"), inputTxtFrontDelay.get("1.0", "end-1c"), inputTxtBackDelay.get("1.0", "end-1c") )])
+        saveButton.pack(side="bottom")
+
