@@ -24,6 +24,7 @@ class MoveGui:
         self.moveFrame.grid_columnconfigure(1, weight=1)
         self.moveFrame.grid_columnconfigure(2, weight=1)
         self.moveFrame.grid_columnconfigure(3, weight=1)
+        self.moveFrame.grid_columnconfigure(4, weight=1)
         self.moveFrame.grid_rowconfigure(0, weight=1)
         self.moveFrame.grid_rowconfigure(1, weight=1)
 
@@ -47,15 +48,22 @@ class MoveGui:
         setBackDelayLabel.grid(row=0, column=3, padx=10, pady=5)
         inputTxtBackDelay.grid(row=1, column=3, padx=10, pady=5)
 
-        saveButton = tk.Button(self.moveFrame, text="Save", command=lambda: self.saveInputs(
+        saveButton = tk.Button(self.moveFrame, text="Save", command=lambda: self.__saveInputs(
             inputTxtVelocity.get("1.0", "end-1c"),
             inputTxtHeight.get("1.0", "end-1c"),
             inputTxtFrontDelay.get("1.0", "end-1c"),
             inputTxtBackDelay.get("1.0", "end-1c")
         ))
-        saveButton.grid(row=2, column=0, columnspan=4, pady=10)
+        saveButton.grid(row=2, column=2, padx=10, pady=10)
 
-    def saveInputs(self, velocity, height, front_delay, back_delay):
-        # Here you can perform any operations you need with the values
+        executeButton = tk.Button(self.moveFrame, text="Execute", command=self.execute)
+        executeButton.grid(row=2, column=3, padx=10, pady=10)
+
+    def __saveInputs(self, velocity, height, front_delay, back_delay):
+        self.move.saveInputs(self, velocity, height, front_delay, back_delay)
         print(f"Velocity: {velocity}, Height: {height}, Front Delay: {front_delay}, Back Delay: {back_delay}")
+
+    def execute(self):
+        self.move.execute()
+        print("Execute button pressed")
 
