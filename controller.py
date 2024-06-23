@@ -84,6 +84,7 @@ class Controller:
         inBytes = bytes(getStateCommand, 'utf-8')
         time.sleep(1)
         compare = b'1TS000028\r\n'
+        print(self.ser.readline())
         while(self.ser.readline() == compare):
             print("runs")
             getPositionCommand = "1" + "TP" + "\r\n"
