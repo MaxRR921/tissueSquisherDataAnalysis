@@ -86,6 +86,8 @@ class Controller:
         compare = b'1TS000028\r\n'
         self.ser.write(inBytes)
         print(self.ser.readline())
+        if(self.ser.readline() == compare):
+            print("RUNS")
         # while(self.ser.readline() == compare):
         #     print("runs")
         #     getPositionCommand = "1" + "TP" + "\r\n"
