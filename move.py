@@ -11,6 +11,7 @@ class Move:
         self.controller = controller
 
     def execute(self):
+        controller.enterTracking()
         self.controller.setVelocity(self.velocity)
         time.sleep(self.frontDelay)
         self.controller.goToHeight(self.targetHeight)
