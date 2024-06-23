@@ -83,7 +83,8 @@ class Controller:
         getPositionCommand = "1" + "TS" + "\r\n"
         inBytes = bytes(getPositionCommand, 'utf-8')
         time.sleep(1)
-        while(self.ser.readline().decode('utf-8') == "b'1TS000028\r\n"):
+        compare = b'1TS000028\r\n'
+        while(self.ser.readline() == compare):
             print("runs")
             getPositionCommand = "1" + "TP" + "\r\n"
             inBytes = bytes(getPositionCommand, 'utf-8')
