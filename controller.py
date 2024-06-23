@@ -88,7 +88,7 @@ class Controller:
         self.ser.write(inBytes)
         print(self.ser.readline())
         
-        if(self.ser.readline().strip() == compare.strip()):
+        if(self.ser.readline().strip() == compare):
             print("RUNS")
         # while(self.ser.readline() == compare):
         #     print("runs")
