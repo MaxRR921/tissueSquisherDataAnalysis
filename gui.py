@@ -86,6 +86,7 @@ class Gui:
     def __executeAllMoves(self):
         #self.moveList[0].move.execute()
         print("HELLO")
+        time.sleep(10)
         
         
     
