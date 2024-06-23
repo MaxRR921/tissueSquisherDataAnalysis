@@ -35,7 +35,6 @@ class Gui:
     
         self.micrometerController.goHome()
         
-        self.micrometerController.enterTracking()
         #run seperate gui windows
 
         #initialize plots   
