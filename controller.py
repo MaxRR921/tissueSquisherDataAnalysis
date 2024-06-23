@@ -88,6 +88,7 @@ class Controller:
             inBytes = bytes(getPositionCommand, 'utf-8')
             self.ser.write(inBytes)
             self.micrometerPosition = self.ser.readline()
+            print(self.micrometerPosition)
             self.timeStamp = time.time()
            
             
