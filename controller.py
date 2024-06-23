@@ -105,6 +105,19 @@ class Controller:
             print("done")
         
     
+
+
+    def testCommand(self):
+        testCommand = "1" + "TP" + "\r\n"
+        inBytes = bytes(testCommand, 'utf-8')
+        self.ser.write(inBytes)
+        returned = self.ser.readline()
+        returned.decode('utf-8')
+        print(returned)
+
+        
+
+
     def readResponse(self, response):                                                                                                                                    
         print(str(response))
 

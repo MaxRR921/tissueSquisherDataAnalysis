@@ -59,6 +59,10 @@ class MoveGui:
         executeButton = tk.Button(self.moveFrame, text="Execute", command=self.__execute)
         executeButton.grid(row=2, column=3, padx=10, pady=10)
 
+
+        testButton = tk.Button(self.moveFrame, text="test", command=self.__test)
+        testButton.grid(row=2, column=3, padx=10, pady=10)
+
     def __saveInputs(self, velocity, height, frontDelay, backDelay):
         frontDelay = float(frontDelay)
         backDelay = float(backDelay)
@@ -69,4 +73,10 @@ class MoveGui:
         thread = Thread(target = self.move.execute, args=[])
         thread.start()
         print("Execute button pressed")
+
+
+    def __test(self):
+        thread = Thread(target= self.move.testCommand, args=[])
+        thread.start()
+        print("test button pressed")
 
