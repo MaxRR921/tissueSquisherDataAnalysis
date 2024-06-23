@@ -178,7 +178,6 @@ class Gui:
 
     def updatePlotsFromData(self):
             self.timeStamp = time.time()
-            print("RUNNING")
             if(self.triedMicrometer == False):
                 try:
                     self.micrometerPlot.updatePlot(self.timeStamp, self.micrometerController.micrometerPosition)
