@@ -90,19 +90,18 @@ class Controller:
         compare = b'1TS000028\r\n'
         self.ser.write(b'1TS\r\n')
         print(self.ser.readline())
-        print(self.ser.readline())
         compare2 = self.ser.readline()
         print(compare2)
-        # while(state == compare):
-        #     print("RUNS")
-        #     getPositionCommand = "1" + "TP" + "\r\n"
-        #     inBytes = bytes(getPositionCommand, 'utf-8')
-        #     self.ser.write(inBytes)
-        #     self.micrometerPosition = self.ser.readline()
-        #     print(self.micrometerPosition)
-        #     self.timeStamp = time.time()
-        #     self.ser.write(b'1TS\r\n')
-        #     state = self.ser.readline()
+        while(compare2 == compare):
+            print("RUNS")
+            getPositionCommand = "1" + "TP" + "\r\n"
+            inBytes = bytes(getPositionCommand, 'utf-8')
+            self.ser.write(inBytes)
+            self.micrometerPosition = self.ser.readline()
+            print(self.micrometerPosition)
+            self.timeStamp = time.time()
+            self.ser.write(b'1TS\r\n')
+            compare2 = self.ser.readline()
            
             
         print("done")
