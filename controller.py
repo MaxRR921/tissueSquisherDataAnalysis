@@ -90,7 +90,8 @@ class Controller:
         compare = b'1TS000028\r\n'
         compare2 = b'1TS000028\r\n'
         self.ser.write(b'1TS\r\n')
-        self.ser.readline()
+        print(self.ser.readline())
+        print(self.ser.readline())
         compare2 = self.ser.readline()
         while(compare2 == compare):
             print("RUNS")
