@@ -74,12 +74,17 @@ class Gui:
         frameMoveList.pack(side="top", anchor="nw")
         frameMoveList.pack_propagate(False)
         self.__addMoveButton(frameMoveList)
-        executeAllMovesButton = tk.Button(frameMoveList, text="execute all moves", command=lambda: [self.__executeAllMoves()]) 
+        executeAllMovesButton = tk.Button(frameMoveList, text="execute all moves", command=lambda: [self.__startExecuteThread()]) 
         executeAllMovesButton.pack(side='left') 
 
+    def __startExecuteThread(self):
+        thread = Thread(target = self.__executeAllMoves, args=[])
+        thread.start()
+
     def __executeAllMoves(self):
-        for move in self.moveList:
-            move.move.execute()
+        #self.moveList[0].move.execute()
+        print("HELLO")
+        time.sleep(10)
         
         
     
