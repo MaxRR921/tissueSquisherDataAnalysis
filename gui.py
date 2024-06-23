@@ -84,9 +84,8 @@ class Gui:
         thread.start()
 
     def __executeAllMoves(self):
-        for move in self.moveList:
-            #move.move.execute()
-            move.move.toString()
+        self.moveList[0].move.execute()
+        
         
     
     def __quitButton(self, frameTopMenu):
