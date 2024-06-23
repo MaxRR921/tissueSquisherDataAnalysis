@@ -54,7 +54,6 @@ class Controller:
         velocityCommand = "1" + "VA" + "?" + "\r\n"
         inBytes = bytes(velocityCommand, 'utf-8')
         self.ser.write(inBytes)
-        print(str(self.ser.readline()))
 
     def disable(self):
         self.ser.write(b'1MM0\r\n')
