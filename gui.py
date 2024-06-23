@@ -84,7 +84,8 @@ class Gui:
         thread.start()
 
     def __executeAllMoves(self):
-        self.moveList[0].move.execute()
+        #self.moveList[0].move.execute()
+        print("HELLO")
         
         
     
