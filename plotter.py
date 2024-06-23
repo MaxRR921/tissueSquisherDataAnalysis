@@ -44,6 +44,9 @@ class Plot2D:
     def updatePlot(self, xData, yData):
         #NEED TO FIX THREADING ISSUE
         # makes sure it's a float
+       
+        yData = self.micrometerPosition.decode('utf-8')
+        yData = self.micrometerPosition[3:]
         yData = float(yData)
         xData = float(xData)
         self.data['xAxis'].append(xData)

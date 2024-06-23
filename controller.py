@@ -80,30 +80,18 @@ class Controller:
 
         
         timeStamp = time.time()
-        getPositionCommand = "1" + "TP" + "\r\n"
+        getPositionCommand = "1" + "TS" + "\r\n"
         inBytes = bytes(getPositionCommand, 'utf-8')
-        if(float(self.micrometerPosition) < float(inputHeight)):
-            while(float(self.micrometerPosition) <= float(inputHeight)):
-                self.ser.write(inBytes)
-                self.micrometerPosition = self.ser.readline()
-                self.timeStamp = time.time()
-                self.micrometerPosition = self.micrometerPosition.decode('utf-8')
-                self.micrometerPosition = self.micrometerPosition[3:]
-                float(self.micrometerPosition)
-                time.sleep(0.1)
-            print("done")
-
-        if(float(self.micrometerPosition) > float(inputHeight)):
-            while(float(self.micrometerPosition) >= float(inputHeight)):
-                self.ser.write(inBytes)
-                self.micrometerPosition = self.ser.readline()
-                self.timeStamp = time.time() 
-                self.micrometerPosition = self.micrometerPosition.decode('utf-8')
-                self.micrometerPosition = self.micrometerPosition[3:]
-                float(self.micrometerPosition)
-                time.sleep(0.1)
-            print("done")
-        
+       
+        while(self.ser.readline().decode('utf-8') == "b'1TS000028\r\n"):
+            getPositionCommand = "1" + "TP" + "\r\n"
+            inBytes = bytes(getPositionCommand, 'utf-8')
+            self.ser.write(inBytes)
+            self.micrometerPosition = self.ser.readline()
+            self.timeStamp = time.time()
+           
+            
+        print("done")
     
 
 
