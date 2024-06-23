@@ -84,9 +84,10 @@ class Controller:
         inBytes = bytes(getStateCommand, 'utf-8')
         time.sleep(1)
         compare = b'1TS000028\r\n'
+        compare2 = b'1TS000028\r\n'
         self.ser.write(inBytes)
         print(self.ser.readline())
-        if(self.ser.readline() == compare):
+        if(compare2 == compare):
             print("RUNS")
         # while(self.ser.readline() == compare):
         #     print("runs")
