@@ -88,12 +88,12 @@ class Controller:
         getStateCommand = "1" + "TS" + "\r\n"
         inBytes = bytes(getStateCommand, 'utf-8')
         compare = b'1TS000046\r\n'
-        compare2 = b'1TS000046\r\n'
+        compare2 = b'1TS000047\r\n'
         self.ser.write(b'1TS\r\n')
         print(self.ser.readline())
         print(self.ser.readline())
-        compare2 = self.ser.readline()
-        while(compare2 == compare):
+        state = self.ser.readline()
+        while(state == compare or state == compare2):
             print("RUNS")
             getPositionCommand = "1" + "TP" + "\r\n"
             inBytes = bytes(getPositionCommand, 'utf-8')
