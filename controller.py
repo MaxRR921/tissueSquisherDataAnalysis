@@ -44,7 +44,11 @@ class Controller:
         self.ser.write(b'1OR?\r\n')
         print("RUNS")
         time.sleep(0.1)
+        
+
+    def enterTracking(self):
         self.ser.write(b'1TK1\r\n')
+        time.sleep(0.1)
 
 
     def setVelocity(self, inputVelocity):
