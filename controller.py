@@ -104,7 +104,7 @@ class Controller:
             getStateCommand = "1" + "TS" + "\r\n"
             inBytes = bytes(getStateCommand, 'utf-8')
             self.ser.write(inBytes)
-            compare2 = self.ser.readline()
+            state = self.ser.readline()
            
             
         print("done")
