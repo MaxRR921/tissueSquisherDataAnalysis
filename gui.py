@@ -85,7 +85,8 @@ class Gui:
 
     def __executeAllMoves(self):
         for move in self.moveList:
-            move.move.execute()
+            #move.move.execute()
+            move.toString()
         
     
     def __quitButton(self, frameTopMenu):

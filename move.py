@@ -22,4 +22,8 @@ class Move:
         self.frontDelay = frontWait
         self.backDelay = backWait
 
+    def toString(self):
+         print(f"Velocity: {self.velocity}, Height: {self.targetHeight}, Front Delay: {self.frontDelay}, Back Delay: {self.backDelay}")
+
+        
     
