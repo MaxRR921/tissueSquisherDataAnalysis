@@ -86,7 +86,6 @@ class Controller:
         compare2 = b'1TS000028\r\n'
         self.ser.write(b'1TS\r\n')
         time.sleep(1)
-        print(self.ser.readline())
         compare2 = self.ser.readline()
         if(compare2 == compare):
             print("RUNS")
