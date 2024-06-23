@@ -93,7 +93,7 @@ class Controller:
         self.ser.readline()
         compare2 = self.ser.readline()
         while(compare2 == compare):
-            print("runs")
+            print("RUNS")
             getPositionCommand = "1" + "TP" + "\r\n"
             inBytes = bytes(getPositionCommand, 'utf-8')
             self.ser.write(inBytes)
