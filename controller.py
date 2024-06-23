@@ -82,7 +82,7 @@ class Controller:
         timeStamp = time.time()
         getPositionCommand = "1" + "TS" + "\r\n"
         inBytes = bytes(getPositionCommand, 'utf-8')
-       
+        time.sleep(0.1)
         while(self.ser.readline().decode('utf-8') == "b'1TS000028\r\n"):
             getPositionCommand = "1" + "TP" + "\r\n"
             inBytes = bytes(getPositionCommand, 'utf-8')
