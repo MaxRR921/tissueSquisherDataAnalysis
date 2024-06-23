@@ -42,6 +42,7 @@ class Controller:
 
     def goHome(self): 
         self.ser.write(b'1OR?\r\n')
+        print("RUNS")
         time.sleep(0.1)
         self.ser.write(b'1TK1\r\n')
 
