@@ -87,8 +87,8 @@ class Controller:
         timeStamp = time.time()
         getStateCommand = "1" + "TS" + "\r\n"
         inBytes = bytes(getStateCommand, 'utf-8')
-        compare = b'1TS000028\r\n'
-        compare2 = b'1TS000028\r\n'
+        compare = b'1TS000046\r\n'
+        compare2 = b'1TS000046\r\n'
         self.ser.write(b'1TS\r\n')
         print(self.ser.readline())
         print(self.ser.readline())
