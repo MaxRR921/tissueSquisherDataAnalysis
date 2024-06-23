@@ -85,7 +85,7 @@ class Controller:
         compare = b'1TS000028\r\n'
         compare2 = b'1TS000028\r\n'
         self.ser.write(b'1TS\r\n')
-        time.sleep(.1)
+        time.sleep(1)
         print(self.ser.readline())
         
         if(self.ser.readline().strip() == compare):
