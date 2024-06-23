@@ -9,7 +9,7 @@ class Controller:
         self.root = tk._default_root
         #self.plot = Plot2D('micrometer plot', 'time', 'distance')
         # Replace 'COM1' with the appropriate serial port identifier
-        serialPort = 'COM3'
+        serialPort = 'COM4'
         self.micrometerPosition = 0.0
         self.timeStamp = 0.0
         self.updating = True
@@ -108,7 +108,7 @@ class Controller:
 
 
     def testCommand(self):
-        testCommand = "1" + "TP" + "\r\n"
+        testCommand = "1" + "TS" + "\r\n"
         inBytes = bytes(testCommand, 'utf-8')
         self.ser.write(inBytes)
         returned = self.ser.readline()
