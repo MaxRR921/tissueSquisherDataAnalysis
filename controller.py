@@ -87,7 +87,8 @@ class Controller:
         compare2 = b'1TS000028\r\n'
         self.ser.write(inBytes)
         print(self.ser.readline())
-        if(compare2 == compare):
+        
+        if(self.ser.readline().strip() == compare.strip()):
             print("RUNS")
         # while(self.ser.readline() == compare):
         #     print("runs")
