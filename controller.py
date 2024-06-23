@@ -87,8 +87,8 @@ class Controller:
         self.ser.write(b'1TS\r\n')
         time.sleep(1)
         print(self.ser.readline())
-        print(self.ser.readline())
-        if(self.ser.readline() == compare):
+        compare2 = self.ser.readline()
+        if(compare2 == compare):
             print("RUNS")
         # while(self.ser.readline() == compare):
         #     print("runs")
