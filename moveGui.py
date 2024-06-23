@@ -76,7 +76,7 @@ class MoveGui:
 
 
     def __test(self):
-        thread = Thread(target= self.move.testCommand, args=[])
+        thread = Thread(target= self.move.controller.testCommand, args=[])
         thread.start()
         print("test button pressed")
 
