@@ -47,7 +47,7 @@ class Controller:
         
 
     def enterTracking(self):
-        self.ser.write(b'1TK1\r\n')
+        self.ser.write(b'1TK0\r\n')
         time.sleep(0.1)
 
 
