@@ -102,7 +102,6 @@ class Controller:
         inBytes = bytes(testCommand, 'utf-8')
         self.ser.write(inBytes)
         returned = self.ser.readline()
-        returned.decode('utf-8')
         print(returned)
 
         
