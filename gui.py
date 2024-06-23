@@ -84,6 +84,8 @@ class Gui:
 
     def __executeAllMoves(self):
         for move in self.moveList:
+            move.move.toString()
+        for move in self.moveList:
             move.move.execute()
         
         
