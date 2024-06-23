@@ -88,11 +88,12 @@ class Controller:
         getStateCommand = "1" + "TS" + "\r\n"
         inBytes = bytes(getStateCommand, 'utf-8')
         compare = b'1TS000028\r\n'
-        self.ser.write(b'1TS\r\n')
+        self.ser.write(b'1TS\r\n')\
+        #no idea why but for some reason you need to read twice and on the second time you will get the command look into this later.
         print(self.ser.readline())
-        compare2 = self.ser.readline()
-        print(compare2)
-        while(compare2 == compare):
+        state = self.ser.readline()
+        print(state)
+        while(state == compare):
             print("RUNS")
             getPositionCommand = "1" + "TP" + "\r\n"
             inBytes = bytes(getPositionCommand, 'utf-8')
@@ -101,7 +102,7 @@ class Controller:
             print(self.micrometerPosition)
             self.timeStamp = time.time()
             self.ser.write(b'1TS\r\n')
-            compare2 = self.ser.readline()
+            state = self.ser.readline()
            
             
         print("done")
