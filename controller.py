@@ -91,8 +91,8 @@ class Controller:
         self.ser.write(b'1TS\r\n')
         print(self.ser.readline())
         print(self.ser.readline())
-        state = self.ser.readline()
-        print(state)
+        compare2 = self.ser.readline()
+        print(compare2)
         # while(state == compare):
         #     print("RUNS")
         #     getPositionCommand = "1" + "TP" + "\r\n"
