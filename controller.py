@@ -80,8 +80,8 @@ class Controller:
 
         
         timeStamp = time.time()
-        getPositionCommand = "1" + "TS" + "\r\n"
-        inBytes = bytes(getPositionCommand, 'utf-8')
+        getStateCommand = "1" + "TS" + "\r\n"
+        inBytes = bytes(getStateCommand, 'utf-8')
         time.sleep(1)
         compare = b'1TS000028\r\n'
         while(self.ser.readline() == compare):
@@ -92,6 +92,9 @@ class Controller:
             self.micrometerPosition = self.ser.readline()
             print(self.micrometerPosition)
             self.timeStamp = time.time()
+            getStateCommand = "1" + "TS" + "\r\n"
+            inBytes = bytes(getStateCommand, 'utf-8')
+            self.ser.write(inBytes)
            
             
         print("done")
