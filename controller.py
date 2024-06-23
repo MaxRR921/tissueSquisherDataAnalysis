@@ -88,7 +88,7 @@ class Controller:
         time.sleep(1)
         print(self.ser.readline())
         print(self.ser.readline())
-        if(self.ser.readline().strip() == compare):
+        if(self.ser.readline() == compare):
             print("RUNS")
         # while(self.ser.readline() == compare):
         #     print("runs")
