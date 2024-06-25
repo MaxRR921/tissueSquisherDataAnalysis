@@ -66,10 +66,17 @@ class Plot2D:
         self.canvas.draw()
 
     def generateCsvFromPlot(self):
-       with open("profiles1.csv", "w", newline="") as f:
-            w = csv.DictWriter(f, self.data.keys())
-            w.writeheader()
-            w.writerow(self.data)
-                
-        
+        # Ensure that the data is in the format of lists of equal length
+        keys = self.data.keys()
+        values = zip(*self.data.values())
+
+        with open("profiles1.csv", "w", newline="") as f:
+            w = csv.writer(f)
+            # Write the header
+            w.writerow(keys)
+            # Write the rows
+            for row in values:
+                w.writerow(row)
+                    
+            
         
