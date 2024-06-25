@@ -1,7 +1,7 @@
 import tkinter as tk
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-
+import csv
 
 class Plot2D:
     def __init__(self, title='untitled', xAxisTitle='x', yAxisTitle='y'):
@@ -64,5 +64,12 @@ class Plot2D:
         self.ax.relim()
         self.ax.autoscale_view()
         self.canvas.draw()
+
+    def generateCsvFromPlot(self):
+       with open("profiles1.csv", "w", newline="") as f:
+            w = csv.DictWriter(f, self.data.keys())
+            w.writeheader()
+            w.writerow(self.data)
+                
         
         
