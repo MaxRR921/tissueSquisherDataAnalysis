@@ -106,6 +106,7 @@ class Gui:
         thread.start()
 
     def __executeAllMoves(self):
+        self.powerPlot.resetPlot()
         for i in range(self.numExecutions):
             for move in self.moveList:
                 move.move.execute()
