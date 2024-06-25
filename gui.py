@@ -221,8 +221,10 @@ class Gui:
             if self.updatingPlots:
                 self.root.after(100, self.updatePlotsFromData)
 
+            self.writeToCsv()
 
-    def writeToCsv():
+
+    def writeToCsv(self):
         with open('profiles1.csv', 'w', newline='') as file:
             writer = csv.writer(file)
             field = ["name", "age", "country"]
