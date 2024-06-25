@@ -206,7 +206,6 @@ class Gui:
                 try:
                     self.micrometerPlot.updatePlot(self.timeStamp, self.micrometerController.micrometerPosition)
                     
-                    
                 except:
                     print("micrometer not found")
                     self.triedMicrometer = True
