@@ -2,10 +2,10 @@
 try:
     import win32gui
     import win32com.client
+    import pythoncom
 except ImportError:
     print("win32 modules are not available on this platform. Continuing without them.")
 
-import pythoncom
 import time
 import traceback
 from threading import Thread
@@ -29,6 +29,8 @@ class Powermeter:
             self.device2Data = 0.0
         except OSError as err:
             print("OS error: {0}".format(err))
+        except ModuleNotFoundError as e:
+            print("Module not found error:", e)
         except:
             print("no powermeters connected. Note: you must be on windows.")
         # Stop & Close all devices
@@ -103,28 +105,31 @@ class Powermeter:
 
 
     def __runDevice2(self, device):
-        deviceHandle = self.OphirCom.OpenUSBDevice(device)# open first device
-        exists = self.OphirCom.IsSensorExists(deviceHandle, 0)
-        if exists:
-            # print('\n----------Data for S/N {0} ---------------'.format(device))
-            # An Example for data retrieving
-            self.OphirCom.StartStream(deviceHandle, 0)# start measuring
-            for i in range(300):
-                time.sleep(.2)# wait a little for data
-                data = self.OphirCom.GetData(deviceHandle, 0)
-                if len(data[0]) > 0: # if any data available, print the first one from the batch
-                    # print('Reading = {0}, TimeStamp = {1}, Status = {2} '.format(data[0][0] ,data[1][0] ,data[2][0]))
-                    # print(time.time())
-                    if(i==0):
-                        self.device2ZeroTime = data[1][0]
-                        deltaTime = 0   
-                    else:
-                        deltaTime = data[1][0] - self.device2ZeroTime
+        try:
+            deviceHandle = self.OphirCom.OpenUSBDevice(device)# open first device
+            exists = self.OphirCom.IsSensorExists(deviceHandle, 0)
+            if exists:
+                # print('\n----------Data for S/N {0} ---------------'.format(device))
+                # An Example for data retrieving
+                self.OphirCom.StartStream(deviceHandle, 0)# start measuring
+                for i in range(300):
+                    time.sleep(.2)# wait a little for data
+                    data = self.OphirCom.GetData(deviceHandle, 0)
+                    if len(data[0]) > 0: # if any data available, print the first one from the batch
+                        # print('Reading = {0}, TimeStamp = {1}, Status = {2} '.format(data[0][0] ,data[1][0] ,data[2][0]))
+                        # print(time.time())
+                        if(i==0):
+                            self.device2ZeroTime = data[1][0]
+                            deltaTime = 0   
+                        else:
+                            deltaTime = data[1][0] - self.device2ZeroTime
 
-                    newData = np.array([[data[0][0], deltaTime, data[2][0]]])
-                    self.device2Data = data[0][0]
-        else:
-            print('\nNo Sensor attached to {0} !!!'.format(device))
+                        newData = np.array([[data[0][0], deltaTime, data[2][0]]])
+                        self.device2Data = data[0][0]
+            else:
+                print('\nNo Sensor attached to {0} !!!'.format(device))
+        except ModuleNotFoundError as e:
+            print("Module not found error:", e)
 
 
     def __printData(self):
