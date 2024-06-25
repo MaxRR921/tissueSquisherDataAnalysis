@@ -23,6 +23,7 @@ class Powermeter:
             self.device2ZeroTime = 0.0
             self.device1Data = 0.0
             self.device2Data = 0.0
+            self.plot = True
         except OSError as err:
             print("OS error: {0}".format(err))
         except:
@@ -41,7 +42,6 @@ class Powermeter:
         self.OphirCom.CloseAll()
         # Release the object
         self.OphirCom = None
-
 
 
 
@@ -73,7 +73,7 @@ class Powermeter:
             # print('\n----------Data for S/N {0} ---------------'.format(device))
             # An Example for data retrieving
             self.OphirCom.StartStream(deviceHandle, 0)# start measuring
-            for i in range(300):
+            while(self.plot == True)
                 time.sleep(.2)# wait a little for data
                 data = self.OphirCom.GetData(deviceHandle, 0)
                 if len(data[0]) > 0: # if any data available, print the first one from the batch
@@ -102,7 +102,7 @@ class Powermeter:
             # print('\n----------Data for S/N {0} ---------------'.format(device))
             # An Example for data retrieving
             self.OphirCom.StartStream(deviceHandle, 0)# start measuring
-            for i in range(300):
+            while(self.plot == True):
                 time.sleep(.2)# wait a little for data
                 data = self.OphirCom.GetData(deviceHandle, 0)
                 if len(data[0]) > 0: # if any data available, print the first one from the batch
