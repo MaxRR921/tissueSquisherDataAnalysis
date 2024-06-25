@@ -41,9 +41,12 @@ class Controller:
         return self.ser
 
     def goHome(self): 
-        self.ser.write(b'1OR?\r\n')
-        print("RUNS")
-        time.sleep(0.1)
+        try:
+            self.ser.write(b'1OR?\r\n')
+            print("RUNS")
+            time.sleep(0.1)
+        except AttributeError as e:
+            print("Serial connection error:", e)
         
 
     def enterTracking(self):

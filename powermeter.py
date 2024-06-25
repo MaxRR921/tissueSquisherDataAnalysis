@@ -30,17 +30,20 @@ class Powermeter:
         # Stop & Close all devices
 
     def start(self):
-        power1 = Thread(target = self.__runDevice1, args=[self.deviceList[0]])
-        power2 = Thread(target = self.__runDevice2, args=[self.deviceList[1]])
-        power1.start()
-        power2.start()
-        power1.join()
-        power2.join()
-        #self.__printData()
-        self.OphirCom.StopAllStreams()
-        self.OphirCom.CloseAll()
-        # Release the object
-        self.OphirCom = None
+        try:
+            power1 = Thread(target = self.__runDevice1, args=[self.deviceList[0]])
+            power2 = Thread(target = self.__runDevice2, args=[self.deviceList[1]])
+            power1.start()
+            power2.start()
+            power1.join()
+            power2.join()
+            #self.__printData()
+            self.OphirCom.StopAllStreams()
+            self.OphirCom.CloseAll()
+            # Release the object
+            self.OphirCom = None
+        except IndexError as e:
+            print(f"An error occurred: {e}")
 
 
 
