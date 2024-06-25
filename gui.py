@@ -109,6 +109,8 @@ class Gui:
         for i in range(self.numExecutions):
             for move in self.moveList:
                 move.move.execute()
+
+        self.powerPlot.generateCsvFromPlot()
     
     
         
@@ -221,13 +223,3 @@ class Gui:
             if self.updatingPlots:
                 self.root.after(100, self.updatePlotsFromData)
 
-
-    def writeToCsv():
-        with open('profiles1.csv', 'w', newline='') as file:
-            writer = csv.writer(file)
-            field = ["name", "age", "country"]
-            
-            writer.writerow(field)
-            writer.writerow(["Oladele Damilola", "40", "Nigeria"])
-            writer.writerow(["Alina Hricko", "23", "Ukraine"])
-            writer.writerow(["Isabel Walter", "50", "United Kingdom"])
