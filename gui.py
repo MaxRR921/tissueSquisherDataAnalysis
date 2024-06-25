@@ -32,8 +32,6 @@ class Gui:
         self.triedMicrometer = False
 
         self.moveList = []
-        self.positionList = []
-        self.powerList = []
 
         self.micrometerController.goHome()
         
@@ -217,8 +215,6 @@ class Gui:
             if(self.triedPowermeters == False):
                 try:
                     self.powerPlot.updatePlot(self.micrometerController.micrometerPosition, abs(self.powGui.power.device1Data - self.powGui.power.device2Data))
-                    self.positionList.append(self.micrometerController.micrometerPosition[3:].strip())
-                    self.powerList.append(str(self.powGui.power.device1Data - self.powGui.power.device2Data))
                 except:
                     print("not enough powermeters connected.")
                     self.triedPowermeters = True
