@@ -12,6 +12,9 @@ from plotter import Plot2D
 import time
 import moveGui
 from threading import Thread
+import csv
+from csv import writer
+from csv import DictWriter
 #TODO: take out unnecessary imports
 #README: Gui is the main menu for the program. 
 
@@ -217,3 +220,14 @@ class Gui:
             
             if self.updatingPlots:
                 self.root.after(100, self.updatePlotsFromData)
+
+
+    def writeToCsv():
+        with open('profiles1.csv', 'w', newline='') as file:
+            writer = csv.writer(file)
+            field = ["name", "age", "country"]
+            
+            writer.writerow(field)
+            writer.writerow(["Oladele Damilola", "40", "Nigeria"])
+            writer.writerow(["Alina Hricko", "23", "Ukraine"])
+            writer.writerow(["Isabel Walter", "50", "United Kingdom"])
