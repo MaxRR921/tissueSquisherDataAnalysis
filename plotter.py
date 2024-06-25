@@ -65,11 +65,11 @@ class Plot2D:
         self.ax.autoscale_view()
         self.canvas.draw()
 
-    def generateCsvFromPlot(self):
-       with open("profiles1.csv", "w", newline="") as f:
-            w = csv.DictWriter(f, self.data.keys())
-            w.writeheader()
-            w.writerow(self.data)
+    # def generateCsvFromPlot(self):
+    #    with open("profiles1.csv", "w", newline="") as f:
+    #         w = csv.DictWriter(f, self.data.keys())
+    #         w.writeheader()
+    #         w.writerow(self.data)
                 
         
         
