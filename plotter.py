@@ -40,6 +40,7 @@ class Plot2D:
         self.ax.set_title(self.title)
         self.fig.tight_layout()
         self.canvas.draw()
+        
 
     def updatePlot(self, xData, yData):
         #NEED TO FIX THREADING ISSUE
