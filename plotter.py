@@ -77,6 +77,7 @@ class Plot2D:
             # Write the rows
             for row in values:
                 w.writerow(row)
+        
                     
             
         
