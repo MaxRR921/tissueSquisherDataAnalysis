@@ -83,7 +83,7 @@ class Gui:
         self.textInput.pack(side='left')
 
         # Add a Button to save the input into self.numExecutions
-        saveButton = tk.Button(frameMoveList, text="Save", command=self.save_input)
+        saveButton = tk.Button(frameMoveList, text="Save", command=self.saveNumExecutionsInput)
         saveButton.pack(side='left')
 
     def saveNumExecutionsInput(self):
