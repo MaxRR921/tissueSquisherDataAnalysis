@@ -78,6 +78,8 @@ class Gui:
         frameMoveList.pack(side="top", anchor="nw")
         frameMoveList.pack_propagate(False)
         self.__addMoveButton(frameMoveList)
+        self.powerPlot.resetPlot()
+        self.micrometerPlot.resetPlot()
         executeAllMovesButton = tk.Button(frameMoveList, text="execute all moves", command=lambda: [self.__startExecuteThread()]) 
         executeAllMovesButton.pack(side='left') 
 
@@ -106,7 +108,6 @@ class Gui:
         thread.start()
 
     def __executeAllMoves(self):
-        self.powerPlot.resetPlot()
         for i in range(self.numExecutions):
             for move in self.moveList:
                 move.move.execute()
