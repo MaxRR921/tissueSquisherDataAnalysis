@@ -67,6 +67,7 @@ class Powermeter:
 
 
     def __runDevice1(self, device):
+        i=0
         deviceHandle = self.OphirCom.OpenUSBDevice(device)# open first device
         exists = self.OphirCom.IsSensorExists(deviceHandle, 0)
         if exists:
@@ -88,6 +89,7 @@ class Powermeter:
                     newData = np.array([[data[0][0], deltaTime, data[2][0]]])
                     #self.device1Data = np.append(self.device1Data, newData, axis=0) 
                     self.device1Data = data[0][0]
+                i=i+1
 
 
                    
@@ -96,6 +98,7 @@ class Powermeter:
 
 
     def __runDevice2(self, device):
+        i = 0
         deviceHandle = self.OphirCom.OpenUSBDevice(device)# open first device
         exists = self.OphirCom.IsSensorExists(deviceHandle, 0)
         if exists:
@@ -116,6 +119,7 @@ class Powermeter:
 
                     newData = np.array([[data[0][0], deltaTime, data[2][0]]])
                     self.device2Data = data[0][0]
+                i=i+1
         else:
             print('\nNo Sensor attached to {0} !!!'.format(device))
 
