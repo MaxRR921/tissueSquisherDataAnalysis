@@ -1,6 +1,10 @@
 # Uses pywin32
-import win32gui
-import win32com.client
+try:
+    import win32gui
+    import win32com.client
+except ImportError:
+    print("win32 modules are not available on this platform. Continuing without them.")
+
 import pythoncom
 import time
 import traceback
