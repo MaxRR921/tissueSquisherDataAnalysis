@@ -22,7 +22,7 @@ class Gui:
         self.window.config(background="red")
         self.window.title("Data GUI")
         self.window.geometry("1000x1000")
-        
+        self.numExecutions = 1
         self.micrometerController = controller.Controller()
         self.polGui = polarimeterGui.PolarimeterGui()
         self.powGui = powermeterGui.PowermeterGui()
@@ -78,14 +78,36 @@ class Gui:
         executeAllMovesButton = tk.Button(frameMoveList, text="execute all moves", command=lambda: [self.__startExecuteThread()]) 
         executeAllMovesButton.pack(side='left') 
 
+        # Add a Text widget for input
+        self.textInput = tk.Text(frameMoveList, height=1, width=10)
+        self.textInput.pack(side='left')
+
+        # Add a Button to save the input into self.numExecutions
+        saveButton = tk.Button(frameMoveList, text="Save", command=self.save_input)
+        saveButton.pack(side='left')
+
+    def saveNumExecutionsInput(self):
+        # Get the text from the Text widget and save it into self.numExecutions
+        inputTxt = self.textInput.get("1.0", tk.END).strip()
+        try:
+            self.numExecutions = int(inputTxt)
+            print(f"Saved number of executions: {self.numExecutions}")
+        except ValueError:
+            print("Invalid input, please enter a valid number")
+        
+
+        
+
     def __startExecuteThread(self):
         thread = Thread(target = self.__executeAllMoves, args=[])
         thread.start()
 
     def __executeAllMoves(self):
-        for move in self.moveList:
-            move.move.execute()
-        
+        for i in range(self.numExecutions):
+            for move in self.moveList:
+                move.move.execute()
+    
+    
         
     
     def __quitButton(self, frameTopMenu):
