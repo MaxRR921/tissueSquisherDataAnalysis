@@ -41,14 +41,20 @@ class Controller:
         return self.ser
 
     def goHome(self): 
-        self.ser.write(b'1OR?\r\n')
-        print("RUNS")
-        time.sleep(0.1)
+        try: 
+            self.ser.write(b'1OR?\r\n')
+            print("RUNS")
+            time.sleep(0.1)
+        except AttributeError as e:
+            print(f"An error occurred: {e}")
         
 
     def enterTracking(self):
-        self.ser.write(b'1TK0\r\n')
-        time.sleep(0.1)
+        try: 
+            self.ser.write(b'1TK0\r\n')
+            time.sleep(0.1)
+        except AttributeError as e:
+            print(f"An error occurred: {e}")
 
 
     def setVelocity(self, inputVelocity):
@@ -103,7 +109,6 @@ class Controller:
             self.timeStamp = time.time()
             self.ser.write(b'1TS\r\n')
             state = self.ser.readline()
-           
             
         print("done")
     
