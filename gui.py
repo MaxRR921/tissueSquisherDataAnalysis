@@ -15,14 +15,15 @@ from threading import Thread
 import csv
 from csv import writer
 from csv import DictWriter
+from ttkthemes import ThemedTk
 #TODO: take out unnecessary imports
 #README: Gui is the main menu for the program. 
 
 class Gui:
     def __init__(self):
-        self.window = tk.Tk()
+        self.window = ThemedTk(theme="arc")
         self.root = tk._default_root #same as window!
-        self.window.config(background="red")
+        self.window.config()
         self.window.title("Data GUI")
         self.window.geometry("1000x1000")
         self.numExecutions = 1
