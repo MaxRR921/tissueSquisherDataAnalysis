@@ -4,29 +4,31 @@ from ttkthemes import ThemedTk
 from threading import Thread
 
 class MoveGui(ttk.Frame):
-    def __init__(self, parent, moveList, item_height):
+    def __init__(self, parent, moveList, item_height, width):
         super().__init__(master=parent)
-        self.pack(expand=True, fill='both')
-
+        self.pack(expand=True, fill='both', anchor="nw")
+        
+        self.width = width
         # widget data
         self.moveList = moveList
         self.item_number = len(moveList)
         self.item_height = item_height
 
         # canvas 
-        self.canvas = tk.Canvas(self, background='white', scrollregion=(0, 0, self.winfo_width(), self.item_number * self.item_height))
-        self.canvas.pack(side="left", expand=True, fill='both')
+        self.canvas = tk.Canvas(self, scrollregion=(0, 0, self.width, self.item_number * self.item_height))
+        self.canvas.pack(side="right", expand=True, fill='both')
 
         # display frame
-        self.frame = ttk.Frame(self.canvas)
+        self.frame = ttk.Frame(self.canvas, width=self.width)
         self.frame_id = self.canvas.create_window((0, 0), window=self.frame, anchor='nw')
+        
 
         self.populate_items()
 
         # scrollbar 
         self.scrollbar = ttk.Scrollbar(self, orient='vertical', command=self.canvas.yview)
         self.canvas.configure(yscrollcommand=self.scrollbar.set)
-        self.scrollbar.pack(side="right", fill="y")
+        self.scrollbar.pack(side="left", fill="y")
 
         # events
         self.canvas.bind_all('<MouseWheel>', self._on_mouse_wheel)
@@ -38,7 +40,7 @@ class MoveGui(ttk.Frame):
     def updateList(self, moveList):
         self.moveList = moveList
         self.item_number = len(moveList)
-        self.canvas.configure(scrollregion=(0, 0, self.winfo_width(), self.item_number * self.item_height))
+        self.canvas.configure(scrollregion=(0, 0, self.width, self.item_number * self.item_height))
 
         for widget in self.frame.winfo_children():
             widget.destroy()
@@ -73,11 +75,13 @@ class MoveGui(ttk.Frame):
         ttk.Label(frame, text='velocity').grid(row=0, column=1)
         ttk.Label(frame, text='front wait').grid(row=0, column=2)
         ttk.Label(frame, text='back wait').grid(row=0, column=3)
-        ttk.Button(frame, text='save', command=lambda: self.saveEntries(move, targetHeight_var, velocity_var, frontDelay_var, backDelay_var)).grid(row=0, column=4)
-        ttk.Entry(frame, textvariable=targetHeight_var).grid(row=1, column=0)
-        ttk.Entry(frame, textvariable=velocity_var).grid(row=1, column=1)
-        ttk.Entry(frame, textvariable=frontDelay_var).grid(row=1, column=2)
-        ttk.Entry(frame, textvariable=backDelay_var).grid(row=1, column=3)
+        ttk.Button(frame, text='save', command=lambda: self.saveEntries(move, targetHeight_var, velocity_var, frontDelay_var, backDelay_var)).grid(row=1, column=4,)
+        ttk.Entry(frame, textvariable=targetHeight_var).grid(row=1, column=0, sticky='new')  # Ensure entries expand horizontally
+        ttk.Entry(frame, textvariable=velocity_var).grid(row=1, column=1, sticky='new')      # Ensure entries expand horizontally
+        ttk.Entry(frame, textvariable=frontDelay_var).grid(row=1, column=2, sticky='new')    # Ensure entries expand horizontally
+        ttk.Entry(frame, textvariable=backDelay_var).grid(row=1, column=3, sticky='new')     # Ensure entries expand horizontally
+
+        return frame
 
         return frame
 

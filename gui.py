@@ -82,27 +82,31 @@ class Gui:
         # self.__openPowermeterMenuButton(self.topMenuFrame)
 
     def addMoveListButtons(self, listFrame):
+        numExec = tk.StringVar()
         listFrame.grid_rowconfigure(0, weight=1)
         listFrame.grid_rowconfigure(1, weight=0)
         listFrame.grid_columnconfigure(1, weight=0)
         listFrame.grid_columnconfigure(2, weight=1)
+        listFrame.grid_columnconfigure(3, weight=2)
         executeAllMovesButton = ttk.Button(listFrame, text='execute all moves', command=lambda: self.__startExecuteThread())
         executeAllMovesButton.grid(row=2, column=0, sticky='sw', pady=5, padx=30)
         addMoveButton = ttk.Button(listFrame, text='add move', command=lambda: self.__addMove(listFrame))
-        addMoveButton.grid(row=1, column=0, sticky='sw', pady=5, padx= 30)
+        addMoveButton.grid(row=1, column=0, sticky='sw', pady=5, padx=30)
+        saveNumExecutionsButton = ttk.Button(listFrame, text='save', command=lambda: self.saveNumExecutions(numExec))
+        saveNumExecutionsButton.grid(row=2,column=3, sticky='sw', pady=5)
         
         
 
-        ttk.Entry(listFrame, textvariable=self.numExecutions).grid(row=2, column=1, sticky='sw', pady=5)
+        ttk.Entry(listFrame, textvariable=numExec).grid(row=2, column=1, sticky='sw', pady=5)
         timesText = ttk.Label(listFrame, text='times').grid(row=2, column=2, sticky= 'w', pady=5, padx=30)
 
         
 
 
-    def saveNumExecutionsInput(self, index, text_data):
-        inputTxt = self.textInput.get("1.0", tk.END).strip()
+    def saveNumExecutions(self, numExec):
+        
         try:
-            self.numExecutions = int(inputTxt)
+            self.numExecutions = int(numExec.get())
             print(f"Saved number of executions: {self.numExecutions}")
         except ValueError:
             print("Invalid input, please enter a valid number")
