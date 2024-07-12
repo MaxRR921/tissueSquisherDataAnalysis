@@ -1,82 +1,93 @@
-import move
 import tkinter as tk
+from tkinter import ttk
+from ttkthemes import ThemedTk
 from threading import Thread
-class MoveGui:
-    
 
-    def __init__(self, frameMoveList, controller):
-        self.micrometerController = controller
-        self.root = frameMoveList
-        self.moveFrame = tk.Frame(self.root, width=300, height=100)
-        self.moveFrame.config(bg="grey")
-        self.moveFrame.pack(side="top")
-        self.moveFrame.pack_propagate(False)
-        self.move = move.Move(self.micrometerController)
-        self.__setMoveAttributesFrame()
+class MoveGui(ttk.Frame):
+    def __init__(self, parent, moveList, item_height):
+        super().__init__(master=parent)
+        self.pack(expand=True, fill='both')
 
-    def run(self):
-        
-        self.mainloop()
+        # widget data
+        self.moveList = moveList
+        self.item_number = len(moveList)
+        self.item_height = item_height
 
+        # canvas 
+        self.canvas = tk.Canvas(self, background='white', scrollregion=(0, 0, self.winfo_width(), self.item_number * self.item_height))
+        self.canvas.pack(side="left", expand=True, fill='both')
 
-    def __setMoveAttributesFrame(self):
-        self.moveFrame.grid_columnconfigure(0, weight=1)
-        self.moveFrame.grid_columnconfigure(1, weight=1)
-        self.moveFrame.grid_columnconfigure(2, weight=1)
-        self.moveFrame.grid_columnconfigure(3, weight=1)
-        self.moveFrame.grid_columnconfigure(4, weight=1)
-        self.moveFrame.grid_rowconfigure(0, weight=1)
-        self.moveFrame.grid_rowconfigure(1, weight=1)
+        # display frame
+        self.frame = ttk.Frame(self.canvas)
+        self.frame_id = self.canvas.create_window((0, 0), window=self.frame, anchor='nw')
 
-        setVelocityLabel = tk.Label(self.moveFrame, text="set velocity")
-        inputTxtVelocity = tk.Text(self.moveFrame, height=1, width=10)
-        setVelocityLabel.grid(row=0, column=0, padx=10, pady=5)
-        inputTxtVelocity.grid(row=1, column=0, padx=10, pady=5)
+        self.populate_items()
 
-        setHeightLabel = tk.Label(self.moveFrame, text="Set the target height")
-        inputTxtHeight = tk.Text(self.moveFrame, height=1, width=10)
-        setHeightLabel.grid(row=0, column=1, padx=10, pady=5)
-        inputTxtHeight.grid(row=1, column=1, padx=10, pady=5)
+        # scrollbar 
+        self.scrollbar = ttk.Scrollbar(self, orient='vertical', command=self.canvas.yview)
+        self.canvas.configure(yscrollcommand=self.scrollbar.set)
+        self.scrollbar.pack(side="right", fill="y")
 
-        setFrontDelayLabel = tk.Label(self.moveFrame, text="set front delay")
-        inputTxtFrontDelay = tk.Text(self.moveFrame, height=1, width=10)
-        setFrontDelayLabel.grid(row=0, column=2, padx=10, pady=5)
-        inputTxtFrontDelay.grid(row=1, column=2, padx=10, pady=5)
+        # events
+        self.canvas.bind_all('<MouseWheel>', self._on_mouse_wheel)
+        self.bind('<Configure>', self.update_size)
 
-        setBackDelayLabel = tk.Label(self.moveFrame, text="set back delay")
-        inputTxtBackDelay = tk.Text(self.moveFrame, height=1, width=10)
-        setBackDelayLabel.grid(row=0, column=3, padx=10, pady=5)
-        inputTxtBackDelay.grid(row=1, column=3, padx=10, pady=5)
+    def _on_mouse_wheel(self, event):
+        self.canvas.yview_scroll(-int(event.delta / 120), "units")
 
-        saveButton = tk.Button(self.moveFrame, text="Save", command=lambda: self.__saveInputs(
-            inputTxtVelocity.get("1.0", "end-1c"),
-            inputTxtHeight.get("1.0", "end-1c"),
-            inputTxtFrontDelay.get("1.0", "end-1c"),
-            inputTxtBackDelay.get("1.0", "end-1c")
-        ))
-        saveButton.grid(row=2, column=2, padx=10, pady=10)
+    def updateList(self, moveList):
+        self.moveList = moveList
+        self.item_number = len(moveList)
+        self.canvas.configure(scrollregion=(0, 0, self.winfo_width(), self.item_number * self.item_height))
 
-        executeButton = tk.Button(self.moveFrame, text="Execute", command=self.__execute)
-        executeButton.grid(row=2, column=3, padx=10, pady=10)
+        for widget in self.frame.winfo_children():
+            widget.destroy()
 
+        self.populate_items()
+        self.update_size(None)
 
-        testButton = tk.Button(self.moveFrame, text="test", command=self.__test)
-        testButton.grid(row=2, column=3, padx=10, pady=10)
+    def populate_items(self):
+        for index, move in enumerate(self.moveList):
+            self.create_item(move).pack(expand=True, fill='both', pady=4, padx=10)
 
-    def __saveInputs(self, velocity, height, frontDelay, backDelay):
-        frontDelay = float(frontDelay)
-        backDelay = float(backDelay)
-        self.move.saveInputs(velocity, height, frontDelay, backDelay)
-        print(f"Velocity: {velocity}, Height: {height}, Front Delay: {frontDelay}, Back Delay: {backDelay}")
+    def update_size(self, event):
+        canvas_width = self.winfo_width()
+        canvas_height = self.item_number * self.item_height
+        self.canvas.itemconfig(self.frame_id, width=canvas_width, height=canvas_height)
+        self.canvas.configure(scrollregion=self.canvas.bbox("all"))
 
-    def __execute(self):
-        thread = Thread(target = self.move.execute, args=[])
-        thread.start()
-        print("Execute button pressed")
+    def create_item(self, move):
+        frame = ttk.Frame(self.frame)
 
+        # grid layout
+        frame.rowconfigure(0, weight=1)
+        frame.columnconfigure((0, 1, 2, 3, 4), weight=1, uniform='a')
 
-    def __test(self):
-        thread = Thread(target= self.move.controller.enterTracking, args=[])
-        thread.start()
-        print("test button pressed")
+        # widgets 
+        targetHeight_var = tk.StringVar(value=str(move.targetHeight))
+        velocity_var = tk.StringVar(value=str(move.velocity))
+        frontDelay_var = tk.StringVar(value=str(move.frontDelay))
+        backDelay_var = tk.StringVar(value=str(move.backDelay))
 
+        ttk.Label(frame, text='target height').grid(row=0, column=0)
+        ttk.Label(frame, text='velocity').grid(row=0, column=1)
+        ttk.Label(frame, text='front wait').grid(row=0, column=2)
+        ttk.Label(frame, text='back wait').grid(row=0, column=3)
+        ttk.Button(frame, text='save', command=lambda: self.saveEntries(move, targetHeight_var, velocity_var, frontDelay_var, backDelay_var)).grid(row=0, column=4)
+        ttk.Entry(frame, textvariable=targetHeight_var).grid(row=1, column=0)
+        ttk.Entry(frame, textvariable=velocity_var).grid(row=1, column=1)
+        ttk.Entry(frame, textvariable=frontDelay_var).grid(row=1, column=2)
+        ttk.Entry(frame, textvariable=backDelay_var).grid(row=1, column=3)
+
+        return frame
+
+    def saveEntries(self, move, targetHeight_var, velocity_var, frontDelay_var, backDelay_var):
+        try:
+            move.targetHeight = float(targetHeight_var.get())
+            move.velocity = float(velocity_var.get())
+            move.frontDelay = float(frontDelay_var.get())
+            move.backDelay = float(backDelay_var.get())
+            print("MOVE:")
+            print(f"targetHeight: {move.targetHeight}, velocity: {move.velocity}, frontDelay: {move.frontDelay}, backDelay: {move.backDelay}")
+        except ValueError:
+            print("Invalid input. Please enter valid numbers.")

@@ -10,18 +10,18 @@ import polarimeterGui
 import powermeterGui
 from plotter import Plot2D
 import time
+import move
 import moveGui
 from threading import Thread
 import csv
 from csv import writer
 from csv import DictWriter
+from tkinter import ttk
 from ttkthemes import ThemedTk
-#TODO: take out unnecessary imports
-#README: Gui is the main menu for the program. 
 
 class Gui:
     def __init__(self):
-        self.window = ThemedTk(theme="arc")
+        self.window = ThemedTk(theme="breeze")
         self.root = tk._default_root #same as window!
         self.window.config()
         self.window.title("Data GUI")
@@ -30,110 +30,87 @@ class Gui:
         self.micrometerController = controller.Controller()
         self.polGui = polarimeterGui.PolarimeterGui()
         self.powGui = powermeterGui.PowermeterGui()
-
         self.updatingPlots = True
         self.triedPowermeters = False
         self.triedMicrometer = False
 
-        self.moveList = []
-    
+        defualtMove = move.Move(self.micrometerController)
+        self.moveList = [defualtMove]
+        
+        # Create main layout frames
+        self.topMenuFrame = tk.Frame(self.window, height=30)
+        self.topMenuFrame.pack(side='top', fill='x')
+        
+        self.mainFrame = tk.Frame(self.window)
+        self.mainFrame.pack(expand=True, fill='both')
+
+        self.listFrame = tk.Frame(self.mainFrame, width=500)
+        self.listFrame.pack(side='left', fill='y')
+
+        self.canvasFrame = tk.Frame(self.mainFrame)
+        self.canvasFrame.pack(side='left', expand=True, fill='both')
+        
+        self.addTopMenuButtons()
+        
+        self.moveGui = moveGui.MoveGui(self.listFrame, self.moveList, 100)
+        self.addMoveListButtons(self.listFrame)
+        
+        # Dummy empty space on the right
+        # self.emptyFrame = tk.Frame(self.mainFrame)
+        # self.emptyFrame.pack(side='left', expand=True, fill='both')
+
         self.micrometerController.goHome()
         
-        #run seperate gui windows
-
-        #initialize plots   
         self.micrometerPlot = Plot2D('micrometer plot', 'time', 'distance')
         self.powerPlot = Plot2D('power plot', 'distance (no idea)', 'power (um)')
-        #update plots
         self.root.after(100, self.updatePlotsFromData)
-        
-
-        
 
     def run(self):
-        self.__topMenu()
-        self.__moveList()
         self.window.mainloop()
-    
-    def __topMenu(self):
-        frameTopMenu = tk.Frame(self.window, width=1000, height=30)
-        frameTopMenu.config(bg="blue")
-        frameTopMenu.pack(side='top')
-        frameTopMenu.pack_propagate(False)
 
-        #buttons
-        self.__quitButton(frameTopMenu)
+    def addTopMenuButtons(self):
+        self.__quitButton(self.topMenuFrame)
+        self.__browseDataFileButton(self.topMenuFrame)
+        self.__openMicrometerMenuButton(self.topMenuFrame)
+        self.__openPolarimeterMenuButton(self.topMenuFrame)
+        self.__openPowermeterMenuButton(self.topMenuFrame)
 
-        self.__browseDataFileButton(frameTopMenu)
+    def addMoveListButtons(self, listFrame):
+        self.__addMoveButton(listFrame)
+        executeAllMovesButton = ttk.Button(listFrame, text='execute all moves', command=lambda: self.__startExecuteThread()).pack(side='top')
 
-        self.__openMicrometerMenuButton(frameTopMenu)
-        
-        self.__openPolarimeterMenuButton(frameTopMenu)
-
-        self.__openPowermeterMenuButton(frameTopMenu)
-
-
-    def __moveList(self):  
-        frameMoveList = tk.Frame(self.window, width=500, height=800)
-        frameMoveList.config(bg="orange")
-        frameMoveList.pack(side="top", anchor="nw")
-        frameMoveList.pack_propagate(False)
-        self.__addMoveButton(frameMoveList)
-        
-        executeAllMovesButton = tk.Button(frameMoveList, text="execute all moves", command=lambda: [self.__startExecuteThread()]) 
-        executeAllMovesButton.pack(side='left') 
-
-        # Add a Text widget for input
-        self.textInput = tk.Text(frameMoveList, height=1, width=10)
-        self.textInput.pack(side='left')
-
-        # Add a Button to save the input into self.numExecutions
-        saveButton = tk.Button(frameMoveList, text="Save", command=self.saveNumExecutionsInput)
-        saveButton.pack(side='left')
-
-    def saveNumExecutionsInput(self):
-        # Get the text from the Text widget and save it into self.numExecutions
+    def saveNumExecutionsInput(self, index, text_data):
         inputTxt = self.textInput.get("1.0", tk.END).strip()
         try:
             self.numExecutions = int(inputTxt)
             print(f"Saved number of executions: {self.numExecutions}")
         except ValueError:
             print("Invalid input, please enter a valid number")
-        
-
-        
 
     def __startExecuteThread(self):
         self.powerPlot.resetPlot()
         self.micrometerPlot.resetPlot()
-        thread = Thread(target = self.__executeAllMoves, args=[])
+        thread = Thread(target=self.__executeAllMoves, args=[])
         thread.start()
 
     def __executeAllMoves(self):
         for i in range(self.numExecutions):
             for move in self.moveList:
                 move.move.execute()
-
         self.powerPlot.generateCsvFromPlot()
-        
-    
-    
-        
-    
-    def __quitButton(self, frameTopMenu):
-        quitButton = tk.Button(frameTopMenu, text="Quit", command=lambda: [self.window.quit()]) 
-        quitButton.pack(side='right') 
 
+    def __quitButton(self, frameTopMenu):
+        quitButton = tk.Button(frameTopMenu, text="Quit", command=lambda: [self.window.quit()])
+        quitButton.pack(side='right')
 
     def __addMoveButton(self, frameMoveList):
         addMoveButton = tk.Button(frameMoveList, text="add move", command=lambda: [self.__addMove(frameMoveList)])
         addMoveButton.pack(side='top')
 
-    
     def __addMove(self, frameMoveList):
-        moveToAdd = moveGui.MoveGui(frameMoveList, self.micrometerController)
+        moveToAdd = move.Move(self.micrometerController)
         self.moveList.append(moveToAdd)
-
+        self.moveGui.updateList(self.moveList)
 
     def __browseDataFileButton(self, frameTopMenu):
         browseDataFileButton = tk.Button(frameTopMenu, text="browse for data file", command=lambda: [self.__browseFile(self.window)])
@@ -148,29 +125,22 @@ class Gui:
         openPolarimeterMenu.pack(side="left")
 
     def __openPowermeterMenuButton(self, frameTopMenu):
-        openPowermeterMenu = tk.Button(frameTopMenu, text="powermeter menu", command= lambda: [self.powGui.run()])
+        openPowermeterMenu = tk.Button(frameTopMenu, text="powermeter menu", command=lambda: [self.powGui.run()])
         openPowermeterMenu.pack(side="left")
 
-    # browse file button helper method
     def __browseFile(self):
         self.filePath = tk.filedialog.askopenfilename(filetypes=[('CSV Files', '*.csv')])
-        if(self.filePath):
+        if self.filePath:
             self.__plot()
 
     def __plot(self):
         timeList, strain, phase, s1List, s2List, s3List = dataAnalysisVmaster.analyzeData(self.filePath)
-    
-        # Write the analyzed data into a .csv file
         data = np.vstack((timeList, strain, phase)).T
         filename = 'analyzed_data.csv'
         np.savetxt(filename, data, delimiter=',', header='time (s),strain (mm/mm),phase (pi radians)', comments='')
-
-        #setup tkinter frame for graphs
         frameGraphs = tk.Frame(self.window, width=800, height=400)
         frameGraphs.pack()
         frameGraphs.pack_propagate(False)
-
-        # Plot phase vs. strain
         fig2, ax2 = plt.subplots()
         fig2.set_figheight(4)
         fig2.set_figwidth(4)
@@ -178,13 +148,8 @@ class Gui:
         ax2.set_title('Phase vs. Strain')
         ax2.set_xlabel('Strain (mm/mm)')
         ax2.set_ylabel('Phase (pi radians)')
-        
-    
-        # Embed the Matplotlib graph in Tkinter
         canvas1 = FigureCanvasTkAgg(fig2, master=frameGraphs)
         canvas1.get_tk_widget().pack(side="left")
-
-        # Plot circle trace on sphere (for reference)
         fig3 = plt.figure()
         ax3 = fig3.add_subplot(111, projection='3d')
         fig3.set_figheight(4)
@@ -201,30 +166,22 @@ class Gui:
         ax3.set_ylabel('s2')
         ax3.set_zlabel('s3')
         ax3.set_title('Circle Trace on Sphere')
-
-
-        # Embed the Matplotlib graph in Tkinter
         canvas1 = FigureCanvasTkAgg(fig3, master=frameGraphs)
-        canvas1Widget = canvas1.get_tk_widget()
         canvas1.get_tk_widget().pack(side="left")
 
     def updatePlotsFromData(self):
-            self.timeStamp = time.time()
-            if(self.triedMicrometer == False):
-                try:
-                    self.micrometerPlot.updatePlot(self.timeStamp, self.micrometerController.micrometerPosition)
-                except:
-                    print("micrometer not found")
-                    self.triedMicrometer = True
-              
-
-            if(self.triedPowermeters == False):
-                try:
-                    self.powerPlot.updatePlot(self.micrometerController.micrometerPosition, abs(self.powGui.power.device1Data - self.powGui.power.device2Data))
-                except:
-                    print("not enough powermeters connected.")
-                    self.triedPowermeters = True
-            
-            if self.updatingPlots:
-                self.root.after(100, self.updatePlotsFromData)
-
+        self.timeStamp = time.time()
+        if not self.triedMicrometer:
+            try:
+                self.micrometerPlot.updatePlot(self.timeStamp, self.micrometerController.micrometerPosition)
+            except:
+                print("micrometer not found")
+                self.triedMicrometer = True
+        if not self.triedPowermeters:
+            try:
+                self.powerPlot.updatePlot(self.micrometerController.micrometerPosition, abs(self.powGui.power.device1Data - self.powGui.power.device2Data))
+            except:
+                print("not enough powermeters connected.")
+                self.triedPowermeters = True
+        if self.updatingPlots:
+            self.root.after(100, self.updatePlotsFromData)
