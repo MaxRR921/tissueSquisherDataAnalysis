@@ -120,7 +120,7 @@ class Gui:
     def __executeAllMoves(self):
         for i in range(self.numExecutions):
             for move in self.moveList:
-                move.move.execute()
+                move.execute()
         self.powerPlot.generateCsvFromPlot()
 
     def __quitButton(self, frameTopMenu):
