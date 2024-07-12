@@ -89,8 +89,8 @@ class MoveGui(ttk.Frame):
         try:
             move.targetHeight = str(targetHeight_var.get())
             move.velocity = str(velocity_var.get())
-            move.frontDelay = str(frontDelay_var.get())
-            move.backDelay = str(backDelay_var.get())
+            move.frontDelay = int(frontDelay_var.get())
+            move.backDelay = int(backDelay_var.get())
             print("MOVE:")
             print(f"targetHeight: {move.targetHeight}, velocity: {move.velocity}, frontDelay: {move.frontDelay}, backDelay: {move.backDelay}")
         except ValueError:
