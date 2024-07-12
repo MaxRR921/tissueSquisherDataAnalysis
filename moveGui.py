@@ -87,10 +87,10 @@ class MoveGui(ttk.Frame):
 
     def saveEntries(self, move, targetHeight_var, velocity_var, frontDelay_var, backDelay_var):
         try:
-            move.targetHeight = float(targetHeight_var.get())
-            move.velocity = float(velocity_var.get())
-            move.frontDelay = float(frontDelay_var.get())
-            move.backDelay = float(backDelay_var.get())
+            move.targetHeight = str(targetHeight_var.get())
+            move.velocity = str(velocity_var.get())
+            move.frontDelay = str(frontDelay_var.get())
+            move.backDelay = str(backDelay_var.get())
             print("MOVE:")
             print(f"targetHeight: {move.targetHeight}, velocity: {move.velocity}, frontDelay: {move.frontDelay}, backDelay: {move.backDelay}")
         except ValueError:
