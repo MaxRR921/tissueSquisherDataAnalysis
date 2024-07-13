@@ -24,7 +24,7 @@ class Gui:
         self.window = ThemedTk(theme="breeze")
         self.root = tk._default_root #same as window!
         self.window.title("Data GUI")
-        self.window.geometry("1920x1080")
+        self.window.geometry("800x800")
         self.numExecutions = 1
         self.micrometerController = controller.Controller()
         self.polGui = polarimeterGui.PolarimeterGui()
@@ -39,34 +39,42 @@ class Gui:
         
         
         # Create main layout frames
-        self.mainFrame = tk.Frame(self.window, background="green", width=100, height=800)
-        self.mainFrame.grid(row=0, column=1, sticky="nsew")
-        self.mainFrame.grid_propagate(False)
+        # self.mainFrame = tk.Frame(self.window, background="green", width=100, height=800)
+        # self.mainFrame.grid(row=0, column=1, sticky="nsew")
+        # self.mainFrame.grid_propagate(False)
 
        
        
 
-        
-        self.listFrame = tk.Frame(self.window, background="light grey", width=500, height=500)  # Adjust the width here for the left panel
-        self.listFrame.grid(row=0, column=0, sticky="nsew")
+        # adding listFrame
+        self.listFrame = tk.Frame(self.window, width=800, height=1000)  # Adjust the width here for the left panel
+        self.listFrame.grid(row=0, column=0, columnspan= 2, rowspan=2, sticky="nsew")
         self.listFrame.grid_propagate(False)
 
-          # Create top menu frame
-        self.topMenuFrame = tk.Frame(self.window, background="blue", height=30)  # Adjust the height here
+        # Create listFrame
+        self.topMenuFrame = tk.Frame(self.window, height=30, background="light grey")  # Adjust the height here
         self.topMenuFrame.grid(row=0, column=0, columnspan=2, sticky="new")
         self.topMenuFrame.grid_propagate(False)
         self.addTopMenuButtons()
         
+        #create bottomFrame 
+        self.bottomFrame = tk.Frame(self.window, height=80, background="light grey")
+        self.bottomFrame.grid(row=1, column=0, columnspan=2, sticky='sew')
+        self.bottomFrame.grid_propagate(False)
+        self.addMoveListButtons(self.bottomFrame)
+
         self.window.columnconfigure(0, weight=1)  # Make the list frame column expandable
         self.window.columnconfigure(1, weight=3)  # Make the main frame column expandable
         self.window.rowconfigure(0, weight=1)     # Make the row expandable
+        self.window.rowconfigure(1, weight=2)
 
-        
+        #create the move list gui elements
         self.moveGui = moveGui.MoveGui(self.listFrame, self.moveList, 100, width=500)
-        self.addMoveListButtons(self.listFrame)
         
+        #micrometer moves to original position
         self.micrometerController.goHome()
         
+        #plots initialized, set to update every 100 ms.
         self.micrometerPlot = Plot2D('micrometer plot', 'time', 'distance')
         self.powerPlot = Plot2D('power plot', 'distance (no idea)', 'power (um)')
         self.root.after(100, self.updatePlotsFromData)
@@ -76,10 +84,14 @@ class Gui:
 
     def addTopMenuButtons(self):
         self.__quitButton(self.topMenuFrame)
+        # self.__settingsButton(self.topMenuFrame)
         # self.__browseDataFileButton(self.topMenuFrame)
         # self.__openMicrometerMenuButton(self.topMenuFrame)
         # self.__openPolarimeterMenuButton(self.topMenuFrame)
         # self.__openPowermeterMenuButton(self.topMenuFrame)
+
+
+    
 
     def addMoveListButtons(self, listFrame):
         numExec = tk.StringVar()
@@ -93,12 +105,9 @@ class Gui:
         addMoveButton = ttk.Button(listFrame, text='add move', command=lambda: self.__addMove(listFrame))
         addMoveButton.grid(row=1, column=0, sticky='sw', pady=5, padx=30)
         saveNumExecutionsButton = ttk.Button(listFrame, text='save', command=lambda: self.saveNumExecutions(numExec))
-        saveNumExecutionsButton.grid(row=2,column=3, sticky='sw', pady=5)
-        
-        
-
+        saveNumExecutionsButton.grid(row=2,column=2, sticky='sw', pady=5, padx=50)
         ttk.Entry(listFrame, textvariable=numExec).grid(row=2, column=1, sticky='sw', pady=5)
-        timesText = ttk.Label(listFrame, text='times').grid(row=2, column=2, sticky= 'w', pady=5, padx=30)
+        timesText = ttk.Label(listFrame, text='times').grid(row=2, column=2, sticky= 'w', pady=5, padx=5)
 
         
 
@@ -124,8 +133,11 @@ class Gui:
         self.powerPlot.generateCsvFromPlot()
 
     def __quitButton(self, frameTopMenu):
-        quitButton = tk.Button(frameTopMenu, text="Quit", command=lambda: [self.window.quit()])
-        quitButton.pack(side='right')
+        # quitButton = tk.Button(frameTopMenu, text="Quit", command=lambda: [self.window.quit()])
+        # quitButton.pack(side='right')
+
+        quitButton = ttk.Button(frameTopMenu, text='Quit', command=lambda: self.window.quit())
+        quitButton.pack(side="right")
 
         
     def __addMove(self, frameMoveList):
