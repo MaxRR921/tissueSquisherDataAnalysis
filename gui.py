@@ -74,7 +74,7 @@ class Gui:
         #micrometer moves to original position
         self.micrometerController.goHome()
         
-        #plots initialized, set to update every 100 ms.
+        #plots initialized, set to update every 100
         self.micrometerPlot = Plot2D('micrometer plot', 'time', 'distance')
         self.powerPlot = Plot2D('power plot', 'distance (no idea)', 'power (um)')
         self.root.after(100, self.updatePlotsFromData)

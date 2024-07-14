@@ -3,6 +3,8 @@ from tkinter import ttk
 from ttkthemes import ThemedTk
 from threading import Thread
 
+
+
 class MoveGui(ttk.Frame):
     def __init__(self, parent, moveList, item_height, width):
         super().__init__(master=parent)
@@ -75,7 +77,10 @@ class MoveGui(ttk.Frame):
         ttk.Label(frame, text='velocity').grid(row=0, column=1)
         ttk.Label(frame, text='front wait').grid(row=0, column=2)
         ttk.Label(frame, text='back wait').grid(row=0, column=3)
-        ttk.Button(frame, text='save', command=lambda: self.saveEntries(move, targetHeight_var, velocity_var, frontDelay_var, backDelay_var)).grid(row=1, column=4,)
+        ttk.Button(frame, text='save', command=lambda: self.__saveEntries(move, targetHeight_var, velocity_var, frontDelay_var, backDelay_var)).grid(row=1, column=4,)
+        ttk.Button(frame, text='execute', command=lambda: self.__executeMove(move, targetHeight_var, velocity_var, frontDelay_var, backDelay_var)).grid(row=1, column=5, padx=15)
+        # ttk.Button(frame, text='x', command=lambda: self.__deleteMove(move)).grid(row=0, column=4)
+        ttk.Button(frame, text='x', width=.3, command=lambda: self.__deleteMove(move,frame)).grid(row=0, column=5, sticky='ne', padx=20, pady=20)
         ttk.Entry(frame, textvariable=targetHeight_var).grid(row=1, column=0, sticky='new')  # Ensure entries expand horizontally
         ttk.Entry(frame, textvariable=velocity_var).grid(row=1, column=1, sticky='new')      # Ensure entries expand horizontally
         ttk.Entry(frame, textvariable=frontDelay_var).grid(row=1, column=2, sticky='new')    # Ensure entries expand horizontally
@@ -85,7 +90,7 @@ class MoveGui(ttk.Frame):
 
         return frame
 
-    def saveEntries(self, move, targetHeight_var, velocity_var, frontDelay_var, backDelay_var):
+    def __saveEntries(self, move, targetHeight_var, velocity_var, frontDelay_var, backDelay_var):
         try:
             move.targetHeight = str(targetHeight_var.get())
             move.velocity = str(velocity_var.get())
@@ -95,3 +100,24 @@ class MoveGui(ttk.Frame):
             print(f"targetHeight: {move.targetHeight}, velocity: {move.velocity}, frontDelay: {move.frontDelay}, backDelay: {move.backDelay}")
         except ValueError:
             print("Invalid input. Please enter valid numbers.")
+
+
+
+    def __executeMove(self, move):
+        move.execute()
+
+
+    def __deleteMove(self, move, frame):
+         # Check if the move is in the list
+        if move in self.moveList:
+            # Remove the move from the list
+            self.moveList.remove(move)
+            print(f"Removed move: {move}")  # Debug print
+            # Destroy the frame containing the move
+            frame.destroy()
+            print(f"Destroyed frame: {frame}")  # Debug print
+            # Update the canvas scrollregion
+            self.updateList(self.moveList)
+            self.update_size(None)
+        else:
+            print("Move not found in the list.")
