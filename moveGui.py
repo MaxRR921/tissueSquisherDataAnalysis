@@ -78,7 +78,7 @@ class MoveGui(ttk.Frame):
         ttk.Label(frame, text='front wait').grid(row=0, column=2)
         ttk.Label(frame, text='back wait').grid(row=0, column=3)
         ttk.Button(frame, text='save', command=lambda: self.__saveEntries(move, targetHeight_var, velocity_var, frontDelay_var, backDelay_var)).grid(row=1, column=4,)
-        ttk.Button(frame, text='execute', command=lambda: self.__executeMove(move, targetHeight_var, velocity_var, frontDelay_var, backDelay_var)).grid(row=1, column=5, padx=15)
+        ttk.Button(frame, text='execute', command=lambda: self.__executeMove(move)).grid(row=1, column=5, padx=15)
         # ttk.Button(frame, text='x', command=lambda: self.__deleteMove(move)).grid(row=0, column=4)
         ttk.Button(frame, text='x', width=.3, command=lambda: self.__deleteMove(move,frame)).grid(row=0, column=5, sticky='ne', padx=20, pady=20)
         ttk.Entry(frame, textvariable=targetHeight_var).grid(row=1, column=0, sticky='new')  # Ensure entries expand horizontally
