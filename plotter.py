@@ -80,5 +80,4 @@ class Plot2D:
                 w.writerow(row)
         
                     
-            
-        
+    
