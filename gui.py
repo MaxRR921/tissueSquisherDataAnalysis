@@ -75,8 +75,12 @@ class Gui:
         self.micrometerController.goHome()
         
         #plots initialized, set to update every 100
-        self.micrometerPlot = Plot2D('micrometer plot', 'time', 'distance')
-        self.powerPlot = Plot2D('power plot', 'distance (no idea)', 'power (um)')
+        # self.micrometerPlot = Plot2D('micrometer plot', 'time', 'distance')
+        # self.powerPlot = Plot2D('power plot', 'distance (no idea)', 'power (um)')
+
+        self.plotsList = []
+        
+
         self.root.after(100, self.updatePlotsFromData)
 
     def run(self):
@@ -84,8 +88,10 @@ class Gui:
 
     def addTopMenuButtons(self):
         self.__quitButton(self.topMenuFrame)
+        self.__dropdownButton(self.topMenuFrame)
+        
         # self.__settingsButton(self.topMenuFrame)
-        # self.__browseDataFileButton(self.topMenuFrame)
+        self.__browseDataFileButton(self.topMenuFrame)
         # self.__openMicrometerMenuButton(self.topMenuFrame)
         # self.__openPolarimeterMenuButton(self.topMenuFrame)
         # self.__openPowermeterMenuButton(self.topMenuFrame)
@@ -139,14 +145,36 @@ class Gui:
         quitButton = ttk.Button(frameTopMenu, text='Quit', command=lambda: self.window.quit())
         quitButton.pack(side="right")
 
+    def __dropdownButton(self, frameTopMenu):
+        dropdownButton = ttk.Menubutton(frameTopMenu, text="Add Graphs", direction="below")
+        dropdownMenu = tk.Menu(dropdownButton, tearoff=False)
+        dropdownMenu.add_command(label="Micrometer position vs. Time", command=self.__option1)
+        dropdownMenu.add_command(label="Power difference vs. Time", command=self.__option2)
+        dropdownMenu.add_command(label="Polarimter Δpol vs. Time ", command=self.__option3)
+        dropdownButton["menu"] = dropdownMenu
+        dropdownButton.pack(side="left")
+
         
+    def __option1(self):
+        print("Option 1 selected")
+        self.micrometerPlot = Plot2D('micrometer plot', 'time', 'distance')
+
+    def __option2(self):
+        print("Option 2 selected")
+        self.powerPlot = Plot2D('power plot', 'distance (mm)', 'power (um)')
+
+    def __option3(self):
+        print("Option 3 selected")
+        self.polPlot = Plot2D('polarimeter plot', 'distance (mm)', 'Δpol')
+
+    
     def __addMove(self, frameMoveList):
         moveToAdd = move.Move(self.micrometerController)
         self.moveList.append(moveToAdd)
         self.moveGui.updateList(self.moveList)
 
     def __browseDataFileButton(self, frameTopMenu):
-        browseDataFileButton = tk.Button(frameTopMenu, text="browse for data file", command=lambda: [self.__browseFile(self.window)])
+        browseDataFileButton = ttk.Button(frameTopMenu, text="browse for data file", command=lambda: self.__browseFile())
         browseDataFileButton.pack(side='left')
 
     def __openMicrometerMenuButton(self, frameTopMenu):
@@ -167,13 +195,18 @@ class Gui:
             self.__plot()
 
     def __plot(self):
-        timeList, strain, phase, s1List, s2List, s3List = dataAnalysisVmaster.analyzeData(self.filePath)
+        analyzer = dataAnalysisVmaster.DataAnalyzer()
+        timeList, strain, phase, s1List, s2List, s3List = analyzer.analyze_data(self.filePath)
         data = np.vstack((timeList, strain, phase)).T
         filename = 'analyzed_data.csv'
         np.savetxt(filename, data, delimiter=',', header='time (s),strain (mm/mm),phase (pi radians)', comments='')
+
+        # Create a new frame for graphs
         frameGraphs = tk.Frame(self.window, width=800, height=400)
-        frameGraphs.pack()
-        frameGraphs.pack_propagate(False)
+        frameGraphs.grid(row=2, column=0, columnspan=2, sticky="nsew")
+        frameGraphs.grid_propagate(False)
+
+        # Create the first plot
         fig2, ax2 = plt.subplots()
         fig2.set_figheight(4)
         fig2.set_figwidth(4)
@@ -182,7 +215,9 @@ class Gui:
         ax2.set_xlabel('Strain (mm/mm)')
         ax2.set_ylabel('Phase (pi radians)')
         canvas1 = FigureCanvasTkAgg(fig2, master=frameGraphs)
-        canvas1.get_tk_widget().pack(side="left")
+        canvas1.get_tk_widget().grid(row=0, column=0)
+
+        # Create the second plot
         fig3 = plt.figure()
         ax3 = fig3.add_subplot(111, projection='3d')
         fig3.set_figheight(4)
@@ -199,22 +234,32 @@ class Gui:
         ax3.set_ylabel('s2')
         ax3.set_zlabel('s3')
         ax3.set_title('Circle Trace on Sphere')
-        canvas1 = FigureCanvasTkAgg(fig3, master=frameGraphs)
-        canvas1.get_tk_widget().pack(side="left")
+        canvas2 = FigureCanvasTkAgg(fig3, master=frameGraphs)
+        canvas2.get_tk_widget().grid(row=0, column=1)
+
+        # Ensure the parent window is properly configured to handle the new frame
+        self.window.rowconfigure(2, weight=1)
+        self.window.columnconfigure(0, weight=1)
+        self.window.columnconfigure(1, weight=1)
+
 
     def updatePlotsFromData(self):
         self.timeStamp = time.time()
-        if not self.triedMicrometer:
-            try:
-                self.micrometerPlot.updatePlot(self.timeStamp, self.micrometerController.micrometerPosition)
-            except:
-                print("micrometer not found")
-                self.triedMicrometer = True
-        if not self.triedPowermeters:
-            try:
-                self.powerPlot.updatePlot(self.micrometerController.micrometerPosition, abs(self.powGui.power.device1Data - self.powGui.power.device2Data))
-            except:
-                print("not enough powermeters connected.")
-                self.triedPowermeters = True
+        try:
+            self.micrometerPlot.updatePlot(self.timeStamp, self.micrometerController.micrometerPosition)
+        except:
+            # print("micrometer not found")
+            self.triedMicrometer = True
+        
+        try:
+            self.powerPlot.updatePlot(self.micrometerController.micrometerPosition, abs(self.powGui.power.device1Data - self.powGui.power.device2Data))
+        except:
+            # print("not enough powermeters connected.")
+            self.triedPowermeters = True
+        try:
+            self.polPlot.updatePlot()
+        except:
+            print("no polarimeter connected.")
+            
         if self.updatingPlots:
             self.root.after(100, self.updatePlotsFromData)
