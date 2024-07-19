@@ -6,8 +6,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 import tkinter as tk
 import controller
-import polarimeterGui
-import powermeterGui
+import powermeter
 from plotter import Plot2D
 import time
 import move
@@ -29,8 +28,7 @@ class Gui:
         self.numExecutions = 1
         self.micrometerController = controller.Controller()
         self.polarimeter = polarimeter.Polarimeter()
-        self.polGui = polarimeterGui.PolarimeterGui()
-        self.powGui = powermeterGui.PowermeterGui()
+        self.powermeter = powermeter.Powermeter()
         self.updatingPlots = True
         self.triedPowermeters = False
         self.triedMicrometer = False
@@ -243,7 +241,7 @@ class Gui:
             self.triedMicrometer = True
         
         try:
-            self.powerPlot.updatePlot(self.micrometerController.micrometerPosition, abs(self.powGui.power.device1Data - self.powGui.power.device2Data))
+            self.powerPlot.updatePlot(self.micrometerController.micrometerPosition, abs(self.powermeter.device1Data - self.powermeter.device2Data))
         except:
             # print("not enough powermeters connected.")
             self.triedPowermeters = True
