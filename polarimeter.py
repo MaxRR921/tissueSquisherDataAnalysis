@@ -10,9 +10,20 @@ import ctypes
 from ctypes import *
 from threading import Thread
 import dataAnalysisVmaster
-
+import numpy as np
 
 class Polarimeter():
+
+
+    def __init__(self):
+        self.s1List = []
+        self.s2List = []
+        self.s3List = []
+        self.timeList = []
+        self.phaseList = []
+        self.strainList = []
+
+
 
     def start(self, numIterations):
         try:
@@ -51,7 +62,7 @@ class Polarimeter():
 
 
             # # Short break to make sure the device is correctly initialized
-            time.sleep(5)
+            time.sleep(.5)
 
 
             # # Make settings
@@ -73,9 +84,11 @@ class Polarimeter():
             # Short break
             time.sleep(.1)
 
-            dataAnalyzer = dataAnalysisVmaster.DataAnalyzer()
-
+            initTime = time.time()
             for x in range (numIterations):
+               
+                print("print numiteration is")
+                print(numIterations)
                 revolutionCounter = c_int()
                 scanID = c_int()
                 print("SCAN ID IS BEFORE", scanID.value)
@@ -84,28 +97,36 @@ class Polarimeter():
                 print("Measurement", (x+1))
                 azimuth = c_double()
                 ellipticity = c_double()
-                s1 = c_double()
-                s2 = c_double()
-                s3 = c_double()
-                timeStamp = c_uint32()
-                lib.TLPAX_getTimeStamp(instrumentHandle, scanID, byref(timeStamp))
-                print("TIMESTAMP IS: ", timeStamp.value)
-                vi = lib.TLPAX_getStokesNormalized(instrumentHandle, scanID, byref(s1),byref(s2),byref(s3))
-                print("VI STATUS IS: ", vi)
-                print("S1 Normalized: ", s1.value)
-                print("S2 Normalized: ", s2.value)
-                print("S3 Normalized: ", s3.value)
-                print("")
-                lib.TLPAX_releaseScan(instrumentHandle, scanID)
-                dataAnalyzer.analyzeData(s1.value, s2.value, s3.value, timeStamp.value)
-                time.sleep(3)
+                try:
+                    s1 = c_double()
+                    s2 = c_double()
+                    s3 = c_double()
+                    timeStamp = c_uint32()
+                    lib.TLPAX_getTimeStamp(instrumentHandle, scanID, byref(timeStamp))
+                    print("TIMESTAMP IS: ", timeStamp.value)
+                    vi = lib.TLPAX_getStokesNormalized(instrumentHandle, scanID, byref(s1),byref(s2),byref(s3))
+                    print("VI STATUS IS: ", vi)
+                    print("S1 Normalized: ", s1.value)
+                    print("S2 Normalized: ", s2.value)
+                    print("S3 Normalized: ", s3.value)
+                    print("")
+                    lib.TLPAX_releaseScan(instrumentHandle, scanID)
+                    # dataAnalyzer.analyzeData(s1.value, s2.value, s3.value, timeStamp.value)
+                    self.s1List.append(s1.value)
+                    self.s2List.append(s3.value)
+                    self.s3List.append(s3.value)
+                    self.timeList.append(time.time() - initTime)
 
-                
+                    
+
+                    time.sleep(.01)
+                except:
+                    print("doesn't work here")
             # Close
             lib.TLPAX_close(instrumentHandle)
             print("Connection to PAX1000 closed.")
         except:
-            print("no powermeter connected")
+            print("no polarimeter connected")
 
 
     def analyzeData(self):

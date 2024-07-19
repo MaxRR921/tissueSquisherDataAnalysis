@@ -18,6 +18,7 @@ from csv import writer
 from csv import DictWriter
 from tkinter import ttk
 from ttkthemes import ThemedTk
+import polarimeter
 
 class Gui:
     def __init__(self):
@@ -27,31 +28,27 @@ class Gui:
         self.window.geometry("800x800")
         self.numExecutions = 1
         self.micrometerController = controller.Controller()
+        self.polarimeter = polarimeter.Polarimeter()
         self.polGui = polarimeterGui.PolarimeterGui()
         self.powGui = powermeterGui.PowermeterGui()
         self.updatingPlots = True
         self.triedPowermeters = False
         self.triedMicrometer = False
+        self.phase = np.array(np.zeros)
+        self.strain = np.array(np.zeros)
 
         defualtMove = move.Move(self.micrometerController)
         self.moveList = [defualtMove]
 
         
-        
-        # Create main layout frames
-        # self.mainFrame = tk.Frame(self.window, background="green", width=100, height=800)
-        # self.mainFrame.grid(row=0, column=1, sticky="nsew")
-        # self.mainFrame.grid_propagate(False)
-
-       
-       
+        self.timeList = []
 
         # adding listFrame
         self.listFrame = tk.Frame(self.window, width=800, height=1000)  # Adjust the width here for the left panel
         self.listFrame.grid(row=0, column=0, columnspan= 2, rowspan=2, sticky="nsew")
         self.listFrame.grid_propagate(False)
 
-        # Create listFrame
+        # Create top menu frame
         self.topMenuFrame = tk.Frame(self.window, height=30, background="light grey")  # Adjust the height here
         self.topMenuFrame.grid(row=0, column=0, columnspan=2, sticky="new")
         self.topMenuFrame.grid_propagate(False)
@@ -61,7 +58,7 @@ class Gui:
         self.bottomFrame = tk.Frame(self.window, height=80, background="light grey")
         self.bottomFrame.grid(row=1, column=0, columnspan=2, sticky='sew')
         self.bottomFrame.grid_propagate(False)
-        self.addMoveListButtons(self.bottomFrame)
+        self.addBottomFrameButtons(self.bottomFrame)
 
         self.window.columnconfigure(0, weight=1)  # Make the list frame column expandable
         self.window.columnconfigure(1, weight=3)  # Make the main frame column expandable
@@ -74,13 +71,6 @@ class Gui:
         #micrometer moves to original position
         self.micrometerController.goHome()
         
-        #plots initialized, set to update every 100
-        # self.micrometerPlot = Plot2D('micrometer plot', 'time', 'distance')
-        # self.powerPlot = Plot2D('power plot', 'distance (no idea)', 'power (um)')
-
-        self.plotsList = []
-        
-
         self.root.after(100, self.updatePlotsFromData)
 
     def run(self):
@@ -89,61 +79,31 @@ class Gui:
     def addTopMenuButtons(self):
         self.__quitButton(self.topMenuFrame)
         self.__dropdownButton(self.topMenuFrame)
-        
-        # self.__settingsButton(self.topMenuFrame)
+        self.__polarimeterButton(self.topMenuFrame)
         self.__browseDataFileButton(self.topMenuFrame)
-        # self.__openMicrometerMenuButton(self.topMenuFrame)
-        # self.__openPolarimeterMenuButton(self.topMenuFrame)
-        # self.__openPowermeterMenuButton(self.topMenuFrame)
 
+    #ALL BUTTONS IN TOP MENU
 
-    
+    def __browseDataFileButton(self, frameTopMenu):
+        browseDataFileButton = ttk.Button(frameTopMenu, text="browse for data file", command=lambda: self.__browseFile())
+        browseDataFileButton.pack(side='left')
 
-    def addMoveListButtons(self, listFrame):
-        numExec = tk.StringVar()
-        listFrame.grid_rowconfigure(0, weight=1)
-        listFrame.grid_rowconfigure(1, weight=0)
-        listFrame.grid_columnconfigure(1, weight=0)
-        listFrame.grid_columnconfigure(2, weight=1)
-        listFrame.grid_columnconfigure(3, weight=2)
-        executeAllMovesButton = ttk.Button(listFrame, text='execute all moves', command=lambda: self.__startExecuteThread())
-        executeAllMovesButton.grid(row=2, column=0, sticky='sw', pady=5, padx=30)
-        addMoveButton = ttk.Button(listFrame, text='add move', command=lambda: self.__addMove(listFrame))
-        addMoveButton.grid(row=1, column=0, sticky='sw', pady=5, padx=30)
-        saveNumExecutionsButton = ttk.Button(listFrame, text='save', command=lambda: self.saveNumExecutions(numExec))
-        saveNumExecutionsButton.grid(row=2,column=2, sticky='sw', pady=5, padx=50)
-        ttk.Entry(listFrame, textvariable=numExec).grid(row=2, column=1, sticky='sw', pady=5)
-        timesText = ttk.Label(listFrame, text='times').grid(row=2, column=2, sticky= 'w', pady=5, padx=5)
-
-        
-
-
-    def saveNumExecutions(self, numExec):
-        
-        try:
-            self.numExecutions = int(numExec.get())
-            print(f"Saved number of executions: {self.numExecutions}")
-        except ValueError:
-            print("Invalid input, please enter a valid number")
-
-    def __startExecuteThread(self):
-        self.powerPlot.resetPlot()
-        self.micrometerPlot.resetPlot()
-        thread = Thread(target=self.__executeAllMoves, args=[])
-        thread.start()
-
-    def __executeAllMoves(self):
-        for i in range(self.numExecutions):
-            for move in self.moveList:
-                move.execute()
-        self.powerPlot.generateCsvFromPlot()
+    def __browseFile(self):
+        self.filePath = tk.filedialog.askopenfilename(filetypes=[('CSV Files', '*.csv')])
+        if self.filePath:
+            self.__plot()
 
     def __quitButton(self, frameTopMenu):
-        # quitButton = tk.Button(frameTopMenu, text="Quit", command=lambda: [self.window.quit()])
-        # quitButton.pack(side='right')
-
         quitButton = ttk.Button(frameTopMenu, text='Quit', command=lambda: self.window.quit())
         quitButton.pack(side="right")
+
+    def __polarimeterButton(self, frameTopMenu):
+        polarimeterButton = ttk.Button(frameTopMenu, text='p', command=lambda: self.__startPolarimeterThread())
+        polarimeterButton.pack(side="right")
+
+    def __startPolarimeterThread(self):
+        thread = Thread(target=self.polarimeter.start, args=[10])
+        thread.start()
 
     def __dropdownButton(self, frameTopMenu):
         dropdownButton = ttk.Menubutton(frameTopMenu, text="Add Graphs", direction="below")
@@ -167,32 +127,63 @@ class Gui:
         print("Option 3 selected")
         self.polPlot = Plot2D('polarimeter plot', 'distance (mm)', 'Δpol')
 
+
+    def addBottomFrameButtons(self, listFrame):
+        numExec = tk.StringVar()
+        ttk.Entry(listFrame, textvariable=numExec).grid(row=2, column=1, sticky='sw', pady=5)
+        listFrame.grid_rowconfigure(0, weight=1)
+        listFrame.grid_rowconfigure(1, weight=0)
+        listFrame.grid_columnconfigure(1, weight=0)
+        listFrame.grid_columnconfigure(2, weight=1)
+        listFrame.grid_columnconfigure(3, weight=2)
+        
+        executeAllMovesButton = ttk.Button(listFrame, text='execute all moves', command=lambda: self.__startExecuteThread())
+        executeAllMovesButton.grid(row=2, column=0, sticky='sw', pady=5, padx=30)
+
+        addMoveButton = ttk.Button(listFrame, text='add move', command=lambda: self.__addMove(listFrame))
+        addMoveButton.grid(row=1, column=0, sticky='sw', pady=5, padx=30)
+
+        saveNumExecutionsButton = ttk.Button(listFrame, text='save', command=lambda: self.saveNumExecutions(numExec))
+        saveNumExecutionsButton.grid(row=2,column=2, sticky='sw', pady=5, padx=50)
+       
+        timesText = ttk.Label(listFrame, text='times').grid(row=2, column=2, sticky= 'w', pady=5, padx=5)
+
+        
+    def saveNumExecutions(self, numExec):
+        try:
+            self.numExecutions = int(numExec.get())
+            print(f"Saved number of executions: {self.numExecutions}")
+        except ValueError:
+            print("Invalid input, please enter a valid number")
+
+    def __startExecuteThread(self):
+        try:
+            self.powerPlot.resetPlot()
+            self.micrometerPlot.resetPlot()
+        except:
+            print("no plots to update")
+        thread = Thread(target=self.__executeAllMoves, args=[])
+        thread.start()
+
+    def __executeAllMoves(self):
+        for i in range(self.numExecutions):
+            for move in self.moveList:
+                move.execute()
+            
+        # # self.phase, self.strain = dataAnalysisVmaster.analyzeData(self.polarimeter.s1List, self.polarimeter.s2List, self.polarimeter.s3List, self.polarimeter.timeList)
+        try:
+            self.powerPlot.generateCsvFromPlot()
+        except:
+            print("no power plot open")
+
+
     
     def __addMove(self, frameMoveList):
         moveToAdd = move.Move(self.micrometerController)
         self.moveList.append(moveToAdd)
         self.moveGui.updateList(self.moveList)
 
-    def __browseDataFileButton(self, frameTopMenu):
-        browseDataFileButton = ttk.Button(frameTopMenu, text="browse for data file", command=lambda: self.__browseFile())
-        browseDataFileButton.pack(side='left')
-
-    def __openMicrometerMenuButton(self, frameTopMenu):
-        openMicrometerMenu = tk.Button(frameTopMenu, text="micrometer menu", command=lambda: [self.contGui.run()])
-        openMicrometerMenu.pack(side="left")
-
-    def __openPolarimeterMenuButton(self, frameTopMenu):
-        openPolarimeterMenu = tk.Button(frameTopMenu, text="polarimeter menu", command=lambda: [self.polGui.run()])
-        openPolarimeterMenu.pack(side="left")
-
-    def __openPowermeterMenuButton(self, frameTopMenu):
-        openPowermeterMenu = tk.Button(frameTopMenu, text="powermeter menu", command=lambda: [self.powGui.run()])
-        openPowermeterMenu.pack(side="left")
-
-    def __browseFile(self):
-        self.filePath = tk.filedialog.askopenfilename(filetypes=[('CSV Files', '*.csv')])
-        if self.filePath:
-            self.__plot()
+   
 
     def __plot(self):
         analyzer = dataAnalysisVmaster.DataAnalyzer()
@@ -256,10 +247,12 @@ class Gui:
         except:
             # print("not enough powermeters connected.")
             self.triedPowermeters = True
-        try:
-            self.polPlot.updatePlot()
-        except:
-            print("no polarimeter connected.")
             
+        # try:
+        #     self.polPlot.updatePlot(self.phase, self.strain)
+        # except:
+        #     print("failed to graph")
+
+
         if self.updatingPlots:
             self.root.after(100, self.updatePlotsFromData)

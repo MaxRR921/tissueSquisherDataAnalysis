@@ -1,6 +1,6 @@
 # Uses pywin32
 try:
-    import win32gui
+    # import win32gui
     import win32com.client
     import pythoncom
 except ImportError:
