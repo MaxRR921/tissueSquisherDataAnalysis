@@ -2,6 +2,7 @@ import tkinter as tk
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import csv
+import numpy as np
 
 class Plot2D:
     def __init__(self, title='untitled', xAxisTitle='x', yAxisTitle='y'):
@@ -53,19 +54,44 @@ class Plot2D:
             yData = yData[3:].strip()
         except:
             print("not a controller port")
-        yData = float(yData)
-        xData = float(xData)
-        self.data['xAxis'].append(xData)
-        self.data['yAxis'].append(yData)
-        self.ax.clear()
-        self.ax.plot(self.data['xAxis'], self.data['yAxis'])
-        self.ax.set_xlabel(self.xAxisTitle)
-        self.ax.set_ylabel(self.yAxisTitle)
-        self.ax.set_title(self.title)
-        self.ax.relim()
-        self.ax.autoscale_view()
-        self.canvas.draw()
+        try:
+            yData = float(yData)
+            xData = float(xData)
+            self.data['xAxis'].append(xData)
+            self.data['yAxis'].append(yData)
+            self.ax.clear()
+            self.ax.plot(self.data['xAxis'], self.data['yAxis'])
+            self.ax.set_xlabel(self.xAxisTitle)
+            self.ax.set_ylabel(self.yAxisTitle)
+            self.ax.set_title(self.title)
+            self.ax.relim()
+            self.ax.autoscale_view()
+            self.canvas.draw()
+        except:
+            print("update fail")
 
+    def updatePolPlot(self, x, y):
+           # Ensure data is in the correct format
+        print("updatePolPlot called")
+        if isinstance(x, np.ndarray) and isinstance(y, np.ndarray):
+            if x.ndim == 1 and y.ndim == 1 and x.size == y.size:
+                print("Data is correctly formatted")
+                self.ax.clear()
+                self.ax.plot(x, y)
+                self.ax.set_xlabel(self.xAxisTitle)
+                self.ax.set_ylabel(self.yAxisTitle)
+                self.ax.set_title(self.title)
+                self.ax.relim()
+                self.ax.autoscale_view()
+                try:
+                    self.canvas.draw()
+                    print("Plot updated successfully")
+                except Exception as e:
+                    print(f"Error in updatePolPlot canvas.draw(): {e}")
+            else:
+                print("Error: x and y arrays must be 1-dimensional and of the same length.")
+        else:
+            print("Error: x and y must be numpy arrays.")
     def generateCsvFromPlot(self):
         # Ensure that the data is in the format of lists of equal length
         keys = self.data.keys()

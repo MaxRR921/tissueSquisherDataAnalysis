@@ -109,6 +109,7 @@ def analyzeData(s1List, s2List, s3List, timeList):
         print("Phase:", phase)
         print("S1 List:", s1ListNp)
         print("S2 List:", s2ListNp)
+        print("S3 List: ", s3ListNp)
     except:
         print("UH OH")
     return strain, phase
@@ -220,7 +221,7 @@ def analyze_data(self, file_path):
                 wrapCount -= 2
         phaseCounter[i+1] = wrapCount
 
-    phase = (phase + phaseCounter - phase[0])  # Normalize phase
+    phase = (phase + phaseCounter - phase[0])  # Normalize phase (CHANGE IN POLARIZATION)
 
     # Convert time to strain based on rate of micrometer motion
     thick = 5.28  # thickness of the samples in mm
@@ -231,5 +232,5 @@ def analyze_data(self, file_path):
     print(phase)
     print(s1List)
     print(s2List)
-    return timeList, strain, phase, s1List, s2List, s3List
+    return strain, phase
 

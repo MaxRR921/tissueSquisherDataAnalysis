@@ -10,6 +10,10 @@ import time
 import traceback
 from threading import Thread
 import numpy as np
+
+###IMPORTANT!!! THREADS FOR EAHC POWERMETER SHARE A COMMON RUN VARIABLE BEWARE OF RACE CONDITIONS BUT DOESN"T MATTER BC
+###ITS ALWAYS TRUE RIGHT NOW.
+
 class Powermeter:
     def __init__(self):
         try:
@@ -22,12 +26,12 @@ class Powermeter:
             self.deviceList = self.OphirCom.ScanUSB()
             print(self.deviceList[0])
             print(self.deviceList[1])
-            # if any device is connected
+            # if any device is connected    
             self.device1ZeroTime = 0.0
             self.device2ZeroTime = 0.0
             self.device1Data = 0.0
             self.device2Data = 0.0
-            self.plot = True
+            self.run = True
         except OSError as err:
             print("OS error: {0}".format(err))
         except ModuleNotFoundError as e:
@@ -62,7 +66,7 @@ class Powermeter:
             # print('\n----------Data for S/N {0} ---------------'.format(device))
             # An Example for data retrieving
             self.OphirCom.StartStream(deviceHandle, 0)# start measuring
-            while(self.plot == True):
+            while(self.run == True):  
                 time.sleep(.2)# wait a little for data
                 data = self.OphirCom.GetData(deviceHandle, 0)
                 if len(data[0]) > 0: # if any data available, print the first one from the batch
@@ -86,13 +90,14 @@ class Powermeter:
 
 
     def __runDevice2(self, device):
+        i=0
         deviceHandle = self.OphirCom.OpenUSBDevice(device)# open first device
         exists = self.OphirCom.IsSensorExists(deviceHandle, 0)
         if exists:
             # print('\n----------Data for S/N {0} ---------------'.format(device))
             # An Example for data retrieving
             self.OphirCom.StartStream(deviceHandle, 0)# start measuring
-            for i in range(300):
+            while(self.run==True):
                 time.sleep(.2)# wait a little for data
                 data = self.OphirCom.GetData(deviceHandle, 0)
                 if len(data[0]) > 0: # if any data available, print the first one from the batch
@@ -106,6 +111,7 @@ class Powermeter:
 
                     newData = np.array([[data[0][0], deltaTime, data[2][0]]])
                     self.device2Data = data[0][0]
+                i=i+1
         else:
             print('\nNo Sensor attached to {0} !!!'.format(device))
 

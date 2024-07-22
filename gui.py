@@ -34,6 +34,12 @@ class Gui:
         self.triedMicrometer = False
         self.phase = np.array(np.zeros)
         self.strain = np.array(np.zeros)
+        self.executed = False
+        self.startedPolarimeter = False
+        self.power1Text = tk.StringVar()
+        self.power2Text = tk.StringVar()
+        self.power1Text.set("p1 no reading")
+        self.power2Text.set("p2 no reading") 
 
         defualtMove = move.Move(self.micrometerController)
         self.moveList = [defualtMove]
@@ -100,7 +106,7 @@ class Gui:
         polarimeterButton.pack(side="right")
 
     def __startPolarimeterThread(self):
-        thread = Thread(target=self.polarimeter.start, args=[10])
+        thread = Thread(target=self.polarimeter.start, args=[])
         thread.start()
 
     def __dropdownButton(self, frameTopMenu):
@@ -123,7 +129,7 @@ class Gui:
 
     def __option3(self):
         print("Option 3 selected")
-        self.polPlot = Plot2D('polarimeter plot', 'distance (mm)', 'Δpol')
+        self.polPlot = Plot2D('polarimeter plot', 'strain', 'phase')
 
 
     def addBottomFrameButtons(self, listFrame):
@@ -143,7 +149,8 @@ class Gui:
 
         saveNumExecutionsButton = ttk.Button(listFrame, text='save', command=lambda: self.saveNumExecutions(numExec))
         saveNumExecutionsButton.grid(row=2,column=2, sticky='sw', pady=5, padx=50)
-       
+        power1Text = ttk.Label(listFrame, textvariable=self.power1Text).grid(row=2, column=3, sticky = 'w', pady=5, padx=2)
+        power1Text = ttk.Label(listFrame, textvariable=self.power2Text).grid(row=2, column=3, sticky = 'e', pady=5, padx=10)
         timesText = ttk.Label(listFrame, text='times').grid(row=2, column=2, sticky= 'w', pady=5, padx=5)
 
         
@@ -160,19 +167,40 @@ class Gui:
             self.micrometerPlot.resetPlot()
         except:
             print("no plots to update")
-        thread = Thread(target=self.__executeAllMoves, args=[])
+        thread = Thread(target=self.__collect, args=[])
         thread.start()
 
-    def __executeAllMoves(self):
+    def __collect(self):
+        print("LETS GO")
+        try:
+            self.polarimeter.run = True
+            self.__startPolarimeterThread()
+        except:
+            print("failed to start polarimeter thread.")
+        try:
+            self.polPlot.resetPlot()
+        except:
+            print("failed to reset. Check if there is an open plot.")
         for i in range(self.numExecutions):
             for move in self.moveList:
                 move.execute()
-            
-        # # self.phase, self.strain = dataAnalysisVmaster.analyzeData(self.polarimeter.s1List, self.polarimeter.s2List, self.polarimeter.s3List, self.polarimeter.timeList)
+        try:
+            self.polarimeter.run = False
+        except:
+            print("No polarimeter")
+        self.strain, self.phase  = dataAnalysisVmaster.analyzeData(self.polarimeter.s1List, self.polarimeter.s2List, self.polarimeter.s3List, self.polarimeter.timeList)
+        print("PHASE:")
+        print(self.phase)
+        print("STRAIN")
+        print(self.strain)
+        print(len(self.phase))
+        print(len(self.strain))
         try:
             self.powerPlot.generateCsvFromPlot()
         except:
             print("no power plot open")
+        self.executed = True
+        print("DONE")
 
 
     
@@ -245,12 +273,27 @@ class Gui:
         except:
             # print("not enough powermeters connected.")
             self.triedPowermeters = True
-            
-        # try:
-        #     self.polPlot.updatePlot(self.phase, self.strain)
-        # except:
-        #     print("failed to graph")
+
+        if (self.executed == True):
+            print("PHASE")
+            print(self.phase)
+            print("STRAIN")
+            print(self.strain)
+            try:
+                self.polPlot.updatePolPlot(self.strain, self.phase)
+            except:
+                print("polarimeter plot error. Is the plot open?")
+            self.executed = False
+        try:
+            self.power1Text.set(str(self.powermeter.device1Data))
+            self.power2Text.set(str(self.powermeter.device2Data))
+        except:
+            print("error updating power text")
 
 
         if self.updatingPlots:
             self.root.after(100, self.updatePlotsFromData)
+
+
+
+
