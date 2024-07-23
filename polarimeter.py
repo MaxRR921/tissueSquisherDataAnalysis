@@ -80,6 +80,11 @@ class Polarimeter():
         
 
     def start(self):
+        self.s1List = []
+        self.s2List = []
+        self.s3List = []
+        self.timeList = []
+        self.initTime = 0
         x = 0
         initTime = time.time()
         while self.run:

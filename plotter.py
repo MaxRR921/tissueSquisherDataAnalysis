@@ -35,12 +35,15 @@ class Plot2D:
 
     def resetPlot(self):
         self.data = {'xAxis': [], 'yAxis': []}
+        
         self.ax.clear()
         self.ax.set_xlabel(self.xAxisTitle)
         self.ax.set_ylabel(self.yAxisTitle)
         self.ax.set_title(self.title)
+       
         self.fig.tight_layout()
         self.canvas.draw()
+        print("failed to update plot here.")
         
 
     def updatePlot(self, xData, yData):
@@ -105,5 +108,3 @@ class Plot2D:
             for row in values:
                 w.writerow(row)
         
-                    
-    

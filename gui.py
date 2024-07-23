@@ -163,6 +163,7 @@ class Gui:
 
     def __startExecuteThread(self):
         try:
+            self.polPlot.resetPlot()
             self.powerPlot.resetPlot()
             self.micrometerPlot.resetPlot()
         except:
@@ -177,10 +178,6 @@ class Gui:
             self.__startPolarimeterThread()
         except:
             print("failed to start polarimeter thread.")
-        try:
-            self.polPlot.resetPlot()
-        except:
-            print("failed to reset. Check if there is an open plot.")
         for i in range(self.numExecutions):
             for move in self.moveList:
                 move.execute()
