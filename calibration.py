@@ -1,0 +1,129 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Material properties of fiber
+Y = 7.3e10  # Young's modulus of fiber in N/m^2
+sigma = 0.17  # Poisson's ratio at 633nm wavelength
+N = 1.46  # Refractive index
+p_11 = 0.121  # Photoelastic constants
+p_12 = 0.27
+p_44 = (p_11 - p_12) / 2  # For isotropic materials
+b = 62.5e-6  # Radius of cladding in meters
+Lb_0 = 2e-3  # Unstressed beat length, 2 mm
+
+lambda_light = 980e-9  # Wavelength of light in fiber
+
+# Variables
+npoints = 100
+f = np.linspace(0, 500, npoints)  # Force in N/m (2D analysis)
+l = np.linspace(7.25e-3, 20e-3, npoints)  # Interaction length, about 18 mm
+
+alpha = np.pi / 2  # Angle of birefringence axis wrt force
+beta = np.pi / 3  # Angle of PM fiber wrt polarizer
+delta = 0  # Extra phase from traveling through unstressed fiber
+gamma = np.pi / 2  # Angle of PM fiber wrt polarimeter. Should be 0 or pi/2
+
+# Some simplified equations for a fiber without a jacket
+F = 2 * N**3 * (1 + sigma) * (p_12 - p_11) * Lb_0 * f / (lambda_light * np.pi * b * Y)  # Normalized force
+phi = 0.5 * np.arctan((F * np.sin(2 * alpha)) / (1 + F * np.cos(2 * alpha)))  # Angle of rotated birefringence
+Lb = Lb_0 * (1 + F**2 + 2 * F * np.cos(2 * alpha))**(-1/2)  # Modified beat length
+
+SOP = np.zeros((npoints, npoints))
+for q in range(npoints):
+    arg = (2 * np.pi * l[q]) / Lb
+
+    # Calculate the stokes parameters
+    # Compute the expression
+    term1 = (np.sin(gamma) * (np.exp(-arg * 1j) * (np.cos(beta) * np.sin(phi)**2 + np.cos(phi) * np.sin(beta) * np.sin(phi)) +
+                            np.cos(beta) * np.cos(phi)**2 - np.cos(phi) * np.sin(beta) * np.sin(phi)) +
+            np.exp(-delta * 1j) * np.cos(gamma) * (np.exp(-arg * 1j) * (np.sin(beta) * np.cos(phi)**2 + np.cos(beta) * np.sin(phi) * np.cos(phi)) +
+                                                np.sin(beta) * np.sin(phi)**2 - np.cos(beta) * np.cos(phi) * np.sin(phi)))
+
+    term2 = (np.sin(gamma) * (np.exp(arg * 1j) * (np.cos(beta) * np.sin(phi)**2 + np.cos(phi) * np.sin(beta) * np.sin(phi)) +
+                            np.cos(beta) * np.cos(phi)**2 - np.cos(phi) * np.sin(beta) * np.sin(phi)) +
+            np.exp(delta * 1j) * np.cos(gamma) * (np.exp(arg * 1j) * (np.sin(beta) * np.cos(phi)**2 + np.cos(beta) * np.sin(phi) * np.cos(phi)) +
+                                                np.sin(beta) * np.sin(phi)**2 - np.cos(beta) * np.cos(phi) * np.sin(phi)))
+
+    term3 = (np.cos(gamma) * (np.exp(-arg * 1j) * (np.cos(beta) * np.sin(phi)**2 + np.cos(phi) * np.sin(beta) * np.sin(phi)) +
+                            np.cos(beta) * np.cos(phi)**2 - np.cos(phi) * np.sin(beta) * np.sin(phi)) -
+            np.exp(-delta * 1j) * np.sin(gamma) * (np.exp(-arg * 1j) * (np.sin(beta) * np.cos(phi)**2 + np.cos(beta) * np.sin(phi) * np.cos(phi)) +
+                                                np.sin(beta) * np.sin(phi)**2 - np.cos(beta) * np.cos(phi) * np.sin(phi)))
+
+    term4 = (np.cos(gamma) * (np.exp(arg * 1j) * (np.cos(beta) * np.sin(phi)**2 + np.cos(phi) * np.sin(beta) * np.sin(phi)) +
+                            np.cos(beta) * np.cos(phi)**2 - np.cos(phi) * np.sin(beta) * np.sin(phi)) -
+            np.exp(delta * 1j) * np.sin(gamma) * (np.exp(arg * 1j) * (np.sin(beta) * np.cos(phi)**2 + np.cos(beta) * np.sin(phi) * np.cos(phi)) +
+                                                np.sin(beta) * np.sin(phi)**2 - np.cos(beta) * np.cos(phi) * np.sin(phi)))
+
+    s1 = -np.abs(term1 * term2) + np.abs(term3 * term4)
+
+
+
+
+    # Compute the expression
+    term1 = (np.cos(gamma) * np.sin(delta) * (np.sin(beta) * np.sin(phi)**2 + np.cos(arg) * (np.sin(beta) * np.cos(phi)**2 + np.cos(beta) * np.sin(phi) * np.cos(phi)) - np.cos(beta) * np.cos(phi) * np.sin(phi)) +
+            np.sin(arg) * np.sin(gamma) * (np.cos(beta) * np.sin(phi)**2 + np.cos(phi) * np.sin(beta) * np.sin(phi)) +
+            np.cos(delta) * np.cos(gamma) * np.sin(arg) * (np.sin(beta) * np.cos(phi)**2 + np.cos(beta) * np.sin(phi) * np.cos(phi)))
+
+    term2 = (np.sin(delta) * np.sin(gamma) * (np.sin(beta) * np.sin(phi)**2 + np.cos(arg) * (np.sin(beta) * np.cos(phi)**2 + np.cos(beta) * np.sin(phi) * np.cos(phi)) - np.cos(beta) * np.cos(phi) * np.sin(phi)) -
+            np.cos(gamma) * np.sin(arg) * (np.cos(beta) * np.sin(phi)**2 + np.cos(phi) * np.sin(beta) * np.sin(phi)) +
+            np.cos(delta) * np.sin(arg) * np.sin(gamma) * (np.sin(beta) * np.cos(phi)**2 + np.cos(beta) * np.sin(phi) * np.cos(phi)))
+
+    term3 = (np.sin(gamma) * (np.cos(beta) * np.cos(phi)**2 + np.cos(arg) * (np.cos(beta) * np.sin(phi)**2 + np.cos(phi) * np.sin(beta) * np.sin(phi)) - np.cos(phi) * np.sin(beta) * np.sin(phi)) +
+            np.cos(delta) * np.cos(gamma) * (np.sin(beta) * np.sin(phi)**2 + np.cos(arg) * (np.sin(beta) * np.cos(phi)**2 + np.cos(beta) * np.sin(phi) * np.cos(phi)) - np.cos(beta) * np.cos(phi) * np.sin(phi)) -
+            np.cos(gamma) * np.sin(arg) * np.sin(delta) * (np.sin(beta) * np.cos(phi)**2 + np.cos(beta) * np.sin(phi) * np.cos(phi)))
+
+    term4 = (np.cos(gamma) * (np.cos(beta) * np.cos(phi)**2 + np.cos(arg) * (np.cos(beta) * np.sin(phi)**2 + np.cos(phi) * np.sin(beta) * np.sin(phi)) - np.cos(phi) * np.sin(beta) * np.sin(phi)) -
+            np.cos(delta) * np.sin(gamma) * (np.sin(beta) * np.sin(phi)**2 + np.cos(arg) * (np.sin(beta) * np.cos(phi)**2 + np.cos(beta) * np.sin(phi) * np.cos(phi)) - np.cos(beta) * np.cos(phi) * np.sin(phi)) +
+            np.sin(arg) * np.sin(delta) * np.sin(gamma) * (np.sin(beta) * np.cos(phi)**2 + np.cos(beta) * np.sin(phi) * np.cos(phi)))
+
+    s2 = 2 * (term1 * term2) - 2 * (term3 * term4)
+    
+    s3 = (np.cos(2 * phi)**2 * np.sin(2 * beta) * np.sin(delta) -
+      np.sin(2 * beta) * np.sin(delta) -
+      np.cos(2 * beta) * np.sin(2 * phi) * np.cos(delta) * np.sin(arg) -
+      np.cos(2 * phi) * np.sin(2 * beta) * np.cos(delta) * np.sin(arg) -
+      np.cos(2 * phi)**2 * np.sin(2 * beta) * np.cos(arg) * np.sin(delta) +
+      np.cos(2 * beta) * np.cos(2 * phi) * np.sin(2 * phi) * np.sin(delta) -
+      np.cos(2 * beta) * np.cos(2 * phi) * np.sin(2 * phi) * np.cos(arg) * np.sin(delta))
+
+
+
+    # Calculate the phase-angle of the theoretical fit circle
+    x = s2
+    y = s3
+
+    # Find the angle of the circle (phase)
+    phase = np.arctan2(y, x) / np.pi
+
+    # Normalize the phase so it starts at zero and is always increasing or decreasing
+    k = len(phase)
+    phaseCounter = np.zeros(k)  # This variable counts how many times the phase wraps around
+    wrapCount = 0
+
+    # Check to see if the sign has changed
+    for i in range(k - 1):
+        if np.sign(x[i]) == -1:
+            if (np.sign(y[i]) == 1) and (np.sign(y[i + 1]) == -1):
+                wrapCount += 2
+            elif (np.sign(y[i]) == -1) and (np.sign(y[i + 1]) == 1):
+                wrapCount -= 2
+        phaseCounter[i + 1] = wrapCount
+
+    phase = phase + phaseCounter - phase[0]  # Normalize phase to start at 0
+
+    SOP[q, :] = phase
+
+force = f / .000245  # 245 um for 635 and 400 um for 1550
+
+# Plot the phase vs. force graph for the theoretical fit
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+X, Y = np.meshgrid(force, l)
+ax.plot_surface(X, Y, SOP, cmap='viridis')
+
+ax.set_title('Pol change vs. applied stress and length')
+ax.set_xlabel('Stress (Pa)')
+ax.set_ylabel('Interaction length (m)')
+ax.set_zlabel('Phase')
+
+plt.show()
