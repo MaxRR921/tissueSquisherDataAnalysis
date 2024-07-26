@@ -13,7 +13,8 @@ class Controller:
         self.micrometerPosition = 0.0
         self.timeStamp = 0.0
         self.updating = True
-
+        self.lastInputHeight = 0
+        self.downward = False
         #port=None, baudrate=9600, bytesize=EIGHTBITS, parity=PARITY_NONE, 
         #stopbits=STOPBITS_ONE, timeout=None, xonxoff=False, rtscts=False, write_timeout=None, dsrdtr=False, inter_byte_timeout=None, exclusive=None)
         # Replace the baudrate and other parameters with those specific to your Conex-CC controller
@@ -81,7 +82,7 @@ class Controller:
 
     def goToHeight(self, inputHeight):
         
-        #send command to go to position
+
         positionCommand = "1" + "PA" + inputHeight + "\r\n"
         inBytes = bytes(positionCommand, 'utf-8')
         self.ser.write(inBytes)

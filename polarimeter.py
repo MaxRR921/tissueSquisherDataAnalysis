@@ -16,16 +16,19 @@ from ctypes import *
 from threading import Thread, Lock
 import dataAnalysisVmaster
 import numpy as np
+import controller
 
 class Polarimeter():
 
-    def __init__(self):
+    def __init__(self, micrometer):
         # Load DLL library
+        self.micrometer = micrometer
         self.s1List = []
         self.s2List = []
         self.s3List = []
         self.timeList = []
         self.initTime = 0
+        self.positionList = []
         self.lib = cdll.LoadLibrary("C:\Program Files\IVI Foundation\VISA\Win64\Bin\TLPAX_64.dll")
         self.run = False
         # Detect and initialize PAX1000 device
@@ -80,10 +83,11 @@ class Polarimeter():
         
 
     def start(self):
-        self.s1List = []
-        self.s2List = []
-        self.s3List = []
-        self.timeList = []
+        self.s1List.clear()
+        self.s2List.clear()
+        self.s3List.clear()
+        self.timeList.clear()
+        self.positionList.clear()
         self.initTime = 0
         x = 0
         initTime = time.time()
@@ -108,8 +112,22 @@ class Polarimeter():
             self.s1List.append(s1.value)
             self.s2List.append(s2.value)
             self.s3List.append(s3.value)
-            self.timeList.append(time.time() - initTime)
+            t = time.time()
+            self.timeList.append(t - initTime)
+            print("s1List: ", self.s1List)
+            print("s2List: ", self.s2List)
+            print("s3List: ", self.s3List)
+           
             self.lib.TLPAX_releaseScan(self.instrumentHandle, scanID)
+            try:
+                self.positionList.append(self.micrometer.micrometerPosition.decode()[3:].strip())
+                print(self.positionList)
+            except:
+                print("polarimeter reading of position data is invalid.")
+                self.s1List.remove(s1.value)
+                self.s2List.remove(s2.value)
+                self.s3List.remove(s3.value)
+                self.timeList.remove(t-initTime)
             time.sleep(0.5)
 
         # Close

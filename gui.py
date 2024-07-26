@@ -27,7 +27,7 @@ class Gui:
         self.window.geometry("800x800")
         self.numExecutions = 1
         self.micrometerController = controller.Controller()
-        self.polarimeter = polarimeter.Polarimeter()
+        self.polarimeter = polarimeter.Polarimeter(self.micrometerController)
         self.powermeter = powermeter.Powermeter()
         self.updatingPlots = True
         self.triedPowermeters = False
@@ -44,6 +44,10 @@ class Gui:
         defualtMove = move.Move(self.micrometerController)
         self.moveList = [defualtMove]
 
+        #plots:
+        self.polPlot = None
+        self.powerPlot = None
+        self.micrometerPlot = None
         
         self.timeList = []
 
@@ -162,12 +166,18 @@ class Gui:
             print("Invalid input, please enter a valid number")
 
     def __startExecuteThread(self):
-        try:
+        if self.polPlot is not None:
             self.polPlot.resetPlot()
+        else:
+            print("no polarimeter plot present")
+        if self.powerPlot is not None:
             self.powerPlot.resetPlot()
+        else:
+            print("no power plot open")
+        if self.micrometerPlot is not None:
             self.micrometerPlot.resetPlot()
-        except:
-            print("no plots to update")
+        else:
+            print("no micrometer plot open")
         thread = Thread(target=self.__collect, args=[])
         thread.start()
 
@@ -178,6 +188,7 @@ class Gui:
             self.__startPolarimeterThread()
         except:
             print("failed to start polarimeter thread.")
+
         for i in range(self.numExecutions):
             for move in self.moveList:
                 move.execute()
@@ -192,9 +203,9 @@ class Gui:
         print(self.strain)
         print(len(self.phase))
         print(len(self.strain))
-        try:
+        if self.powerPlot is not None:
             self.powerPlot.generateCsvFromPlot()
-        except:
+        else:
             print("no power plot open")
         self.executed = True
         print("DONE")
@@ -260,13 +271,16 @@ class Gui:
     def updatePlotsFromData(self):
         self.timeStamp = time.time()
         try:
-            self.micrometerPlot.updatePlot(self.timeStamp, self.micrometerController.micrometerPosition)
+            if(self.micrometerController.downward):
+                self.micrometerPlot.updatePlot(self.timeStamp, self.micrometerController.micrometerPosition[3:].strip())
+            else:
+                self.micrometerPlot.updatePlot(self.timeStamp, self.micrometerController.micrometerPosition[3:].strip())
         except:
             # print("micrometer not found")
             self.triedMicrometer = True
         
         try:
-            self.powerPlot.updatePlot(self.micrometerController.micrometerPosition, abs(self.powermeter.device1Data - self.powermeter.device2Data))
+            self.powerPlot.updatePlot(self.micrometerController.micrometerPosition[3:].strip(), abs(self.powermeter.device1Data - self.powermeter.device2Data))
         except:
             # print("not enough powermeters connected.")
             self.triedPowermeters = True
@@ -276,11 +290,10 @@ class Gui:
             print(self.phase)
             print("STRAIN")
             print(self.strain)
-            try:
-                self.polPlot.updatePolPlot(self.strain, self.phase)
-            except:
-                print("polarimeter plot error. Is the plot open?")
-            self.executed = False
+
+            if self.polPlot is not None:
+                self.polPlot.updatePlot(self.polarimeter.positionList, self.phase.tolist())
+                self.executed = False
         try:
             self.power1Text.set(str(self.powermeter.device1Data))
             self.power2Text.set(str(self.powermeter.device2Data))
