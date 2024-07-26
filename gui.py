@@ -29,7 +29,7 @@ class Gui:
         self.micrometerController = controller.Controller()
         self.polarimeter = polarimeter.Polarimeter(self.micrometerController)
         self.powermeter = powermeter.Powermeter()
-        self.updatingPlots = True
+        self.updatingPlots = False
         self.triedPowermeters = False
         self.triedMicrometer = False
         self.phase = np.array(np.zeros)
@@ -40,7 +40,6 @@ class Gui:
         self.power2Text = tk.StringVar()
         self.power1Text.set("p1 no reading")
         self.power2Text.set("p2 no reading") 
-
         defualtMove = move.Move(self.micrometerController)
         self.moveList = [defualtMove]
 
@@ -183,6 +182,9 @@ class Gui:
 
     def __collect(self):
         print("LETS GO")
+        if not self.updatingPlots:
+            self.updatingPlots = True
+            self.root.after(10, self.updatePlotsFromData)
         try:
             self.polarimeter.run = True
             self.__startPolarimeterThread()
@@ -290,10 +292,15 @@ class Gui:
             print(self.phase)
             print("STRAIN")
             print(self.strain)
-
+            self.updatingPlots = False
             if self.polPlot is not None:
                 self.polPlot.updatePlot(self.polarimeter.positionList, self.phase.tolist())
-                self.executed = False
+                self.polPlot.colorLines()
+            
+            if self.powerPlot is not None:
+                self.powerPlot.colorLines()
+                
+            self.executed = False
         try:
             self.power1Text.set(str(self.powermeter.device1Data))
             self.power2Text.set(str(self.powermeter.device2Data))
@@ -302,7 +309,8 @@ class Gui:
 
 
         if self.updatingPlots:
-            self.root.after(100, self.updatePlotsFromData)
+            print("UPDATING")
+            self.root.after(10, self.updatePlotsFromData)
 
 
 

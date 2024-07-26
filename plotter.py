@@ -30,6 +30,7 @@ class Plot2D:
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.framePlot)
         self.canvas.draw()
         self.canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        self.lastX = 0.0
         self.resetPlot()
 
 
@@ -78,18 +79,32 @@ class Plot2D:
         x = np.array(self.data['xAxis'])
         y = np.array(self.data['yAxis'])
         
-        for i in range(len(x) - 1):
-            if x[i + 1] < x[i]:
-                self.ax.plot(x[i:i + 2], y[i:i + 2], color='blue')
-            else:
-                self.ax.plot(x[i:i + 2], y[i:i + 2], color='red')
-
+        self.ax.plot(x, y)
         legend_elements = [
             Line2D([0], [0], color='red', lw=2, label='Unloading'),
             Line2D([0], [0], color='blue', lw=2, label='Loading')
         ]
         self.ax.legend(handles=legend_elements)
 
+
+    def colorLines(self):
+        x = np.array(self.data['xAxis'])
+        y = np.array(self.data['yAxis'])
+        print("colorLines runs")
+        for i in range(len(x) - 1):
+            if x[i + 1] < x[i]:
+                self.ax.plot(x[i:i + 2], y[i:i + 2], color='blue')
+            else:
+                self.ax.plot(x[i:i + 2], y[i:i + 2], color='red')
+
+
+        self.ax.set_xlabel(self.xAxisTitle)
+        self.ax.set_ylabel(self.yAxisTitle)
+        self.ax.set_title(self.title)
+        self.ax.relim()
+        self.ax.autoscale_view()
+
+        self.canvas.draw()
 
     def updatePolPlot(self, x, y):
            # Ensure data is in the correct format
