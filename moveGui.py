@@ -6,10 +6,10 @@ from threading import Thread
 
 
 class MoveGui(ttk.Frame):
-    def __init__(self, parent, moveList, item_height, width):
+    def __init__(self, parent, gui, moveList, item_height, width):
         super().__init__(master=parent)
         self.pack(expand=True, fill='both', anchor="nw")
-        
+        self.gui = gui
         self.width = width
         # widget data
         self.moveList = moveList
@@ -104,7 +104,9 @@ class MoveGui(ttk.Frame):
 
 
     def __executeMove(self, move):
-        move.execute()
+        moveList = []
+        moveList.append(move)
+        self.gui.startExecuteThread(moveList)
 
 
     def __deleteMove(self, move, frame):

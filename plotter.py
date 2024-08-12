@@ -15,7 +15,7 @@ class Plot2D:
         self.title = title
         self.xAxisTitle = xAxisTitle
         self.yAxisTitle = yAxisTitle
-
+        self.update = False
         ######
 
         self.fig = Figure(figsize=(6, 4), dpi=100)
@@ -78,7 +78,9 @@ class Plot2D:
     def plotData(self):
         x = np.array(self.data['xAxis'])
         y = np.array(self.data['yAxis'])
-        
+        print(self.title)
+        print("x", x)
+        print("y", y)
         self.ax.plot(x, y)
         legend_elements = [
             Line2D([0], [0], color='red', lw=2, label='Unloading'),
@@ -106,40 +108,14 @@ class Plot2D:
 
         self.canvas.draw()
 
-    def updatePolPlot(self, x, y):
-           # Ensure data is in the correct format
-        print("updatePolPlot called")
-        x = np.char.decode(x)
-        x = np.char.replace(x, '1TP', '')
-        x = np.char.strip(x)
-        x = x.astype(float)
-        downward = False
-        downward = np.any(np.diff(x) < 0)
-        print(x)
-        if isinstance(x, np.ndarray) and isinstance(y, np.ndarray):
-            if x.ndim == 1 and y.ndim == 1 and x.size == y.size:
-                print("Data is correctly formatted")
-                self.ax.clear()
-                self.ax.plot(x, y, color=self.color)
-                self.ax.set_xlabel(self.xAxisTitle)
-                self.ax.set_ylabel(self.yAxisTitle)
-                self.ax.set_title(self.title)
-                self.ax.relim()
-                self.ax.autoscale_view()
-                try:
-                    self.canvas.draw()
-                except Exception as e:
-                    print(f"Error in updatePolPlot canvas.draw(): {e}")
-            else:
-                print("Error: x and y arrays must be 1-dimensional and of the same length.")
-        else:
-            print("Error: x and y must be numpy arrays.")
-    def generateCsvFromPlot(self):
+
+    def generateCsvFromPlot(self, name):
         # Ensure that the data is in the format of lists of equal length
         keys = self.data.keys()
+        print("DATA:", self.data["xAxis"])
         values = zip(*self.data.values())
 
-        with open("profiles1.csv", "w", newline="") as f:
+        with open(name, "w", newline="") as f:
             w = csv.writer(f)
             # Write the header
             w.writerow(keys)

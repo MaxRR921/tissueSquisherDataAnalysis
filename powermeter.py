@@ -39,8 +39,8 @@ class Powermeter:
         except:
             print("no powermeters connected. Note: you must be on windows.")
         # Stop & Close all devices
-        thread = Thread(target = self.start, args=[])
-        thread.start()
+        # thread = Thread(target = self.start, args=[])
+        # thread.start()
 
     def start(self):
         try:
@@ -53,6 +53,7 @@ class Powermeter:
             #self.__printData()
             self.OphirCom.StopAllStreams()
             self.OphirCom.CloseAll()
+            print("RELEASED")
             # Release the object
             self.OphirCom = None
         except IndexError as e:
@@ -115,6 +116,8 @@ class Powermeter:
         else:
             print('\nNo Sensor attached to {0} !!!'.format(device))
 
+    def stop(self):
+        self.run = False
 
     def __printData(self):
         print('\n----------Data for S/N {0} ---------------'.format(self.deviceList[0]))

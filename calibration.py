@@ -1,6 +1,120 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+
+
+
+def calculateE():
+        # Material properties of fiber
+        Y = 7.3e10  # Young's modulus of fiber in N/m^2
+        sigma = 0.17  # Poisson's ratio at 633nm wavelength
+        N = 1.46  # Refractive index
+        N_s = 1.7
+        N_f = 2.0
+        N_s = float(N_s)
+        N_f = float(N_f)
+        p_11 = 0.121  # Photoelastic constants
+        p_12 = 0.27
+        p_44 = (p_11 - p_12) / 2  # For isotropic materials
+        b = 62.5e-6  # Radius of cladding in meters
+        Lb_0 = 2e-3  # Unstressed beat length, 2 mm
+
+        Ex_0 = .1
+
+        lambda_light = 1550e-9  # Wavelength of light in fiber
+        k = 1/lambda_light
+
+        # Variables
+        npoints = 100
+        f = np.linspace(0, 500, npoints)  # Force in N/m (2D analysis)
+        l = np.linspace(7.25, 20, npoints)  # Interaction length, about 18 mm
+
+        alpha = np.pi / 2  # Angle of birefringence axis wrt force
+        beta = np.pi / 3  # Angle of PM fiber wrt polarizer
+        delta = 0  # Extra phase from traveling through unstressed fiber
+        gamma = np.pi / 2  # Angle of PM fiber wrt polarimeter. Should be 0 or pi/2
+        eta = 376.730313
+
+        # Some simplified equations for a fiber without a jacket
+        F = 2 * N**3 * (1 + sigma) * (p_12 - p_11) * Lb_0 * f / (lambda_light * np.pi * b * Y)  # Normalized force66
+        phiVals = 0.5 * np.arctan((F * np.sin(2 * alpha)) / (1 + F * np.cos(2 * alpha)))  # Angle of rotated birefringence
+        Lb = Lb_0 * (1 + F**2 + 2 * F * np.cos(2 * alpha))**(-1/2)  # Modified beat length
+        power = np.zeros((npoints, npoints))
+        ExList = np.zeros((npoints, npoints))
+        SOP = np.zeros((npoints, npoints))
+        for li in range(npoints):
+                phi = phiVals[li]
+                M1 = np.array([
+                        [np.cos(gamma), np.sin(gamma)],
+                        [-np.sin(gamma), np.cos(gamma)]
+                ])
+
+                M2 = np.array([
+                        [1, 0],
+                        [0, np.exp(1j * delta)]
+                ])
+
+                M3 = np.array([
+                        [np.cos(phi), -np.sin(phi)],
+                        [np.sin(phi), np.cos(phi)]
+                ])
+
+                M4 = np.array([
+                        [np.exp(-1j * k * N_s * l[li]), 0],
+                        [0, np.exp(-1j * k * N_f * l[li])]
+                ])
+
+                M5 = np.array([
+                        [np.cos(phi), np.sin(phi)],
+                        [-np.sin(phi), np.cos(phi)]
+                ])
+
+                M6 = np.array([
+                        [np.cos(beta), np.sin(beta)],
+                        [-np.sin(beta), np.cos(beta)]
+                ])
+
+                # Initial field vector
+                E_initial = np.array([Ex_0, 0])
+
+                # Calculate the resulting field vector
+                E_final = M1 @ M2 @ M3 @ M4 @ M5 @ M6 @ E_initial
+
+                # Extract Ex and Ey from the resulting field vector
+                Ex = E_final[0]
+                Ey = E_final[1]
+
+                print(E_final)
+                # Calculate the magnitude of the electric field
+                E_peak = np.sqrt(np.abs(Ex)**2 + np.abs(Ey)**2)
+
+                print("EPEAK:", E_peak)
+
+                # Calculate the average power per unit area
+                average_power = (E_peak**2) / (2*eta)
+                print(average_power)
+                power[li] = average_power
+                ExList[li] = Ex
+        
+        force = f / .000245  # 245 um for 635 and 400 um for 1550
+
+        # Plot the phase vs. force graph for the theoretical fit
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        X, Y = np.meshgrid(force, l)
+        ax.plot_surface(X, Y, ExList, cmap='viridis')
+
+        ax.set_title('Pol change vs. applied stress and length')
+        ax.set_xlabel('Stress (Pa)')
+        ax.set_ylabel('Interaction length (m)')
+        ax.set_zlabel('Ex')
+
+        plt.show()
+        
+
+
+
+
 # Material properties of fiber
 Y = 7.3e10  # Young's modulus of fiber in N/m^2
 sigma = 0.17  # Poisson's ratio at 633nm wavelength
@@ -11,7 +125,7 @@ p_44 = (p_11 - p_12) / 2  # For isotropic materials
 b = 62.5e-6  # Radius of cladding in meters
 Lb_0 = 2e-3  # Unstressed beat length, 2 mm
 
-lambda_light = 980e-9  # Wavelength of light in fiber
+lambda_light = 1550e-9  # Wavelength of light in fiber
 
 # Variables
 npoints = 100
@@ -24,7 +138,7 @@ delta = 0  # Extra phase from traveling through unstressed fiber
 gamma = np.pi / 2  # Angle of PM fiber wrt polarimeter. Should be 0 or pi/2
 
 # Some simplified equations for a fiber without a jacket
-F = 2 * N**3 * (1 + sigma) * (p_12 - p_11) * Lb_0 * f / (lambda_light * np.pi * b * Y)  # Normalized force
+F = 2 * N**3 * (1 + sigma) * (p_12 - p_11) * Lb_0 * f / (lambda_light * np.pi * b * Y)  # Normalized force66
 phi = 0.5 * np.arctan((F * np.sin(2 * alpha)) / (1 + F * np.cos(2 * alpha)))  # Angle of rotated birefringence
 Lb = Lb_0 * (1 + F**2 + 2 * F * np.cos(2 * alpha))**(-1/2)  # Modified beat length
 
@@ -127,3 +241,6 @@ ax.set_ylabel('Interaction length (m)')
 ax.set_zlabel('Phase')
 
 plt.show()
+calculateE()
+
+
