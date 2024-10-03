@@ -69,6 +69,8 @@ class Gui:
         self.polPlot = None
         self.powerPlot = None
         self.micrometerPlot = None
+        self.pow1Plot = None
+        self.pow2Plot = None
         
         #list of times recorded
         self.timeList = []
@@ -159,6 +161,8 @@ class Gui:
         dropdownMenu.add_command(label="Micrometer position vs. Time", command=self.__option1)
         dropdownMenu.add_command(label="Power difference vs. Time", command=self.__option2)
         dropdownMenu.add_command(label="Polarimter Δpol vs. Time ", command=self.__option3)
+        dropdownMenu.add_command(label="power1 vs. distance ", command=self.__option4)
+        dropdownMenu.add_command(label="power2 vs. distance ", command=self.__option5)
         dropdownButton["menu"] = dropdownMenu
         dropdownButton.pack(side="left")
 
@@ -178,6 +182,15 @@ class Gui:
         self.polPlot = Plot2D('polarimeter plot', 'strain', 'phase')
         self.plotList.append(self.polPlot)
 
+    def __option4(self):
+        print("Option 3 selected")
+        self.pow1Plot = Plot2D('power 1 plot', 'distance', 'power')
+        self.plotList.append(self.pow1Plot)
+
+    def __option5(self):
+        print("Option 3 selected")
+        self.pow2Plot = Plot2D('power 2 plot', 'distance', 'power')
+        self.plotList.append(self.pow2Plot)
 
     def addBottomFrameButtons(self, listFrame):
         numExec = tk.StringVar()
@@ -188,14 +201,12 @@ class Gui:
         listFrame.grid_columnconfigure(2, weight=1)
         listFrame.grid_columnconfigure(3, weight=2)
         
-        executeAllMovesButton = ttk.Button(listFrame, text='execute all moves', command=lambda: self.startExecuteThread(self.moveList))
+        executeAllMovesButton = ttk.Button(listFrame, text='execute all moves', command=lambda: (self.saveNumExecutions(numExec), self.startExecuteThread(self.moveList)))
         executeAllMovesButton.grid(row=2, column=0, sticky='sw', pady=5, padx=30)
 
         addMoveButton = ttk.Button(listFrame, text='add move', command=lambda: self.__addMove(listFrame))
         addMoveButton.grid(row=1, column=0, sticky='sw', pady=5, padx=30)
 
-        saveNumExecutionsButton = ttk.Button(listFrame, text='save', command=lambda: self.saveNumExecutions(numExec))
-        saveNumExecutionsButton.grid(row=2,column=2, sticky='sw', pady=5, padx=50)
         power1Text = ttk.Label(listFrame, textvariable=self.power1Text).grid(row=2, column=3, sticky = 'w', pady=5, padx=2)
         power1Text = ttk.Label(listFrame, textvariable=self.power2Text).grid(row=2, column=3, sticky = 'e', pady=5, padx=10)
         timesText = ttk.Label(listFrame, text='times').grid(row=2, column=2, sticky= 'w', pady=5, padx=5)
@@ -207,6 +218,9 @@ class Gui:
             print(f"Saved number of executions: {self.numExecutions}")
         except ValueError:
             print("Invalid input, please enter a valid number")
+        
+            
+
 
     def startExecuteThread(self, moveList):
         for plot in self.plotList:
@@ -276,6 +290,15 @@ class Gui:
             self.powerPlot.updatePlot(self.micrometerController.micrometerPosition[3:].strip(), abs(self.powermeter.device1Data - self.powermeter.device2Data))
         except:
             # print("not enough powermeters connected.")
+            self.triedPowermeters = True
+
+        try:
+            self.pow1Plot.updatePlot(self.micrometerController.micrometerPosition[3:].strip(), self.powermeter.device1Data)
+        except:
+            self.triedPowermeters = True
+        try:
+            self.pow2Plot.updatePlot(self.micrometerController.micrometerPosition[3:].strip(), self.powermeter.device2Data)
+        except:
             self.triedPowermeters = True
 
         if (self.executed == True):

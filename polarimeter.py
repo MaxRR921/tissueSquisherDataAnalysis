@@ -128,7 +128,7 @@ class Polarimeter():
                 self.s2List.remove(s2.value)
                 self.s3List.remove(s3.value)
                 self.timeList.remove(t-initTime)
-            time.sleep(0.5)
+            time.sleep(0.1)
 
         # Close
         self.lib.TLPAX_close(self.instrumentHandle)
