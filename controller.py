@@ -126,4 +126,5 @@ class Controller:
     def readResponse(self, response):                                                                                                                                    
         print(str(response))
 
-    
+    def stop(self):
+        self.disable()

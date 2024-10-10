@@ -128,7 +128,7 @@ class Polarimeter():
                 self.s2List.remove(s2.value)
                 self.s3List.remove(s3.value)
                 self.timeList.remove(t-initTime)
-            time.sleep(0.5)
+            time.sleep(0.1)
 
         # Close
         self.lib.TLPAX_close(self.instrumentHandle)
@@ -184,3 +184,10 @@ class Polarimeter():
         time.sleep(1)
 
         # Take 5 measurements and output values
+        print("Polarimter thread should close here...")
+        self.run = True
+
+    def stop(self):
+        self.run = False
+        print("POLARIMETER STOPPING")
+        self.lib.TLPAX_close(self.instrumentHandle)

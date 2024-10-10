@@ -1,6 +1,97 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+
+def ex():
+        npoints = 100
+        # Material properties of fiber
+        Y = 7.3e10  # Young's modulus of fiber in N/m^2
+        sigma = 0.17  # Poisson's ratio at 633nm wavelength
+        N = 1.46  # Refractive index
+        N_s = 1.7
+        N_f = 2.0
+        N_s = float(N_s)
+        N_f = float(N_f)
+        p_11 = 0.121  # Photoelastic constants
+        p_12 = 0.27
+        p_44 = (p_11 - p_12) / 2  # For isotropic materials
+        b = 62.5e-6  # Radius of cladding in meters
+        Lb_0 = 2e-3  # Unstressed beat length, 2 mm
+
+        S1 = np.zeros(npoints, dtype=complex)
+        S2 = np.zeros(npoints, dtype=complex)
+        Sdifference = np.zeros(npoints, dtype=complex)
+
+        f = np.linspace(0, 500, npoints)  # Force in N/m (2D analysis)
+        l = np.linspace(7.25, 20, npoints)  # Interaction length, about 18 mm
+        Ex_0 = 1
+        lambda_light = 1550e-9  # Wavelength of light in fiber
+        k = 1/lambda_light
+
+        alpha = np.pi / 2  # Angle of birefringence axis wrt force
+        beta = np.pi / 3  # Angle of PM fiber wrt polarizer
+        delta = 0  # Extra phase from traveling through unstressed fiber
+        gamma = np.pi/2# Angle of PM fiber wrt polarimeter. Should be 0 or pi/2
+        eta = 376.730313 
+
+        F = 2 * N**3 * (1 + sigma) * (p_12 - p_11) * Lb_0 * f / (lambda_light * np.pi * b * Y)  # Normalized force66
+        phiVals = 0.5 * np.arctan((F * np.sin(2 * alpha)) / (1 + F * np.cos(2 * alpha)))  # Angle of rotated birefringence
+        Lb = Lb_0 * (1 + F**2 + 2 * F * np.cos(2 * alpha))**(-1/2)  # Modified beat length
+        print("PhiVals:", phiVals)
+        print("LbVals: ", Lb)
+        print("F", F)
+
+        for li in range(npoints):
+            
+             A = ((np.cos(gamma)*np.cos(phiVals[li])) - (np.exp(1j*delta) * np.sin(gamma) * np.sin(phiVals[li]))) * np.cos(beta + phiVals[li])
+             B = ((np.cos(gamma) * np.cos(phiVals[li])) + (np.exp(1j*delta) * np.sin(gamma) * np.cos(phiVals[li]))) * np.sin(beta+phiVals[li])
+             C = ((-np.sin(gamma)*np.cos(phiVals[li])) - (np.exp(1j*delta) * np.cos(gamma) * np.sin(phiVals[li]))) * np.cos(beta + phiVals[li])
+             D = ((-np.sin(gamma)*np.sin(phiVals[li])) + (np.exp(1j * delta)*np.cos(gamma)*np.cos(phiVals[li]))) * np.sin(beta + phiVals[li])
+
+             Ex = Ex_0*np.exp(-1j*k*N*l[li]) * ((np.exp(-1j*k*l[li]*((2*np.pi)/(k*Lb[li])))*A) + B)
+             Ey = Ex_0*np.exp(-1j*k*N*l[li]) * ((np.exp(-1j*k*l[li]*((2*np.pi)/(k*Lb[li])))*C) + D) 
+             
+        #      print("Ex: ", Ex)
+        #      print("Ey: ", Ey)
+
+        
+             ExConj = np.conjugate(Ex)
+             EyConj = np.conjugate(Ey)
+
+        #      print("ExConj: ", ExConj)
+        #      print("EyConj: ", EyConj)
+
+             Ex2 = Ex*ExConj
+             Ey2 = Ey*EyConj
+
+        #      print("Ex2: ", Ex2)
+        #      print("Ey2: ", Ey2)
+
+             S1[li] = Ex2/(2*eta)
+             S2[li] = Ey2/(2*eta)
+        #      print("S1:", S1[li])
+        #      print("S2: ", S2[li])
+             Sdifference[li] = S1[li] - S2[li]
+
+        plt.figure()
+        plt.plot(f, np.real(S1), label='S1')
+        plt.plot(f, np.real(S2), label='S2')
+        plt.plot(f, Sdifference, label='difference')
+        plt.xlabel('Force (N/m)')
+        plt.ylabel('S1, S2 (Real part)')
+        plt.title('S1 and S2 vs. Force')
+        plt.legend()
+        plt.grid(True)
+        plt.show()
+
+              
+# ex()
+
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+
 # Material properties of fiber
 Y = 7.3e10  # Young's modulus of fiber in N/m^2
 sigma = 0.17  # Poisson's ratio at 633nm wavelength
@@ -27,7 +118,9 @@ gamma = np.pi / 2  # Angle of PM fiber wrt polarimeter. Should be 0 or pi/2
 F = 2 * N**3 * (1 + sigma) * (p_12 - p_11) * Lb_0 * f / (lambda_light * np.pi * b * Y)  # Normalized force
 phi = 0.5 * np.arctan((F * np.sin(2 * alpha)) / (1 + F * np.cos(2 * alpha)))  # Angle of rotated birefringence
 Lb = Lb_0 * (1 + F**2 + 2 * F * np.cos(2 * alpha))**(-1/2)  # Modified beat length
-
+print("PHIVALS: ", phi)
+print("F VALS: ", F)
+print("Lb values: ", Lb)
 SOP = np.zeros((npoints, npoints))
 for q in range(npoints):
     arg = (2 * np.pi * l[q]) / Lb
@@ -77,7 +170,7 @@ for q in range(npoints):
             np.sin(arg) * np.sin(delta) * np.sin(gamma) * (np.sin(beta) * np.cos(phi)**2 + np.cos(beta) * np.sin(phi) * np.cos(phi)))
 
     s2 = 2 * (term1 * term2) - 2 * (term3 * term4)
-    
+
     s3 = (np.cos(2 * phi)**2 * np.sin(2 * beta) * np.sin(delta) -
       np.sin(2 * beta) * np.sin(delta) -
       np.cos(2 * beta) * np.sin(2 * phi) * np.cos(delta) * np.sin(arg) -
@@ -127,6 +220,8 @@ ax.set_ylabel('Interaction length (m)')
 ax.set_zlabel('Phase')
 
 plt.show()
+
+
 
 
 
