@@ -85,7 +85,7 @@ def ex():
         plt.show()
 
               
-# ex()
+ex()
 
 
 
