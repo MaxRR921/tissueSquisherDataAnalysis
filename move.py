@@ -1,6 +1,14 @@
 import controller
 import time
+"""
+Each move object has a velocity, height, delays and a reference to the controller object so that it can tell it to
+do these moves
 
+Execute actually tells the controller to go to the position with the velocity
+
+saveinputs saves the textbox inputs into the variables in this class.
+
+"""
 class Move:
 
     def __init__(self, controller):

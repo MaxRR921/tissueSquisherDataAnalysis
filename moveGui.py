@@ -6,6 +6,13 @@ from threading import Thread
 
 
 class MoveGui(ttk.Frame):
+    """
+    init takes in the list of all moves, a height for the move gui elements and a width as well as the ttk.frame parent class
+    it inherits from
+
+    it sets up all of the ui elements and adds the existing moves (which should just be the default move. It takes in a reference
+    to the top level gui so that it can start the execute thread from the execute button that is attached to each move.
+    """
     def __init__(self, parent, gui, moveList, item_height, width):
         super().__init__(master=parent)
         self.pack(expand=True, fill='both', anchor="nw")
@@ -36,9 +43,11 @@ class MoveGui(ttk.Frame):
         self.canvas.bind_all('<MouseWheel>', self._on_mouse_wheel)
         self.bind('<Configure>', self.update_size)
 
+    """event for scrolling using mouse wheel"""
     def _on_mouse_wheel(self, event):
         self.canvas.yview_scroll(-int(event.delta / 120), "units")
 
+    """updateList takes in a movelist and displays the moves based on this"""
     def updateList(self, moveList):
         self.moveList = moveList
         self.item_number = len(moveList)
@@ -50,16 +59,19 @@ class MoveGui(ttk.Frame):
         self.populate_items()
         self.update_size(None)
 
+    """pupulate items creates all the items for the moves in movelist """
     def populate_items(self):
         for index, move in enumerate(self.moveList):
             self.create_item(move).pack(expand=True, fill='both', pady=4, padx=10)
 
+    """update size updates the size of the frame size based on how many moves are given"""
     def update_size(self, event):
         canvas_width = self.winfo_width()
         canvas_height = self.item_number * self.item_height
         self.canvas.itemconfig(self.frame_id, width=canvas_width, height=canvas_height)
         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
 
+    """create_item creates a new move gui item based on the move it is fed"""
     def create_item(self, move):
         frame = ttk.Frame(self.frame)
 
@@ -86,7 +98,7 @@ class MoveGui(ttk.Frame):
         ttk.Entry(frame, textvariable=backDelay_var).grid(row=1, column=3, sticky='new')     # Ensure entries expand horizontally
 
         return frame
-
+    """save entries saves all the text variable entries to the move associated with the gui element."""
     def saveEntries(self, move, targetHeight_var, velocity_var, frontDelay_var, backDelay_var):
         try:
             move.targetHeight = str(targetHeight_var.get())
@@ -99,13 +111,14 @@ class MoveGui(ttk.Frame):
             print("Invalid input. Please enter valid numbers.")
 
 
-
+    """executemove makes a list only containing that move because startexecute thread needs to take a list
+    so we are just wanting to execute this one move..."""
     def __executeMove(self, move):
         tempList = []
         tempList.append(move)
         self.gui.startExecuteThread(tempList)
 
-
+    """deleteMove deletes the move that the user clicks the x on"""
     def __deleteMove(self, move, frame):
          # Check if the move is in the list
         if move in self.moveList:

@@ -19,8 +19,18 @@ from tkinter import ttk
 from ttkthemes import ThemedTk
 import polarimeter
 
+"""!THINKING MAYBE I SHOULD JUSt iNitiAlize all of the threads in init, then call them later"""
 
 
+"""init initializes all of the gui elements, as well as the classes corresponding to every device
+!it also initializs self.phase and self.strain np.arrays which is kind of weird
+it then adds a default move to the move list, which is fine
+after that it initializes some more gui elements.
+!after that it tells the micrometer to go to the home position, which i don't really like
+because i think this should just be in the micrometer class when it initializes instead of being done from the gui class
+
+!starts updating all of the graphs. this is bad because that method sucks rn. because of a few reasons.
+"""
 class Gui:
     def __init__(self):
         #initializing UI
@@ -113,7 +123,16 @@ class Gui:
         
         
 
+    """stop tells the powermeters to stop collecting data. 
+    !There is no detection right now of whether the powermeters are even connected...
+    it then tries to join the execution thread, which is opened to begin the execution of the moves !REMOVE FROM 
+    TRY CATCH? and make if statement
+    !THEN JOINS POLARIMETER THREAD... I FEEL LIKE THIS SHOULD FOLLOW A SIMILAR THING TO POWERMETER THREADS IDK
+    WHY ITS IN A TRY CATCH RIGHT NOW...
+    then tells polaremter and micrometer to stop and tells powermeter threads to join
 
+    THis method is in need of a restructure... why does some stuff lie in try catches, should just put in if's
+    """
     def stop(self):
         self.powermeter.stop()
         self.stopExecution = True
@@ -131,30 +150,35 @@ class Gui:
 
         self.root.destroy()
 
+    """run begins the main loop. this is fine just a tkinter thing"""
     def run(self):
         self.window.mainloop()
 
+    """addTopMenuButtons is executed from init, calls the methods that create all of the buttons"""
     def addTopMenuButtons(self):
         self.__dropdownButton(self.topMenuFrame)
         self.__browseDataFileButton(self.topMenuFrame)
 
     #ALL BUTTONS IN TOP MENU
 
+    """browseDataFile button creates the button for browsing for the data files."""
     def __browseDataFileButton(self, frameTopMenu):
         browseDataFileButton = ttk.Button(frameTopMenu, text="browse for data file", command=lambda: self.__browseFile())
         browseDataFileButton.pack(side='left')
 
+    """browseFile opens the file browser, is executed from the button"""
     def __browseFile(self):
         self.filePath = tk.filedialog.askopenfilename(filetypes=[('CSV Files', '*.csv')])
         if self.filePath:
             self.__plot()
 
-
+    """startpolarimeterthread starts the thread for data collection from the powlarimeter. This thread runs polarimeter.start"""
     def __startPolarimeterThread(self):
         print("SHOULD START")
         self.polarimeterThread = Thread(target=self.polarimeter.start, args=[])
         self.polarimeterThread.start()
 
+    """dropdownButton creates the dropdown button for all of the graphs that the user has the option to add"""
     def __dropdownButton(self, frameTopMenu):
         dropdownButton = ttk.Menubutton(frameTopMenu, text="Add Graphs", direction="below")
         dropdownMenu = tk.Menu(dropdownButton, tearoff=False)
@@ -166,7 +190,8 @@ class Gui:
         dropdownButton["menu"] = dropdownMenu
         dropdownButton.pack(side="left")
 
-        
+    """options are all of the options to select the plots you want to see displayed in real time (semi real time
+    in the case of the polarimeter plot). iti initializes all of the plot2D objects """
     def __option1(self):
         print("Option 1 selected")
         self.micrometerPlot = Plot2D('micrometer plot', 'time', 'distance')
@@ -192,6 +217,7 @@ class Gui:
         self.pow2Plot = Plot2D('power 2 plot', 'distance', 'power')
         self.plotList.append(self.pow2Plot)
 
+    """adds all of the buttons in the bottom frame"""
     def addBottomFrameButtons(self, listFrame):
         numExec = tk.StringVar()
         ttk.Entry(listFrame, textvariable=numExec).grid(row=2, column=1, sticky='sw', pady=5)
@@ -211,7 +237,8 @@ class Gui:
         power1Text = ttk.Label(listFrame, textvariable=self.power2Text).grid(row=2, column=3, sticky = 'e', pady=5, padx=10)
         timesText = ttk.Label(listFrame, text='times').grid(row=2, column=2, sticky= 'w', pady=5, padx=5)
 
-        
+    """ saveNumExecutions is called when executeall is pressed, saves the number of executions the user entered
+    in the little box at the bottom, checks for invalid input in the textbox."""
     def saveNumExecutions(self, numExec):
         try:
             self.numExecutions = int(numExec.get())
@@ -221,7 +248,9 @@ class Gui:
         
             
 
-
+    """startExecuteThread resets all of the constantly polling plots... starts the execute thread which calls 
+    the collect method. 
+    !! should make it just use self.movelist...."""
     def startExecuteThread(self, moveList):
         for plot in self.plotList:
             plot.resetPlot()
@@ -230,7 +259,21 @@ class Gui:
 
 
 
+    """collect is a lot of logic. !should make it just use self.movelist
+    if the plots currently aren't updating, it calls the recursive updatePlots function to update the plots 
+    every 100 ms. Should just have this instead of having all plots update all of the time.
+    then talls the polarimeter to start running, and starts its thread im thinking there is probably some cleaner logic
+    for this. 
+    !!in the for loop, it does every move the number of executions the user wants times. just calls move.execute 
+     and if the program flags to stop execution of the move, it just breaks out of the loop a little haphazardly I 
+      also should add a button for stopexecution. 
+    !!! weird try catch for polarimeter.run i guess if the polarimeter is not there it shouldn't execute this.
+    ! analyzes the polarimeter data right here, which seems kinda weird. I feel this should be within the polarimter class? or somewhere else just not here. 
+    the function of this method should just be to collect data, not process it.
+    !! also why is this self.powerplot.generatecsvfromplot line here... this seems lazy and should be put somewhere else
+    !be aware of self.executed bool... should this even need to be here if all of the logic is sound?
 
+     """
     def __collect(self, moveList):
         print("LETS GO")
         if not self.updatingPlots:
@@ -268,13 +311,21 @@ class Gui:
         print("DONE")
 
 
-    
+    """addmove adds the move to the movelist and then udpates the move gui adding the move"""
     def __addMove(self, frameMoveList):
         moveToAdd = move.Move(self.micrometerController)
         self.moveList.append(moveToAdd)
         self.moveGui.updateList(self.moveList)
 
-
+    """updateplotsfromdata is really bad right not... try catches for updating every plot that's open will likely lead to 
+    very many exceptions being raised. besides that: 
+    1. tries to update micrometer plot, sets triedmicrometer if the except hits
+    2. tries to update the power plots, sets flag if except
+    3. does same for other power plots, has only one bool for both tho???????
+    4. if executed bool is set in collect, it feeds in polarimeter data to polarimeter plot and generates the csv
+    also colors the lines on polarimeter plot and power plots. Need to like somehow standardize all this
+    also tries to constantly set powermeter value text gui 
+    5. recursively runs this funciton every 10 ms."""
     def updatePlotsFromData(self):
         self.timeStamp = time.time()
         try:
