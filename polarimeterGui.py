@@ -5,6 +5,7 @@ import polarimeter
 from threading import Thread
 #TODO: take out unnecessary imports
 
+"""Gui classes just create the gui elements for their respective things. But i need to get rid of them because they aren't used anymore!!!!"""
 #WARNING DOESNT CLOSE MICROMETER UNTIL MAIN GUI WINDOW IS CLOSED
 class PolarimeterGui():
     def __init__(self):
@@ -37,8 +38,8 @@ class PolarimeterGui():
 
     def __startPolarimeterButton(self, frameTopMenu):
         
-        micrometerControlButton = tk.Button(frameTopMenu, text="Start polarimeter", command=lambda: [self.__startPolarimeter()])
-        micrometerControlButton.pack(side="left")
+        polarimeterButton= tk.Button(frameTopMenu, text="Start polarimeter", command=lambda: [self.__startPolarimeter()])
+        polarimeterButton.pack(side="left")
 
     def __startPolarimeter(self):
         thread = Thread(target = self.polar.start, args=[10])

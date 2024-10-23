@@ -4,7 +4,7 @@ import tkinter as tk
 import controller
 from threading import Thread
 #TODO: take out unnecessary imports
-
+"""Gui classes just create the gui elements for their respective things. But i need to get rid of them because they aren't used anymore!!!!"""
 class ControllerGui:
     def __init__(self):
         self.micrometerController = controller.Controller()
