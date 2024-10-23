@@ -29,6 +29,8 @@ after that it initializes some more gui elements.
 !after that it tells the micrometer to go to the home position, which i don't really like
 because i think this should just be in the micrometer class when it initializes instead of being done from the gui class
 
+!THIS METHOD ALSO STARTS THE POWERMETERS THREAD, WHICH THAT THREAD THEN SPAWNS A THREAD FOR EACH POWERMETER AND WAITS UNTIL both of those join.
+
 !starts updating all of the graphs. this is bad because that method sucks rn. because of a few reasons.
 """
 class Gui:

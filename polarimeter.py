@@ -20,6 +20,12 @@ import controller
 
 class Polarimeter():
 
+
+    """init takes in a reference to the micrometer class so that it can track the position for the plotting
+     initializes three lists for the stokes parameters, as well as a list for the positions. loads the drivers for the polarimeter.
+     initializes and detects polarimeter, connects and sets the settings that are appropriate for the stress sensor. This class takes a break after
+     initializing, and the main gui class waits for it to finish initializing to make sure that all settings are initialized before the program moves 
+     on."""
     def __init__(self, micrometer):
         # Load DLL library
         self.micrometer = micrometer
@@ -29,6 +35,8 @@ class Polarimeter():
         self.timeList = []
         self.initTime = 0
         self.positionList = []
+        #you need to have a windows machine because that's the only one that can have this driver. this line loads this from the default
+        #path this driver is installed in on your machine
         self.lib = cdll.LoadLibrary("C:\Program Files\IVI Foundation\VISA\Win64\Bin\TLPAX_64.dll")
         self.run = False
         # Detect and initialize PAX1000 device
@@ -79,9 +87,17 @@ class Polarimeter():
         # Short break
         time.sleep(5)
 
-        # Take 5 measurements and output values
         
-
+    """start runs on collect() in gui class. starts by clearing all of the object's lists while the self.run bool is set 
+    (set to true from the gui class in collect), it gets the measurement data every .1 seconds as well as the timestamp associated 
+    with this measurement data. I tried getting the time associated with the measurement from the polarimeter, but that was causing weird
+    problems and wouldn't work. Might be a good idea in the future especially considering a !!!!! number of probably lengthy instructions
+    occur before the time is recorded, so that could be a SOURCE OF ERROR in experiment 
+      
+    !! when self.run is set to false in the gui class (probably bad practice, because it's unclear here when the while loop will terminate)
+    After the while loop terminates and while the data is being processed by the analysis class, it closes and reinitializes the connection with the 
+    polarimeter !might be able to run init() again rather than duplicating the initialization code here.  
+    """
     def start(self):
         self.s1List.clear()
         self.s2List.clear()
@@ -187,6 +203,8 @@ class Polarimeter():
         print("Polarimter thread should close here...")
         self.run = True
 
+    """!!stop sets the run flag to false, so the polarimeter breaks out of the loop and then reinitializes itself... 
+    maybe don't want to reinitialize but idk i think it needs to because we want to be able to run again"""
     def stop(self):
         self.run = False
         print("POLARIMETER STOPPING")
