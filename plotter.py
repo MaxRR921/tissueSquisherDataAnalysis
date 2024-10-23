@@ -5,8 +5,11 @@ import csv
 import numpy as np
 from matplotlib.lines import Line2D
 
-
+"""plot2d defines a generic matplotlib plot in the format we want."""
 class Plot2D:
+    """init takes in a title for the x and y axes. It then initializes all of the plot things and then
+    !CAlls reset plot which i feel shouldn't be necessary because I'm setting the title to the default plot titles, 
+    then calling reset, whic sets it to the real title which seems really weird"""
     def __init__(self, title='untitled', xAxisTitle='x', yAxisTitle='y'):
         #set up window
         self.color = 'blue'
@@ -34,8 +37,7 @@ class Plot2D:
         self.resetPlot()
 
 
-
-
+    """resetPlot clears the plot and its data"""
     def resetPlot(self):
         self.data = {'xAxis': [], 'yAxis': []}
         
@@ -47,7 +49,10 @@ class Plot2D:
         self.fig.tight_layout()
         self.canvas.draw()
         
-
+    """updatePlot !appends data to the plot's x and y data but the method isn't very standardized 
+    because each type of plot's data will be in different  forms, so the checking of the data happens here
+    I'm thinking the manipulation of the data to fit into the plots should happen in their respective classes instead this 
+    method runs from gui every 10 ms to make plots update in real time"""
     def updatePlot(self, xData, yData):
         if not isinstance(xData, list):           
             xData = float(xData)
@@ -74,7 +79,9 @@ class Plot2D:
 
         self.canvas.draw()
 
-
+    """ plotdata plots all of the points for each plot al at once. !wondering if i can make it so it just 
+    adds to the plot instead of replotting every single time and updating the legends and stuff. also this method seems
+    weird to use with the polarimeter plot but that's a whole nother thing"""
     def plotData(self):
         x = np.array(self.data['xAxis'])
         y = np.array(self.data['yAxis'])
@@ -88,7 +95,8 @@ class Plot2D:
         ]
         self.ax.legend(handles=legend_elements)
 
-
+    """colorLines colors all of the lines based on the direction the x axis is moving. Colors red when the x axis is moving 
+    in the positive direction, blue when moving in the negative direction."""
     def colorLines(self):
         x = np.array(self.data['xAxis'])
         y = np.array(self.data['yAxis'])
@@ -108,7 +116,8 @@ class Plot2D:
 
         self.canvas.draw()
 
-
+    """generateCsvFromPlot (WEIRD NAME BECAUSE SHOULDN't it just generate from data) but it basically does.
+    it generates csvs from the cleaned up data of x and y axes that the plotter has."""
     def generateCsvFromPlot(self, name):
         # Ensure that the data is in the format of lists of equal length
         keys = self.data.keys()
