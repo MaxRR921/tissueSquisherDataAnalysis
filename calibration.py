@@ -32,7 +32,7 @@ def ex():
         ExList = np.zeros(npoints, dtype=complex)
         EyList = np.zeros(npoints, dtype=complex)
 
-        f = np.linspace(0, 2000, npoints)  # Force in N/m (2D analysis)
+        f = np.linspace(0, 9, npoints)  # Force in N/m (2D analysis)
         l = np.linspace(7.25, 20, npoints)  # Interaction length, about 18 mm
         Ex_0 = 1
         lambda_light = 1550e-9  # Wavelength of light in fiber
@@ -94,8 +94,20 @@ def ex():
         plt.grid(True)
         plt.show()
 
+        # Second Figure: Plot just the difference
+        plt.figure()
+        plt.plot(f, Sdifference, label='Difference (S2 - S1)', color='red')
+        plt.xlabel('Force (N/m)')
+        plt.ylabel('Difference (Real part)')
+        plt.title('Difference (S1 - S2) vs. Force')
+        plt.legend()
+        plt.grid(True)
+
+        plt.show()
+
+
               
-ex()
+#ex()
 
 
 
@@ -340,7 +352,7 @@ ex()
 #         ax.set_zlabel('Ex')
 
 #         plt.show()
-def ex1():
+def ex1(alphaVal):
         npoints = 500
         # Material properties of fiber
         Y = 7.3e10  # Young's modulus of fiber in N/m^2
@@ -362,13 +374,13 @@ def ex1():
         ExList = np.zeros(npoints, dtype=complex)
         EyList = np.zeros(npoints, dtype=complex)
 
-        f = np.linspace(0, 2000, npoints)  # Force in N/m (2D analysis)
+        f = np.linspace(0, 90, npoints)  # Force in N/m (2D analysis)
         l = np.linspace(7.25, 20, npoints)  # Interaction length, about 18 mm
         Ex_0 = 1
         lambda_light = 1550e-9  # Wavelength of light in fiber
         k = 1/lambda_light
 
-        alpha = np.pi / 8 # angle between applied force and fast and slow axis of the fiber.
+        alpha = alphaVal # angle between applied force and fast and slow axis of the fiber.
         beta = np.pi / 6  # Angle between polarized light and fast and slow axis of the fiber.
         delta = 0  # Extra phase from traveling through unstressed fiber
         gamma = np.pi/2# Angle of PM fiber wrt polarimeter. Should be 0 or pi/2
@@ -380,47 +392,59 @@ def ex1():
         print("PhiVals:", phiVals)
         print("LbVals: ", Lb)
         print("F", F)
-
+        initialPowerDifference = 0
+        finalPowerDifference = 0
         for li in range(npoints):
         
-
-                A = ((np.cos(gamma)*np.cos(phiVals[li])) + (np.exp(1j*delta) * np.sin(gamma) * np.sin(phiVals[li])))
-                B = ((-np.cos(gamma) * np.sin(phiVals[li])) + (np.exp(1j*delta) * np.sin(gamma) * np.cos(phiVals[li])))
-                C = ((np.cos(gamma)*np.cos(phiVals[li])) + (np.exp(1j*delta) * np.sin(gamma) * np.sin(phiVals[li])))
-                D = ((-np.cos(gamma) * np.sin(phiVals[li])) + (np.exp(1j*delta) * np.sin(gamma) * np.cos(phiVals[li])))
-                E = ((-np.sin(gamma)*np.cos(phiVals[li])) + (np.exp(1j*delta) * np.cos(gamma) * np.sin(phiVals[li])))
-                F = ((np.sin(gamma)*np.sin(phiVals[li])) + (np.exp(1j * delta)*np.cos(gamma)*np.cos(phiVals[li])))
-                G = ((-np.sin(gamma)*np.cos(phiVals[li])) + (np.exp(1j*delta) * np.cos(gamma) * np.sin(phiVals[li])))
-                H = ((np.sin(gamma)*np.sin(phiVals[li])) + (np.exp(1j * delta)*np.cos(gamma)*np.cos(phiVals[li])))
-                
-                I = (np.cos(phiVals[li]) * A) - (np.sin(phiVals[li]) * B)
-                J = (np.sin(phiVals[li]) * C) - (np.cos(phiVals[li]) * D)
-                K = (np.cos(phiVals[li] * E)) - (np.sin(phiVals[li]) * F)
-                L = (np.sin(phiVals[li]) * G) - (np.cos(phiVals[li]) * H)
-
-                Ex = Ex_0*np.exp(-2j*k*N*l[li])*np.exp(-2j*k*l[li]*((2*np.pi)/(k*Lb[li]))) * (I*np.cos(beta) - J*np.sin(beta))
-                Ey = Ex_0*np.exp(-2j*k*N*l[li])*np.exp(-2j*k*l[li]*((2*np.pi)/(k*Lb[li]))) * (K*np.cos(beta) - L*np.sin(beta))
-
-                 
-
-                print("Ex: ", Ex)
-                print("Ey: ", Ey)
-                #Why am I doing conjugate here??
-                # ExConj = np.conjugate(Ex)
-                # EyConj = np.conjugate(Ey)
-
-                # Compute power
-                Ex2= np.abs(Ex)**2  # Equivalent to |Ex|^2
-                Ey2= np.abs(Ey)**2 #Equivalent to |Ey|^2
-                print("Ex2: ", Ex2)
-                print("Ey2: ", Ey2)
-                eta = 376.73  # Characteristic impedance of free space (ohms)
                
-                S1[li] = Ex2/(2*eta)
-                S2[li] = Ey2/(2*eta)
-                Sdifference[li] = S2[li] - S1[li]
-                ExList[li] = Ex
-                EyList[li] = Ey
+               A = ((np.cos(gamma)*np.cos(phiVals[li])) + (np.exp(1j*delta) * np.sin(gamma) * np.sin(phiVals[li])))
+               B = ((-np.cos(gamma) * np.sin(phiVals[li])) + (np.exp(1j*delta) * np.sin(gamma) * np.cos(phiVals[li])))
+               C = ((np.cos(gamma)*np.cos(phiVals[li])) + (np.exp(1j*delta) * np.sin(gamma) * np.sin(phiVals[li])))
+               D = ((-np.cos(gamma) * np.sin(phiVals[li])) + (np.exp(1j*delta) * np.sin(gamma) * np.cos(phiVals[li])))
+               E = ((-np.sin(gamma)*np.cos(phiVals[li])) + (np.exp(1j*delta) * np.cos(gamma) * np.sin(phiVals[li])))
+               F = ((np.sin(gamma)*np.sin(phiVals[li])) + (np.exp(1j * delta)*np.cos(gamma)*np.cos(phiVals[li])))
+               G = ((-np.sin(gamma)*np.cos(phiVals[li])) + (np.exp(1j*delta) * np.cos(gamma) * np.sin(phiVals[li])))
+               H = ((np.sin(gamma)*np.sin(phiVals[li])) + (np.exp(1j * delta)*np.cos(gamma)*np.cos(phiVals[li])))
+               
+               I = (np.cos(phiVals[li]) * A) - (np.sin(phiVals[li]) * B)
+               J = (np.sin(phiVals[li]) * C) - (np.cos(phiVals[li]) * D)
+               K = (np.cos(phiVals[li] * E)) - (np.sin(phiVals[li]) * F)
+               L = (np.sin(phiVals[li]) * G) - (np.cos(phiVals[li]) * H)
+
+               Ex = Ex_0*np.exp(-2j*k*N*l[li])*np.exp(-2j*k*l[li]*((2*np.pi)/(k*Lb[li]))) * (I*np.cos(beta) - J*np.sin(beta))
+               Ey = Ex_0*np.exp(-2j*k*N*l[li])*np.exp(-2j*k*l[li]*((2*np.pi)/(k*Lb[li]))) * (K*np.cos(beta) - L*np.sin(beta))
+
+               
+
+               # print("Ex: ", Ex)
+               # print("Ey: ", Ey)
+               #Why am I doing conjugate here??
+               # ExConj = np.conjugate(Ex)
+               # EyConj = np.conjugate(Ey)
+
+               # Compute power
+               Ex2= np.abs(Ex)**2  # Equivalent to |Ex|^2
+               Ey2= np.abs(Ey)**2 #Equivalent to |Ey|^2
+               # print("Ex2: ", Ex2)
+               # print("Ey2: ", Ey2)
+               eta = 376.73  # Characteristic impedance of free space (ohms)
+
+               S1[li] = Ex2/(2*eta)
+               S2[li] = Ey2/(2*eta)
+
+               
+               Sdifference[li] = S2[li] - S1[li]
+               
+               if (li == 0):
+                      initialPowerDifference = Sdifference[li]
+                      print("INIT: ", initialPowerDifference)
+
+               if(li == npoints):
+                      finalPowerDifference = Sdifference[li]
+                      print("FIN: ", finalPowerDifference)
+
+               ExList[li] = Ex
+               EyList[li] = Ey
 
 
         print("S1: ", S1) 
@@ -450,6 +474,37 @@ def ex1():
 
         plt.show()
 
+
               
-ex1()
+
+def test_ex1():
+     print("make a function that goes from 0-90 deg and finds max change in power dif....")
+
+     # NEW IDEA!!! TO TEST THE CALIBRATION CODE MORE COMPLETELY, WE 
+
+     #TWO THINGS: 
+     # 1. FOR TESTING:
+          # make a function that tells you
+     
+
+
+
+     # 1. Checks the avg. change in power difference normalized for the data we just took.
+     # 2. Checks the database of normalized power changes for the closest match
+     # 3. Tells user what that angle is and how far they need to turn it to get to the best angle.
+     n = 50
+     alpha = np.linspace(0, np.pi/2, n)
+     deltaPowerDifferences = np.zeros(n) #might need dtype
+     for i in range(0,n):
+          deltaPowerDifferences[i] = ex1(alpha[i])
+     
+     print("DELTA POWER DIFFERENCES:", deltaPowerDifferences)
+
+
+            
+            
+ex1(np.pi/2)
+
+
+
 
