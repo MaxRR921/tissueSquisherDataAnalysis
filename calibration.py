@@ -389,9 +389,9 @@ def ex1(alphaVal):
         F = 2 * N**3 * (1 + sigma) * (p_12 - p_11) * Lb_0 * f / (lambda_light * np.pi * b * Y)  # Normalized force66
         phiVals = 0.5 * np.arctan((F * np.sin(2 * alpha)) / (1 + F * np.cos(2 * alpha)))  # Angle of rotated birefringence
         Lb = Lb_0 * (1 + F**2 + 2 * F * np.cos(2 * alpha))**(-1/2)  # Modified beat length
-        print("PhiVals:", phiVals)
-        print("LbVals: ", Lb)
-        print("F", F)
+     #    print("PhiVals:", phiVals)
+     #    print("LbVals: ", Lb)
+     #    print("F", F)
         initialPowerDifference = 0
         finalPowerDifference = 0
         for li in range(npoints):
@@ -439,7 +439,7 @@ def ex1(alphaVal):
                       initialPowerDifference = Sdifference[li]
                       print("INIT: ", initialPowerDifference)
 
-               if(li == npoints):
+               if(li == npoints - 1):
                       finalPowerDifference = Sdifference[li]
                       print("FIN: ", finalPowerDifference)
 
@@ -447,36 +447,41 @@ def ex1(alphaVal):
                EyList[li] = Ey
 
 
-        print("S1: ", S1) 
-        print("S2: ", S2)
-        print("Sdifference: ", Sdifference)
-        print(ExList)
-        print(EyList) 
-        plt.figure()
-        plt.plot(f, S1, label='S1')
-        plt.plot(f, S2, label='S2')
-        plt.xlabel('Force (N/m)')
-        plt.ylabel('S1, S2 (Real part)')
-        plt.title('S1 and S2 vs. Force')
-        plt.legend()
-        plt.grid(True)
-        plt.show()
+     #    print("S1: ", S1) 
+     #    print("S2: ", S2)
+     #    print("Sdifference: ", Sdifference)
+     #    print(ExList)
+     #    print(EyList) 
+     #    plt.figure()
+     #    plt.plot(f, S1, label='S1')
+     #    plt.plot(f, S2, label='S2')
+     #    plt.xlabel('Force (N/m)')
+     #    plt.ylabel('S1, S2 (Real part)')
+     #    plt.title('S1 and S2 vs. Force')
+     #    plt.legend()
+     #    plt.grid(True)
+     #    plt.show()
 
 
-        # Second Figure: Plot just the difference
-        plt.figure()
-        plt.plot(f, Sdifference, label='Difference (S2 - S1)', color='red')
-        plt.xlabel('Force (N/m)')
-        plt.ylabel('Difference (Real part)')
-        plt.title('Difference (S1 - S2) vs. Force')
-        plt.legend()
-        plt.grid(True)
+     #    # Second Figure: Plot just the difference
+     #    plt.figure()
+     #    plt.plot(f, Sdifference, label='Difference (S2 - S1)', color='red')
+     #    plt.xlabel('Force (N/m)')
+     #    plt.ylabel('Difference (Real part)')
+     #    plt.title('Difference (S1 - S2) vs. Force')
+     #    plt.legend()
+     #    plt.grid(True)
 
-        plt.show()
+     #    plt.show()
+        return (finalPowerDifference-initialPowerDifference)
+        
 
 
               
-
+# needs to tell you:
+# 1. How much you need to turn the fiber to maximize the amount of power difference for that force. (A way to reliably find alpha in the testing setup)
+# 2. How much force you are applying based on the power difference from the data you take
+# 
 def test_ex1():
      print("make a function that goes from 0-90 deg and finds max change in power dif....")
 
@@ -487,23 +492,54 @@ def test_ex1():
           # make a function that tells you
      
 
-
+     #we are looking at distance on the micrometer and force on the calibration curve !!!!!
 
      # 1. Checks the avg. change in power difference normalized for the data we just took.
      # 2. Checks the database of normalized power changes for the closest match
      # 3. Tells user what that angle is and how far they need to turn it to get to the best angle.
      n = 50
-     alpha = np.linspace(0, np.pi/2, n)
+     alpha = np.linspace(0, 2*np.pi, n)
      deltaPowerDifferences = np.zeros(n) #might need dtype
      for i in range(0,n):
           deltaPowerDifferences[i] = ex1(alpha[i])
+
+     deltaPowerDifferencesNormalized = np.zeros(n)
+
+     for i in range(0,n):
+          deltaPowerDifferencesNormalized[i] = (deltaPowerDifferences[i] - (-1e-5)) / (2e-5) 
      
      print("DELTA POWER DIFFERENCES:", deltaPowerDifferences)
+     print("Normalized Delta power differences: ", deltaPowerDifferencesNormalized)
+
+     plt.figure()
+     plt.plot(alpha, deltaPowerDifferencesNormalized, label='change in power difference ')
+     plt.xlabel('alpha (angle of force with respect to fast and slow axes)')
+     plt.ylabel('change in power difference')
+     plt.title('Change in power difference')
+     plt.legend()
+     plt.grid(True)
+     plt.show()
+
+
+     plt.figure()
+     plt.plot(alpha, deltaPowerDifferences, label='change in power difference ')
+     plt.xlabel('alpha (angle of force with respect to fast and slow axes)')
+     plt.ylabel('change in power difference')
+     plt.title('Change in power difference')
+     plt.legend()
+     plt.grid(True)
+     plt.show()
+
+
+
+     
 
 
             
             
-ex1(np.pi/2)
+test_ex1()
+
+
 
 
 
