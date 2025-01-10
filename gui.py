@@ -335,27 +335,28 @@ class Gui:
     5. recursively runs this funciton every 10 ms."""
     def updatePlotsFromData(self):
         self.timeStamp = time.time()
-        try:
-            if(self.micrometerController.downward):
-                self.micrometerPlot.updatePlot(self.timeStamp, self.micrometerController.micrometerPosition[3:].strip())
-        except:
-            print("micrometer not found")
-        
-        try:
-            self.powerPlot.updatePlot(self.micrometerController.micrometerPosition[3:].strip(), abs(self.powermeter.device1Data - self.powermeter.device2Data))
-        except:
-            print("not enough powermeters connected.")
+        if self.updatingPlots:
+            try:
+                if(self.micrometerController.downward):
+                    self.micrometerPlot.updatePlot(self.timeStamp, self.micrometerController.micrometerPosition[3:].strip())
+            except:
+                print("micrometer not found")
+            
+            try:
+                self.powerPlot.updatePlot(self.micrometerController.micrometerPosition[3:].strip(), abs(self.powermeter.device1Data - self.powermeter.device2Data))
+            except:
+                print("not enough powermeters connected.")
 
-        try:
-            self.pow1Plot.updatePlot(self.micrometerController.micrometerPosition[3:].strip(), self.powermeter.device1Data)
+            try:
+                self.pow1Plot.updatePlot(self.micrometerController.micrometerPosition[3:].strip(), self.powermeter.device1Data)
 
-        except:
-            print("not enough powermeters connected.")
+            except:
+                print("not enough powermeters connected.")
 
-        try:
-            self.pow2Plot.updatePlot(self.micrometerController.micrometerPosition[3:].strip(), self.powermeter.device2Data)
-        except:
-            print("not enough powermeters connected.")
+            try:
+                self.pow2Plot.updatePlot(self.micrometerController.micrometerPosition[3:].strip(), self.powermeter.device2Data)
+            except:
+                print("not enough powermeters connected.")
 
         if (self.executed == True):
             print("PHASE")
@@ -372,6 +373,7 @@ class Gui:
                 self.powerPlot.colorLines()
                 
             self.executed = False
+        
         if self.powermeter is not None:
             self.power1Text.set(str(self.powermeter.device1Data))
             self.power2Text.set(str(self.powermeter.device2Data))
@@ -379,9 +381,9 @@ class Gui:
             print("error updating power text")
 
 
-        if self.updatingPlots:
-            print("UPDATING")
-            self.root.after(10, self.updatePlotsFromData)
+        
+        print("UPDATING")
+        self.root.after(10, self.updatePlotsFromData)
 
 
 
