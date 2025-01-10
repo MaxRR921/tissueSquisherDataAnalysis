@@ -374,6 +374,7 @@ class Gui:
                 self.powerPlot.colorLines()
                 
             self.executed = False
+            self.stopExecution = False
         
         if self.powermeter is not None:
             self.power1Text.set(str(self.powermeter.device1Data))
