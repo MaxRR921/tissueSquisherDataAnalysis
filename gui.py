@@ -243,7 +243,7 @@ class Gui:
         addMoveButton.grid(row=1, column=0, sticky='sw', pady=5, padx=30)
 
         stopExecutionButton = ttk.Button(listFrame, text='Stop Execution', command=lambda: setattr(self, 'stopExecution', True))
-        addMoveButton.grid(row=1, column=1, sticky='sw', pady=5, padx=30)
+        stopExecutionButton.grid(row=1, column=1, sticky='sw', pady=5, padx=30)
 
         power1Text = ttk.Label(listFrame, textvariable=self.power1Text).grid(row=2, column=3, sticky = 'w', pady=5, padx=2)
         power1Text = ttk.Label(listFrame, textvariable=self.power2Text).grid(row=2, column=3, sticky = 'e', pady=5, padx=10)
