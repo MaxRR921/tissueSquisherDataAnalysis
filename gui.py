@@ -242,6 +242,9 @@ class Gui:
         addMoveButton = ttk.Button(listFrame, text='add move', command=lambda: self.__addMove(listFrame))
         addMoveButton.grid(row=1, column=0, sticky='sw', pady=5, padx=30)
 
+        stopExecutionButton = ttk.Button(listFrame, text='Stop Execution', command=lambda: setattr(self, 'stopExecution', True))
+        addMoveButton.grid(row=1, column=1, sticky='sw', pady=5, padx=30)
+
         power1Text = ttk.Label(listFrame, textvariable=self.power1Text).grid(row=2, column=3, sticky = 'w', pady=5, padx=2)
         power1Text = ttk.Label(listFrame, textvariable=self.power2Text).grid(row=2, column=3, sticky = 'e', pady=5, padx=10)
         timesText = ttk.Label(listFrame, text='times').grid(row=2, column=2, sticky= 'w', pady=5, padx=5)
@@ -277,16 +280,14 @@ class Gui:
      and if the program flags to stop execution of the move, it just breaks out of the loop a little haphazardly I 
       also should add a button for stopexecution. 
     !!! weird try catch for polarimeter.run i guess if the polarimeter is not there it shouldn't execute this.
-    ! analyzes the polarimeter data right here, which seems kinda weird. I feel this should be within the polarimter class? or somewhere else just not here. 
-    the function of this method should just be to collect data, not process it.
-    !! also why is this self.powerplot.generatecsvfromplot line here... this seems lazy and should be put somewhere else
-    !be aware of self.executed bool... should this even need to be here if all of the logic is sound?
-
+.
      """
     def __collect(self, moveList):
         print("collecting data")
         if not self.updatingPlots:
             self.updatingPlots = True
+
+        #POLARIMETER NEEDS TO START RUNNING BEFORE MOVES EXECUTE. IT DOESN'T CONSTANTLY RUN LIKE THE POWERMETER.
         if(self.polarimeter is not None):
             self.polarimeter.run = True
             self.__startPolarimeterThread()
@@ -301,7 +302,7 @@ class Gui:
                     break
 
         self.executed = True
-        self.updatingPlots= False
+        self.updatingPlots = False
         print("DONE")
 
 
@@ -319,7 +320,10 @@ class Gui:
     4. if executed bool is set in collect, it feeds in polarimeter data to polarimeter plot and generates the csv
     also colors the lines on polarimeter plot and power plots. Need to like somehow standardize all this
     also tries to constantly set powermeter value text gui 
-    5. recursively runs this funciton every 10 ms."""
+    5. recursively runs this funciton every 10 ms.
+    !! also why is this self.powerplot.generatecsvfromplot line here... this seems lazy and should be put somewhere else
+    """
+    
     def updatePlotsFromData(self):
         self.timeStamp = time.time()
         if self.updatingPlots:
@@ -345,7 +349,7 @@ class Gui:
             except:
                 print("not enough powermeters connected.")
 
-        if (self.executed == True):
+        if (self.executed == True): #right here all of the things that need to be done immediately after move(s) are done executing happen
             if self.polarimeter is not None:
                 self.polarimeter.run = False
                 self.strain, self.phase  = dataAnalysisVmaster.analyzeData(self.polarimeter.s1List, self.polarimeter.s2List, self.polarimeter.s3List, self.polarimeter.timeList)
