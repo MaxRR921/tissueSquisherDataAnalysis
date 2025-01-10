@@ -302,10 +302,9 @@ class Gui:
 
         if self.polarimeter is not None:
             self.polarimeter.run = False
+            self.strain, self.phase  = dataAnalysisVmaster.analyzeData(self.polarimeter.s1List, self.polarimeter.s2List, self.polarimeter.s3List, self.polarimeter.timeList)
         else:
             print("polarimeter could not be told to stop running because no polarimeter detected.")
-
-        self.strain, self.phase  = dataAnalysisVmaster.analyzeData(self.polarimeter.s1List, self.polarimeter.s2List, self.polarimeter.s3List, self.polarimeter.timeList)
 
         if self.powerPlot is not None:
             self.powerPlot.generateCsvFromPlot("pow.csv")
@@ -313,6 +312,7 @@ class Gui:
             print("no power plot open")
        
         self.executed = True
+        self.updatingPlots= False
         print("DONE")
 
 
