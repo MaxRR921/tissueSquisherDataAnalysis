@@ -42,12 +42,14 @@ class Gui:
 
         try:
             self.polarimeter = polarimeter.Polarimeter(self.micrometerController)
+            self.polarimeterThread = Thread(target=self.polarimeter.start, args=[])
         except:
             print("Polarimeter Connection Error")
             self.polarimeter = None
 
         try:
             self.powermeter = powermeter.Powermeter()
+            self.powermeterThread = Thread(target=self.powermeter.start, args=[])
         except:
             print("Powermeter Connection Error. You need two powermeters connected at all times.")
             self.powermeter = None
@@ -75,8 +77,6 @@ class Gui:
         self.moveList = [defualtMove]
 
         #THREADS:
-        self.polarimeterThread = Thread(target=self.polarimeter.start, args=[])
-        self.powermeterThread = Thread(target=self.powermeter.start, args=[])
         self.executeThread = Thread(target=self.__collect, args=[])
 
         self.powermeterThread.start()
