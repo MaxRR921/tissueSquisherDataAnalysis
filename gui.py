@@ -55,8 +55,7 @@ class Gui:
             self.powermeter = None
 
         # Event booleans
-        self.updatingPlots = False
-        self.triedPowermeters = False
+        self.updatingPlots = True 
         self.triedMicrometer = False
         self.executed = False
         self.startedPolarimeter = False
@@ -339,26 +338,24 @@ class Gui:
         try:
             if(self.micrometerController.downward):
                 self.micrometerPlot.updatePlot(self.timeStamp, self.micrometerController.micrometerPosition[3:].strip())
-            else:
-                self.micrometerPlot.updatePlot(self.timeStamp, self.micrometerController.micrometerPosition[3:].strip())
         except:
-            # print("micrometer not found")
-            self.triedMicrometer = True
+            print("micrometer not found")
         
         try:
             self.powerPlot.updatePlot(self.micrometerController.micrometerPosition[3:].strip(), abs(self.powermeter.device1Data - self.powermeter.device2Data))
         except:
-            # print("not enough powermeters connected.")
-            self.triedPowermeters = True
+            print("not enough powermeters connected.")
 
         try:
             self.pow1Plot.updatePlot(self.micrometerController.micrometerPosition[3:].strip(), self.powermeter.device1Data)
+
         except:
-            self.triedPowermeters = True
+            print("not enough powermeters connected.")
+
         try:
             self.pow2Plot.updatePlot(self.micrometerController.micrometerPosition[3:].strip(), self.powermeter.device2Data)
         except:
-            self.triedPowermeters = True
+            print("not enough powermeters connected.")
 
         if (self.executed == True):
             print("PHASE")
