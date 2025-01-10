@@ -323,7 +323,7 @@ class Gui:
     5. recursively runs this funciton every 10 ms.
     !! also why is this self.powerplot.generatecsvfromplot line here... this seems lazy and should be put somewhere else
     """
-    
+    """DEAL WITH PLOTTING TRY CATCH""" 
     def updatePlotsFromData(self):
         self.timeStamp = time.time()
         if self.updatingPlots:
@@ -382,7 +382,4 @@ class Gui:
         else: 
             print("error updating power text")
 
-
-        
-        print("UPDATING")
         self.root.after(10, self.updatePlotsFromData)
