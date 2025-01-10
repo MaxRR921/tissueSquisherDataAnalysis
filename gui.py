@@ -386,7 +386,3 @@ class Gui:
         
         print("UPDATING")
         self.root.after(10, self.updatePlotsFromData)
-
-
-
-
