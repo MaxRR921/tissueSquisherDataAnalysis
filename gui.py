@@ -140,6 +140,7 @@ class Gui:
     def stop(self):
         self.powermeter.stop()
         self.stopExecution = True
+        self.updatingPlots = False
         try:
             self.executeThread.join()
         except:
