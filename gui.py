@@ -106,8 +106,6 @@ class Gui:
         #create the move list gui elements
         self.moveGui = moveGui.MoveGui(self.listFrame, self, self.moveList, 100, width=500)
         
-        #micrometer moves to original position
-        self.micrometerController.goHome()
        
         #updating all plots 
         self.root.after(100, self.updatePlotsFromData)

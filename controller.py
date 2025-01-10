@@ -41,6 +41,7 @@ class Controller:
             # print("Disconnected")
         except serial.SerialException as e:
             print("Serial connection error:", e)
+        self.goHome()
 
     """getSerialPort retuns the ser variable so it can be accessed from other classes"""
     def getSerialPort(self): 
