@@ -19,8 +19,6 @@ import polarimeter
 !it also initializs self.phase and self.strain np.arrays which is kind of weird
 it then adds a default move to the move list, which is fine
 after that it initializes some more gui elements.
-!after that it tells the micrometer to go to the home position, which i don't really like
-because i think this should just be in the micrometer class when it initializes instead of being done from the gui class
 
 !THIS METHOD ALSO STARTS THE POWERMETERS THREAD, WHICH THAT THREAD THEN SPAWNS A THREAD FOR EACH POWERMETER AND WAITS UNTIL both of those join.
 
@@ -36,9 +34,23 @@ class Gui:
         self.numExecutions = 1
 
         #Initializing device classes.
-        self.micrometerController = controller.Controller()
-        self.polarimeter = polarimeter.Polarimeter(self.micrometerController)
-        self.powermeter = powermeter.Powermeter()
+        try:
+            self.micrometerController = controller.Controller()
+        except:
+            print("Micrometer Connection Error")
+            self.micrometerController = None
+
+        try:
+            self.polarimeter = polarimeter.Polarimeter(self.micrometerController)
+        except:
+            print("Polarimeter Connection Error")
+            self.polarimeter = None
+
+        try:
+            self.powermeter = powermeter.Powermeter()
+        except:
+            print("Powermeter Connection Error. You need two powermeters connected at all times.")
+            self.powermeter = None
 
         # Event booleans
         self.updatingPlots = False
@@ -108,7 +120,6 @@ class Gui:
         
        
         #updating all plots 
-        self.root.after(100, self.updatePlotsFromData)
         self.root.protocol('WM_DELETE_WINDOW', self.stop)
 
         self.stopExecution = False
@@ -242,7 +253,7 @@ class Gui:
             
 
     """startExecuteThread resets all of the constantly polling plots... starts the execute thread which calls 
-    the collect method. 
+    thecollect method. 
     !! should make it just use self.movelist...."""
     def startExecuteThread(self, moveList):
         for plot in self.plotList:
@@ -268,15 +279,16 @@ class Gui:
 
      """
     def __collect(self, moveList):
-        print("LETS GO")
+        print("collecting data")
         if not self.updatingPlots:
             self.updatingPlots = True
             self.root.after(10, self.updatePlotsFromData)
-        try:
+
+        if(self.polarimeter is not None):
             self.polarimeter.run = True
             self.__startPolarimeterThread()
-        except:
-            print("failed to start polarimeter thread.")
+        else:
+            print("No polarimeter Connected")
 
         for i in range(self.numExecutions):
             for move in moveList:
@@ -284,17 +296,14 @@ class Gui:
                     move.execute()
                 else:
                     break
-        try:
+
+        if self.polarimeter is not None:
             self.polarimeter.run = False
-        except:
-            print("No polarimeter")
+        else:
+            print("polarimeter could not be told to stop running because no polarimeter detected.")
+
         self.strain, self.phase  = dataAnalysisVmaster.analyzeData(self.polarimeter.s1List, self.polarimeter.s2List, self.polarimeter.s3List, self.polarimeter.timeList)
-        print("PHASE:")  
-        print(self.phase)
-        print("STRAIN")
-        print(self.strain)
-        print(len(self.phase))
-        print(len(self.strain))
+
         if self.powerPlot is not None:
             self.powerPlot.generateCsvFromPlot("pow.csv")
         else:
