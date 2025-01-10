@@ -76,8 +76,6 @@ class Gui:
         defualtMove = move.Move(self.micrometerController)
         self.moveList = [defualtMove]
 
-        #THREADS:
-        self.executeThread = Thread(target=self.__collect, args=[])
 
         self.powermeterThread.start()
 
@@ -377,10 +375,10 @@ class Gui:
                 self.powerPlot.colorLines()
                 
             self.executed = False
-        try:
+        if self.powermeter is not None:
             self.power1Text.set(str(self.powermeter.device1Data))
             self.power2Text.set(str(self.powermeter.device2Data))
-        except:
+        else: 
             print("error updating power text")
 
 
