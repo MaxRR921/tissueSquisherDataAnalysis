@@ -118,7 +118,7 @@ class Gui:
        
         #updating all plots 
         self.root.protocol('WM_DELETE_WINDOW', self.stop)
-
+        self.root.after(10, self.updatePlotsFromData)
         self.stopExecution = False
 
         
