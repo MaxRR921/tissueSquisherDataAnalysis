@@ -55,7 +55,7 @@ class Gui:
             self.powermeter = None
 
         # Event booleans
-        self.updatingPlots = True 
+        self.updatingPlots = False 
         self.triedMicrometer = False
         self.executed = False
         self.startedPolarimeter = False
