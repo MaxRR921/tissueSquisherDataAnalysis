@@ -149,8 +149,15 @@ class Gui:
             self.polarimeterThread.join() #needs to join so that it's not initializing when i tell it to stop...
         except:
             print("polarimeter thread not yet started")
-        self.polarimeter.stop()
-        self.micrometerController.stop()
+        if(self.polarimeter is not None):
+            self.polarimeter.stop()
+        else:
+            print("No polarimeter Connected")
+        if(self.micrometerController is not None):
+            self.micrometerController.stop()
+        else:
+            print("No micrometer connected")
+            
         self.powermeterThread.join()
 
         self.root.destroy()
