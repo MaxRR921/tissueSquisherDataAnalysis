@@ -287,8 +287,6 @@ class Gui:
         print("collecting data")
         if not self.updatingPlots:
             self.updatingPlots = True
-            self.root.after(10, self.updatePlotsFromData)
-
         if(self.polarimeter is not None):
             self.polarimeter.run = True
             self.__startPolarimeterThread()
