@@ -122,7 +122,9 @@ class Plot2D:
                     f"xMin: {self.minValX}\n"
                     f"xMax: {self.maxValX}\n"
                     f"yMin: {self.minValY}\n"
-                    f"yMax: {self.maxValY}"
+                    f"yMax: {self.maxValY}\n"
+                    f"xdif: {self.maxValX - self.minValX}"
+                    f"ydif: {self.maxValY - self.minValY}"
                 ),
                 transform=self.ax.transAxes,
                 verticalalignment='top',
