@@ -49,6 +49,11 @@ class Plot2D:
         self.ax.set_xlabel(self.xAxisTitle)
         self.ax.set_ylabel(self.yAxisTitle)
         self.ax.set_title(self.title)
+
+        self.maxValX = float(-10000000)
+        self.minValX = float(100000000)
+        self.maxValY = float(-10000000)
+        self.minValY = float(10000000)
        
         self.fig.tight_layout()
         self.canvas.draw()
