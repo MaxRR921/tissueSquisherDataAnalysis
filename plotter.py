@@ -60,10 +60,10 @@ class Plot2D:
     def updatePlot(self, xData, yData):
         if not isinstance(xData, list):           
             xData = float(xData)
-            if(xData < self.minValX):
-                self.minValX = xData
-            elif(xData > self.maxValX):
-                self.maxValX = xData
+            # if(xData < self.minValX):
+            #     self.minValX = xData
+            # elif(xData > self.maxValX):
+            #     self.maxValX = xData
             self.data['xAxis'].append(xData)
         else:
             xData = [float(i) for i in xData]
@@ -71,10 +71,10 @@ class Plot2D:
             
         if not isinstance(yData, list):
             yData = float(yData)
-            if(yData < self.minValY):
-                self.minValY = yData
-            elif(xData > self.maxValY):
-                self.maxValY = yData
+            # if(yData < self.minValY):
+            #     self.minValY = yData
+            # elif(xData > self.maxValY):
+            #     self.maxValY = yData
             self.data['yAxis'].append(yData)
         else:
             yData = [float(i) for i in yData]
