@@ -24,10 +24,10 @@ class Plot2D:
         self.fig = Figure(figsize=(6, 4), dpi=100)
         self.ax = self.fig.add_subplot(111)
         
-        maxValX = -10000000
-        minValX = 100000000
-        maxValY = -10000000
-        minValY = 10000000
+        maxValX = float(-10000000)
+        minValX = float(100000000)
+        maxValY = float(-10000000)
+        minValY = float(10000000)
 
         self.window = tk.Tk()
         self.window.title("Graph")
