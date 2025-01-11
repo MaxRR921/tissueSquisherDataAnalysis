@@ -78,7 +78,7 @@ class Plot2D:
             yData = float(yData)
             if(yData < self.minValY):
                 self.minValY = yData
-            elif(xData > self.maxValY):
+            elif(yData > self.maxValY):
                 self.maxValY = yData
             self.data['yAxis'].append(yData)
         else:
