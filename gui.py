@@ -208,7 +208,7 @@ class Gui:
 
     def __option2(self):
         print("Option 2 selected")
-        self.powerPlot = Plot2D('power plot', 'distance (mm)', 'power (um)')
+        self.powerPlot = Plot2D('power plot', 'distance (mm)', 'power (um)', True)
         self.plotList.append(self.powerPlot)
 
     def __option3(self):
@@ -371,10 +371,6 @@ class Gui:
                 self.polPlot.generateCsvFromPlot("pol.csv")
             
             if self.powerPlot is not None:
-                print("Min X:",self.powerPlot.minValX)
-                print(self.powerPlot.maxValX)
-                print(self.powerPlot.minValY)
-                print(self.powerPlot.maxValY)
                 self.powerPlot.colorLines()
                 
             self.executed = False

@@ -10,10 +10,10 @@ class Plot2D:
     """init takes in a title for the x and y axes. It then initializes all of the plot things and then
     !CAlls reset plot which i feel shouldn't be necessary because I'm setting the title to the default plot titles, 
     then calling reset, whic sets it to the real title which seems really weird"""
-    def __init__(self, title='untitled', xAxisTitle='x', yAxisTitle='y'):
+    def __init__(self, title='untitled', xAxisTitle='x', yAxisTitle='y', showMinMax=False):
         #set up window
         self.color = 'blue'
-        
+        self.showMinMax = showMinMax
         #initialize variables 
         self.title = title
         self.xAxisTitle = xAxisTitle
@@ -106,6 +106,24 @@ class Plot2D:
             Line2D([0], [0], color='blue', lw=2, label='Loading')
         ]
         self.ax.legend(handles=legend_elements)
+
+        if self.showMinMax:
+             # Display the pre-computed min and max values on the graph
+            text_x = 1.05  # Position for text outside the graph
+            text_y_start = 0.95  # Starting position for the first text
+            self.ax.text(
+                text_x, text_y_start,
+                (
+                    f"xMin: {self.minValX}\n"
+                    f"xMax: {self.maxValX}\n"
+                    f"yMin: {self.minValY}\n"
+                    f"yMax: {self.maxValY}"
+                ),
+                transform=self.ax.transAxes,
+                verticalalignment='top',
+                fontsize=10,
+                bbox=dict(boxstyle="round,pad=0.3", edgecolor='black', facecolor='white', alpha=0.8)
+            )
 
     """colorLines colors all of the lines based on the direction the x axis is moving. Colors red when the x axis is moving 
     in the positive direction, blue when moving in the negative direction."""
