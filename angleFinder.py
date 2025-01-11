@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 
 class AngleFinder:
-    def __init__(self, alpha=np.pi/4, n=3):
+    def __init__(self, alpha=np.pi/6, n=3):
         self.alpha = alpha
         self.n = n
 
@@ -31,9 +31,10 @@ class AngleFinder:
 
 
 # Example usage
-y_values = [0.815, 0.995, 0.940]  # Sample y-values at x = -20, 0, 20 degrees
+y_values = [0.93536, 0.99797, 0.82681]  # Sample y-values at x = -20, 0, 20 degrees
 angle_to_extrema = AngleFinder.findAngle(y_values)
 print(f"Angle to nearest extrema: {angle_to_extrema:.2f} degrees")
+
 
 
 # Plotting code directly at the bottom

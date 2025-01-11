@@ -463,17 +463,18 @@ def ex1(alphaVal):
      #    plt.show()
 
 
-     #    # Second Figure: Plot just the difference
-     #    plt.figure()
-     #    plt.plot(f, Sdifference, label='Difference (S2 - S1)', color='red')
-     #    plt.xlabel('Force (N/m)')
-     #    plt.ylabel('Difference (Real part)')
-     #    plt.title('Difference (S1 - S2) vs. Force')
-     #    plt.legend()
-     #    plt.grid(True)
+       # Second Figure: Plot just the difference
+        plt.figure()
+        plt.plot(f, Sdifference, label='Difference (S2 - S1)', color='red')
+        plt.xlabel('Force (N/m)')
+        plt.ylabel('Difference (Real part)')
+        plt.title('Difference (S1 - S2) vs. Force')
+        plt.legend()
+        plt.grid(True)
 
-     #    plt.show()
-        return (finalPowerDifference-initialPowerDifference)
+        plt.show()
+        print("VALUE: ", finalPowerDifference - initialPowerDifference)
+     #    return (finalPowerDifference-initialPowerDifference)
         
 
 
@@ -537,8 +538,8 @@ def test_ex1():
 
             
             
-test_ex1()
-
+# test_ex1()
+ex1(np.pi/6)
 
 
 

@@ -24,6 +24,10 @@ class Plot2D:
         self.fig = Figure(figsize=(6, 4), dpi=100)
         self.ax = self.fig.add_subplot(111)
         
+        maxValX = -10000000
+        minValX = 100000000
+        maxValY = -10000000
+        minValY = 10000000
 
         self.window = tk.Tk()
         self.window.title("Graph")
@@ -56,6 +60,10 @@ class Plot2D:
     def updatePlot(self, xData, yData):
         if not isinstance(xData, list):           
             xData = float(xData)
+            if(xData < self.minValX):
+                self.minValX = xData
+            elif(xData > self.maxValX):
+                self.maxValX = xData
             self.data['xAxis'].append(xData)
         else:
             xData = [float(i) for i in xData]
@@ -63,6 +71,10 @@ class Plot2D:
             
         if not isinstance(yData, list):
             yData = float(yData)
+            if(yData < self.minValY):
+                self.minValY = yData
+            elif(xData > self.maxValY):
+                self.maxValY = yData
             self.data['yAxis'].append(yData)
         else:
             yData = [float(i) for i in yData]
@@ -116,7 +128,7 @@ class Plot2D:
 
         self.canvas.draw()
 
-    """generateCsvFromPlot (WEIRD NAME BECAUSE SHOULDN't it just generate from data) but it basically does.
+    """generateCsvFromPlot 
     it generates csvs from the cleaned up data of x and y axes that the plotter has."""
     def generateCsvFromPlot(self, name):
         # Ensure that the data is in the format of lists of equal length
@@ -131,4 +143,6 @@ class Plot2D:
             # Write the rows
             for row in values:
                 w.writerow(row)
+
+
         

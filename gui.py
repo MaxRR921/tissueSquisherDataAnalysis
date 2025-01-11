@@ -371,6 +371,10 @@ class Gui:
                 self.polPlot.generateCsvFromPlot("pol.csv")
             
             if self.powerPlot is not None:
+                print("Min X:",self.powerPlot.minValX)
+                print(self.powerPlot.maxValX)
+                print(self.powerPlot.minValY)
+                print(self.powerPlot.maxValY)
                 self.powerPlot.colorLines()
                 
             self.executed = False
