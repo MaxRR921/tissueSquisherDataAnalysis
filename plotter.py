@@ -123,7 +123,7 @@ class Plot2D:
                     f"xMax: {self.maxValX}\n"
                     f"yMin: {self.minValY}\n"
                     f"yMax: {self.maxValY}\n"
-                    f"xdif: {self.maxValX - self.minValX}"
+                    f"xdif: {self.maxValX - self.minValX}\n"
                     f"ydif: {self.maxValY - self.minValY}"
                 ),
                 transform=self.ax.transAxes,
