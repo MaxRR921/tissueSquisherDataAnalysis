@@ -109,8 +109,8 @@ class Plot2D:
 
         if self.showMinMax:
              # Display the pre-computed min and max values on the graph
-            text_x = 1.05  # Position for text outside the graph
-            text_y_start = 0.95  # Starting position for the first text
+            text_x = 0.7  # Position for text within the graph (adjust as needed)
+            text_y_start = 0.95  # Starting position for the first text line
             self.ax.text(
                 text_x, text_y_start,
                 (
