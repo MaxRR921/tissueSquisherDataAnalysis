@@ -11,6 +11,7 @@ from threading import Thread
 from tkinter import ttk
 from ttkthemes import ThemedTk
 import polarimeter
+import angleFinder
 
 """!THINKING MAYBE I SHOULD JUSt iNitiAlize all of the threads in init, then call them later"""
 
@@ -167,6 +168,7 @@ class Gui:
     def addTopMenuButtons(self):
         self.__dropdownButton(self.topMenuFrame)
         self.__browseDataFileButton(self.topMenuFrame)
+        self.__alignAlphaButton(self.topMenuFrame)
 
     #ALL BUTTONS IN TOP MENU
 
@@ -175,11 +177,30 @@ class Gui:
         browseDataFileButton = ttk.Button(frameTopMenu, text="browse for data file", command=lambda: self.__browseFile())
         browseDataFileButton.pack(side='left')
 
+    
+
+
     """browseFile opens the file browser, is executed from the button"""
     def __browseFile(self):
         self.filePath = tk.filedialog.askopenfilename(filetypes=[('CSV Files', '*.csv')])
         if self.filePath:
             self.__plot()
+    
+    def __alignAlphaButton(self, frameTopMenu):
+        calibrateButton = ttk.Button(frameTopMenu, text="Align Alpha", command=lambda: self.__alignAlpha)
+        calibrateButton.pack(side="left")
+
+    def __alignAlpha(self):
+        # Create a new pop-up window
+        popup = tk.Toplevel(self.window)  # Create a child window of the main application
+        popup.title("Align Alpha")       # Set the title of the pop-up window
+        popup.geometry("300x200")        # Set the size of the pop-up window
+        popup.resizable(False, False)    # Make the pop-up window non-resizable
+
+        # Optional: Add a label for visual confirmation of the empty pop-up
+        label = ttk.Label(popup, text="Align Alpha Pop-Up", font=("Arial", 14))
+        label.pack(pady=20)  # Add some padding for visual spacing 
+
 
     """startpolarimeterthread starts the thread for data collection from the powlarimeter. This thread runs polarimeter.start"""
     def __startPolarimeterThread(self):
