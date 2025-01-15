@@ -51,6 +51,7 @@ class Gui:
         try:
             self.powermeter = powermeter.Powermeter()
             self.powermeterThread = Thread(target=self.powermeter.start, args=[])
+            print("Powermeters connected successfully")
         except:
             print("Powermeter Connection Error. You need two powermeters connected at all times.")
             self.powermeter = None
@@ -76,8 +77,8 @@ class Gui:
         defualtMove = move.Move(self.micrometerController)
         self.moveList = [defualtMove]
 
-
-        self.powermeterThread.start()
+        if self.powermeter is not None:
+            self.powermeterThread.start()
 
         #plots:
         self.plotList = []
@@ -136,7 +137,8 @@ class Gui:
     THis method is in need of a restructure... why does some stuff lie in try catches, should just put in if's
     """
     def stop(self):
-        self.powermeter.stop()
+        if self.powermeter is not None:
+            self.powermeter.stop()
         self.stopExecution = True
         self.updatingPlots = False
         try:
@@ -187,7 +189,7 @@ class Gui:
             self.__plot()
     
     def __alignAlphaButton(self, frameTopMenu):
-        calibrateButton = ttk.Button(frameTopMenu, text="Align Alpha", command=lambda: self.__alignAlpha)
+        calibrateButton = ttk.Button(frameTopMenu, text="Align Alpha", command=lambda: self.__alignAlpha())
         calibrateButton.pack(side="left")
 
     def __alignAlpha(self):
@@ -266,9 +268,10 @@ class Gui:
         stopExecutionButton = ttk.Button(listFrame, text='Stop Execution', command=lambda: setattr(self, 'stopExecution', True))
         stopExecutionButton.grid(row=1, column=1, sticky='sw', pady=5, padx=30)
 
-        power1Text = ttk.Label(listFrame, textvariable=self.power1Text).grid(row=2, column=3, sticky = 'w', pady=5, padx=2)
-        power1Text = ttk.Label(listFrame, textvariable=self.power2Text).grid(row=2, column=3, sticky = 'e', pady=5, padx=10)
-        timesText = ttk.Label(listFrame, text='times').grid(row=2, column=2, sticky= 'w', pady=5, padx=5)
+        if self.powermeter is not None:
+            power1Text = ttk.Label(listFrame, textvariable=self.power1Text).grid(row=2, column=3, sticky = 'w', pady=5, padx=2)
+            power1Text = ttk.Label(listFrame, textvariable=self.power2Text).grid(row=2, column=3, sticky = 'e', pady=5, padx=10)
+            timesText = ttk.Label(listFrame, text='times').grid(row=2, column=2, sticky= 'w', pady=5, padx=5)
 
     """ saveNumExecutions is called when executeall is pressed, saves the number of executions the user entered
     in the little box at the bottom, checks for invalid input in the textbox."""
@@ -400,7 +403,4 @@ class Gui:
         if self.powermeter is not None:
             self.power1Text.set(str(self.powermeter.device1Data))
             self.power2Text.set(str(self.powermeter.device2Data))
-        else: 
-            print("error updating power text")
-
         self.root.after(10, self.updatePlotsFromData)
