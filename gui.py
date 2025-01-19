@@ -192,16 +192,67 @@ class Gui:
         calibrateButton = ttk.Button(frameTopMenu, text="Align Alpha", command=lambda: self.__alignAlpha())
         calibrateButton.pack(side="left")
 
+
+
+    '''
+        How is this going to work????
+        - text box: sample height
+        - text box: low height
+        direction:
+        - tell user move to -20 (toward user 5 deg marks)
+        - execute 
+        - record and display power dif
+         - tell user move to 0 (away from user 5 deg marks)
+        - execute 
+        - record and display power dif
+         - tell user move to 20 (away from user 5 deg marks)
+        - execute 
+        - record and display power dif
+        process:
+        - send three values to anglefinder.py 
+        - display graph and maximum!!!!
+    '''
     def __alignAlpha(self):
         # Create a new pop-up window
-        popup = tk.Toplevel(self.window)  # Create a child window of the main application
-        popup.title("Align Alpha")       # Set the title of the pop-up window
-        popup.geometry("300x200")        # Set the size of the pop-up window
-        popup.resizable(False, False)    # Make the pop-up window non-resizable
+        alignAlphaWindow = tk.Toplevel(self.window)  # Create a child window of the main application
+        alignAlphaWindow.title("Align Alpha")       # Set the title of the pop-up window
+        alignAlphaWindow.geometry("300x200")        # Set the size of the pop-up window
+        alignAlphaWindow.resizable(False, False)    # Make the pop-up window non-resizable
+
+        # Create a frame within the pop-up window
+        frame = ttk.Frame(alignAlphaWindow, padding=10)
+        frame.pack(fill="both", expand=True)
+
+        # Add label for instructions
+        instruction_label = ttk.Label(frame, text="Move to -20 degrees (toward user)", font=("Arial", 12))
+        instruction_label.pack(pady=(0, 10))
+
+        # Add text box for sample height
+        sample_height_label = ttk.Label(frame, text="Sample Height:")
+        sample_height_label.pack(anchor="w")
+        sample_height_entry = ttk.Entry(frame)
+        sample_height_entry.pack(fill="x", pady=5)
+
+        # Add text box for compression height
+        compression_height_label = ttk.Label(frame, text="Compression Height:")
+        compression_height_label.pack(anchor="w")
+        compression_height_entry = ttk.Entry(frame)
+        compression_height_entry.pack(fill="x", pady=5)
+
+        # Add button to collect power difference
+        collect_button = ttk.Button(frame, text="Collect Power Difference", command=self.__collectPowerDifference)
+        collect_button.pack(pady=10)
 
         # Optional: Add a label for visual confirmation of the empty pop-up
-        label = ttk.Label(popup, text="Align Alpha Pop-Up", font=("Arial", 14))
-        label.pack(pady=20)  # Add some padding for visual spacing 
+        label = ttk.Label(alignAlphaWindow, text="Align Alpha Pop-Up", font=("Arial", 14))
+        label.pack(pady=20)
+
+    def __collectPowerDifference(self):
+        # Placeholder for the logic to collect power difference
+        print("Collecting power difference...")
+
+    
+        
 
 
     """startpolarimeterthread starts the thread for data collection from the powlarimeter. This thread runs polarimeter.start"""
