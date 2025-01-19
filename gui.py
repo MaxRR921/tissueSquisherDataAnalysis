@@ -216,7 +216,7 @@ class Gui:
         # Create a new pop-up window
         alignAlphaWindow = tk.Toplevel(self.window)  # Create a child window of the main application
         alignAlphaWindow.title("Align Alpha")       # Set the title of the pop-up window
-        alignAlphaWindow.geometry("300x200")        # Set the size of the pop-up window
+        alignAlphaWindow.geometry("500x300")        # Set the size of the pop-up window
         alignAlphaWindow.resizable(False, False)    # Make the pop-up window non-resizable
 
         # Create a frame within the pop-up window
