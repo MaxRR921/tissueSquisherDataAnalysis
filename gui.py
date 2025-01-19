@@ -268,6 +268,10 @@ class Gui:
         stopExecutionButton = ttk.Button(listFrame, text='Stop Execution', command=lambda: setattr(self, 'stopExecution', True))
         stopExecutionButton.grid(row=1, column=1, sticky='sw', pady=5, padx=30)
 
+        
+        raiseMicrometerButton = ttk.Button(listFrame, text='Raise Micrometer', command=lambda: self.__raiseMicrometer())
+        raiseMicrometerButton.grid(row=1, column=2, sticky='sw', pady=5, padx=30)
+
         if self.powermeter is not None:
             power1Text = ttk.Label(listFrame, textvariable=self.power1Text).grid(row=2, column=3, sticky = 'w', pady=5, padx=2)
             power1Text = ttk.Label(listFrame, textvariable=self.power2Text).grid(row=2, column=3, sticky = 'e', pady=5, padx=10)
@@ -282,7 +286,17 @@ class Gui:
         except ValueError:
             print("Invalid input, please enter a valid number")
         
-            
+
+    def __raiseMicrometer(self):
+        raiseMove = move.Move(self.micrometerController)
+        raiseMove.velocity = "1"
+        raiseMove.targetHeight = "12"
+        listTemp = []
+        listTemp.append(raiseMove)
+        self.startExecuteThread(listTemp)
+
+
+        
 
     """startExecuteThread resets all of the constantly polling plots... starts the execute thread which calls 
     thecollect method. 

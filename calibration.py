@@ -40,7 +40,7 @@ def ex():
 
         alpha = np.pi / 4  # angle between applied force and fast and slow axis of the fiber.
         beta = np.pi / 6  # Angle between polarized light and fast and slow axis of the fiber.
-        delta = 0  # Extra phase from traveling through unstressed fiber
+        delta = 570  # Extra phase from traveling through unstressed fiber
         gamma = np.pi/2# Angle of PM fiber wrt polarimeter. Should be 0 or pi/2
         eta = 376.730313 
 
@@ -382,7 +382,7 @@ def ex1(alphaVal):
 
         alpha = alphaVal # angle between applied force and fast and slow axis of the fiber.
         beta = np.pi / 6  # Angle between polarized light and fast and slow axis of the fiber.
-        delta = 0  # Extra phase from traveling through unstressed fiber
+        delta = 1  # Extra phase from traveling through unstressed fiber
         gamma = np.pi/2# Angle of PM fiber wrt polarimeter. Should be 0 or pi/2
         eta = 376.730313 
 
