@@ -90,6 +90,8 @@ class Gui:
         
         #list of times recorded
         self.timeList = []
+        #alpha values for calibration
+        self.alphaVals = []
 
         # adding listFrame
         self.listFrame = tk.Frame(self.window, width=800, height=1000)  # Adjust the width here for the left panel
@@ -219,6 +221,8 @@ class Gui:
         alignAlphaWindow.geometry("500x300")        # Set the size of the pop-up window
         alignAlphaWindow.resizable(False, False)    # Make the pop-up window non-resizable
 
+
+
         # Create a frame within the pop-up window
         frame = ttk.Frame(alignAlphaWindow, padding=10)
         frame.pack(fill="both", expand=True)
@@ -226,6 +230,7 @@ class Gui:
         # Add label for instructions
         instruction_label = ttk.Label(frame, text="Move to -20 degrees (toward user)", font=("Arial", 12))
         instruction_label.pack(pady=(0, 10))
+
 
         # Add text box for sample height
         sample_height_label = ttk.Label(frame, text="Sample Height:")
@@ -240,16 +245,23 @@ class Gui:
         compression_height_entry.pack(fill="x", pady=5)
 
         # Add button to collect power difference
-        collect_button = ttk.Button(frame, text="Collect Power Difference", command=self.__collectPowerDifference)
+        collect_button = ttk.Button(frame, text="Collect Power Difference", command=self.__collectPowerDifference(self.alphaVals))
         collect_button.pack(pady=10)
 
         # Optional: Add a label for visual confirmation of the empty pop-up
         label = ttk.Label(alignAlphaWindow, text="Align Alpha Pop-Up", font=("Arial", 14))
         label.pack(pady=20)
 
-    def __collectPowerDifference(self):
+        
+
+    def __collectPowerDifference(self, sample_height_entry, compression_height_entry):
         # Placeholder for the logic to collect power difference
+        targetHeight = sample_height_entry.get()
+        compressionHeight = compression_height_entry.get()
+        print("TARGET HEIGHT: ",targetHeight)
+        print("COMPRESSION HEIGHT: ", compressionHeight)
         print("Collecting power difference...")
+
 
     
         
