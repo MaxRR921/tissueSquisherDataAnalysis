@@ -385,9 +385,11 @@ class Gui:
 
         for i in range(self.numExecutions):
             for move in moveList:
-                if not self.stopExecution:
+                if not self.stopExecution and (self.micrometerController.micrometerPosition.decode()[3:].strip() != move.targetHeight):
                     move.execute()
                     print("Position:", self.micrometerController.micrometerPosition.decode('utf-8'))
+                elif (self.micrometerController.micrometerPosition.decode()[3:].strip() == move.targetHeight):
+                    print("Can't move here, this is the current position.")
                 else:
                     break
 
