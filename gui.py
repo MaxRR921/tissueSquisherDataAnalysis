@@ -256,12 +256,19 @@ class Gui:
 
     def __collectPowerDifference(self, sample_height_entry, compression_height_entry):
         # Placeholder for the logic to collect power difference
-        targetHeight = sample_height_entry.get()
+        sampleHeight = sample_height_entry.get()
         compressionHeight = compression_height_entry.get()
-        print("TARGET HEIGHT: ",targetHeight)
+        print("TARGET HEIGHT: ", sampleHeight)
         print("COMPRESSION HEIGHT: ", compressionHeight)
         loadMove = move.Move(self.micrometerController)
+        loadMove.targetHeight = sampleHeight
+        loadMove.velocity = "0.1"
+
+
         unloadMove = move.Move(self.micrometerController)
+        unloadMove.targetHeight = compressionHeight 
+        unloadMove.velocity = "0.1"
+
         listTemp = []
         listTemp.append(unloadMove)
         listTemp.append(loadMove)
