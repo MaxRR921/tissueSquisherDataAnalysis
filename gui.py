@@ -261,12 +261,12 @@ class Gui:
         print("TARGET HEIGHT: ", sampleHeight)
         print("COMPRESSION HEIGHT: ", compressionHeight)
         loadMove = move.Move(self.micrometerController)
-        loadMove.targetHeight = sampleHeight
+        loadMove.targetHeight = compressionHeight
         loadMove.velocity = "1"
 
 
         unloadMove = move.Move(self.micrometerController)
-        unloadMove.targetHeight = compressionHeight 
+        unloadMove.targetHeight = sampleHeight 
         unloadMove.velocity = "1"
 
         listTemp = []
