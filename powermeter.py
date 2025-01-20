@@ -97,7 +97,7 @@ class Powermeter:
                     newData = np.array([[data[0][0], deltaTime, data[2][0]]])
                     #self.device1Data = np.append(self.device1Data, newData, axis=0) 
                     self.device1Data = data[0][0]
-                    print("DATA:", self.device1Data)
+                    # print("DATA:", self.device1Data)
                 i=i+1
 
 
@@ -128,7 +128,7 @@ class Powermeter:
 
                     newData = np.array([[data[0][0], deltaTime, data[2][0]]])
                     self.device2Data = data[0][0]
-                    print("DATA:", self.device2Data)
+                    # print("DATA:", self.device2Data)
                 i=i+1
         else:
             print('\nNo Sensor attached to {0} !!!'.format(device))

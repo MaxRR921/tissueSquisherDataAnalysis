@@ -387,6 +387,7 @@ class Gui:
             for move in moveList:
                 if not self.stopExecution:
                     move.execute()
+                    print(self.micrometerController.micrometerPosition)
                 else:
                     break
 
