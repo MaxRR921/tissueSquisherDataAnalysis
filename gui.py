@@ -270,8 +270,8 @@ class Gui:
         unloadMove.velocity = "1"
 
         listTemp = []
-        listTemp.append(unloadMove)
         listTemp.append(loadMove)
+        listTemp.append(unloadMove)
         self.startExecuteThread(listTemp)
         print("Collecting power difference...")
 
