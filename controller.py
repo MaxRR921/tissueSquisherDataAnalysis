@@ -14,7 +14,7 @@ class Controller:
         #self.plot = Plot2D('micrometer plot', 'time', 'distance')
         # Replace 'COM1' with the appropriate serial port identifier
         serialPort = 'COM4'
-        self.micrometerPosition = 0.0
+        self.micrometerPosition = b'0'
         self.timeStamp = 0.0
         self.updating = True
         self.lastInputHeight = 0

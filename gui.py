@@ -382,13 +382,13 @@ class Gui:
             self.__startPolarimeterThread()
         else:
             print("No polarimeter Connected")
-
+        #WARNING: BECAUSE of comparing move.targethiehgt to micrometer position, can only have one decimal place micrometer movement
         for i in range(self.numExecutions):
             for move in moveList:
-                if not self.stopExecution and (self.micrometerController.micrometerPosition.decode()[3:].strip() != move.targetHeight):
+                if not self.stopExecution and (self.micrometerController.micrometerPosition.decode('utf-8')[3:6].strip() != move.targetHeight):
                     move.execute()
-                    print("Position:", self.micrometerController.micrometerPosition.decode('utf-8'))
-                elif (self.micrometerController.micrometerPosition.decode()[3:].strip() == move.targetHeight):
+                    print("Position:", self.micrometerController.micrometerPosition.decode('utf-8')[3:6].strip())
+                elif (self.micrometerController.micrometerPosition.decode('utf-8')[3:6].strip() == move.targetHeight):
                     print("Can't move here, this is the current position.")
                 else:
                     break
