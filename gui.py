@@ -260,6 +260,12 @@ class Gui:
         compressionHeight = compression_height_entry.get()
         print("TARGET HEIGHT: ",targetHeight)
         print("COMPRESSION HEIGHT: ", compressionHeight)
+        loadMove = move.Move(self.micrometerController)
+        unloadMove = move.Move(self.micrometerController)
+        listTemp = []
+        listTemp.append(unloadMove)
+        listTemp.append(loadMove)
+        self.startExecuteThread(listTemp)
         print("Collecting power difference...")
 
 
@@ -395,6 +401,7 @@ class Gui:
         else:
             print("No polarimeter Connected")
         #WARNING: BECAUSE of comparing move.targethiehgt to micrometer position, can only have one decimal place micrometer movement
+        # ALSO: won't recognize values like 0.1 and .1 as being the same. I'll fix this later.
         for i in range(self.numExecutions):
             for move in moveList:
                 if not self.stopExecution and (self.micrometerController.micrometerPosition.decode('utf-8')[3:6].strip() != move.targetHeight):
