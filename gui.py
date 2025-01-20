@@ -387,7 +387,7 @@ class Gui:
             for move in moveList:
                 if not self.stopExecution:
                     move.execute()
-                    print(self.micrometerController.micrometerPosition)
+                    print("Position:", self.micrometerController.micrometerPosition.decode('utf-8'))
                 else:
                     break
 
