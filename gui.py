@@ -220,9 +220,7 @@ class Gui:
         alignAlphaWindow.title("Align Alpha")       # Set the title of the pop-up window
         alignAlphaWindow.geometry("500x300")        # Set the size of the pop-up window
         alignAlphaWindow.resizable(False, False)    # Make the pop-up window non-resizable
-
-
-
+        
         # Create a frame within the pop-up window
         frame = ttk.Frame(alignAlphaWindow, padding=10)
         frame.pack(fill="both", expand=True)
@@ -245,7 +243,7 @@ class Gui:
         compression_height_entry.pack(fill="x", pady=5)
 
         # Add button to collect power difference
-        collect_button = ttk.Button(frame, text="Collect Power Difference", command=lambda: self.__collectPowerDifference(sample_height_entry, compression_height_entry))
+        collect_button = ttk.Button(frame, text="Collect Power Difference", command=lambda: self.__collectPowerDifference(sample_height_entry, compression_height_entry, instruction_label, frame))
         collect_button.pack(pady=10)
 
         # Optional: Add a label for visual confirmation of the empty pop-up
@@ -254,7 +252,7 @@ class Gui:
 
         
 
-    def __collectPowerDifference(self, sample_height_entry, compression_height_entry):
+    def __collectPowerDifference(self, sample_height_entry, compression_height_entry, instruction_label, frame):
         # Placeholder for the logic to collect power difference
         sampleHeight = sample_height_entry.get()
         compressionHeight = compression_height_entry.get()
@@ -263,17 +261,42 @@ class Gui:
         loadMove = move.Move(self.micrometerController)
         loadMove.targetHeight = compressionHeight
         loadMove.velocity = "1"
-
+        
 
         unloadMove = move.Move(self.micrometerController)
         unloadMove.targetHeight = sampleHeight 
         unloadMove.velocity = "1"
 
+        if len(self.alphaVals) == 0:
+            instruction_label = ttk.Label(frame, text="Move to -20 degrees (toward user)", font=("Arial", 12))
+            instruction_label.pack(pady=(0, 10))
+        if len(self.alphaVals) == 1:
+            instruction_label = ttk.Label(frame, text="Move to 0 degrees (away from user)", font=("Arial", 12))
+            instruction_label.pack(pady=(0, 10))
+        if len(self.alphaVals) == 2:
+            instruction_label = ttk.Label(frame, text="Move to 20 degrees (away from user)", font=("Arial", 12))
+            instruction_label.pack(pady=(0, 10))
+        else:
+            instruction_label = ttk.Label(frame, text="error, len(alphaVals) should not have this length", font=("Arial", 12))
+            instruction_label.pack(pady=(0, 10))
+
+        
         listTemp = []
-        listTemp.append(loadMove)
         listTemp.append(unloadMove)
+
+        if self.micrometerController.micrometerPosition.decode('utf-8')[3:6].strip() != unloadMove.targetHeight:
+           self.startExecuteThread[listTemp] 
+
+        
+        listTemp.append(loadMove)
         self.startExecuteThread(listTemp)
+        
+
         print("Collecting power difference...")
+
+
+        
+
 
 
     
