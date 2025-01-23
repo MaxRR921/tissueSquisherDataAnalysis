@@ -257,7 +257,10 @@ class Gui:
         self.alpha_vals_temp_label = ttk.Label(self.alphaFrame, text="alpha values: " + str(self.alphaVals))
         self.alpha_vals_temp_label.pack(pady=(0,10))
         
-
+    """
+    the issue here is that start execute thread goes, but the other stuff happens before the data is gathered. I want to join start execute, but the problem is that 
+    the graphs have to come out still. Investigate more thoroughly 
+    """
     def __collectPowerDifference(self):
         self.alphaFind = True
         # Placeholder for the logic to collect power difference
@@ -296,7 +299,7 @@ class Gui:
         listTemp = []
         listTemp.append(loadMove)
         listTemp.append(unloadMove)
-        self.saveNumExecutions(tk.StringVar(alignAlphaWindow, "3"))
+        self.saveNumExecutions(tk.StringVar(self.alignAlphaWindow, "3"))
         self.startExecuteThread(listTemp)
         self.alphaVals.append(self.powerPlot.maxValY - self.powerPlot.minValY)
         self.alpha_vals_temp_label = ttk.Label(self.alphaFrame, text="alpha values: " + str(self.alphaVals))
