@@ -61,6 +61,7 @@ class Gui:
         self.triedMicrometer = False
         self.executed = False
         self.startedPolarimeter = False
+        self.alphaFind = False
 
         #lists for phase and strain...bad.
         self.phase = np.array(np.zeros)
@@ -213,8 +214,15 @@ class Gui:
         process:
         - send three values to anglefinder.py 
         - display graph and maximum!!!!
+        
+
+        it's actually not that simple. 
+        1. move the micrometer to sample height without collecting data.
+        2. execute (loadmove, unloadmove) 3 times 
+        3. 
     '''
     def __alignAlpha(self):
+        self.alphaVals = []
         # Create a new pop-up window
         alignAlphaWindow = tk.Toplevel(self.window)  # Create a child window of the main application
         alignAlphaWindow.title("Align Alpha")       # Set the title of the pop-up window
@@ -246,13 +254,12 @@ class Gui:
         collect_button = ttk.Button(frame, text="Collect Power Difference", command=lambda: self.__collectPowerDifference(sample_height_entry, compression_height_entry, instruction_label, frame))
         collect_button.pack(pady=10)
 
-        # Optional: Add a label for visual confirmation of the empty pop-up
-        label = ttk.Label(alignAlphaWindow, text="Align Alpha Pop-Up", font=("Arial", 14))
-        label.pack(pady=20)
-
+        alpha_vals_temp_label = ttk.Label(frame, text="alpha values: " + str(self.alphaVals))
+        alpha_vals_temp_label.pack(pady=(0,10))
         
 
-    def __collectPowerDifference(self, sample_height_entry, compression_height_entry, instruction_label, frame):
+    def __collectPowerDifference(self, sample_height_entry, compression_height_entry, instruction_label, frame, alpha_vals_temp_label):
+        self.alphaFind = True
         # Placeholder for the logic to collect power difference
         sampleHeight = sample_height_entry.get()
         compressionHeight = compression_height_entry.get()
@@ -270,26 +277,32 @@ class Gui:
         if len(self.alphaVals) == 0:
             instruction_label = ttk.Label(frame, text="Move to -20 degrees (toward user)", font=("Arial", 12))
             instruction_label.pack(pady=(0, 10))
-        if len(self.alphaVals) == 1:
+        elif len(self.alphaVals) == 1:
             instruction_label = ttk.Label(frame, text="Move to 0 degrees (away from user)", font=("Arial", 12))
             instruction_label.pack(pady=(0, 10))
-        if len(self.alphaVals) == 2:
+        elif len(self.alphaVals) == 2:
             instruction_label = ttk.Label(frame, text="Move to 20 degrees (away from user)", font=("Arial", 12))
             instruction_label.pack(pady=(0, 10))
         else:
             instruction_label = ttk.Label(frame, text="error, len(alphaVals) should not have this length", font=("Arial", 12))
             instruction_label.pack(pady=(0, 10))
-
         
-        listTemp = []
-        listTemp.append(unloadMove)
-
+         
         if self.micrometerController.micrometerPosition.decode('utf-8')[3:6].strip() != unloadMove.targetHeight:
-           self.startExecuteThread[listTemp] 
+            listTemp = []
+            listTemp.append(unloadMove)
+            self.startExecuteThread(listTemp)
+            self.executeThread.join()
+        listTemp = []
+        listTemp.append(loadMove)
+        listTemp.append(unloadMove)
+        self.saveNumExecutions(3)
+        self.startExecuteThread(listTemp)
+        self.alphaVals.append(self.powerPlot.maxValY - self.powerPlot.minValY)
+        alpha_vals_temp_label = ttk.Label(frame, text="alpha values: " + str(self.alphaVals))
+        alpha_vals_temp_label.pack(pady=(0,10))
 
         
-        listTemp.append(loadMove)
-        self.startExecuteThread(listTemp)
         
 
         print("Collecting power difference...")
@@ -419,6 +432,9 @@ class Gui:
     !!! weird try catch for polarimeter.run i guess if the polarimeter is not there it shouldn't execute this.
 .
      """
+    """
+    this starts the collection thread, each move.execute blocks the thread until the move completes 
+    """
     def __collect(self, moveList):
         print("collecting data")
         if not self.updatingPlots:
@@ -442,6 +458,7 @@ class Gui:
                 else:
                     break
 
+        self.alphaFind = True
         self.executed = True
         self.updatingPlots = False
         print("DONE")
