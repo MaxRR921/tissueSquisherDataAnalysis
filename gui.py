@@ -296,7 +296,7 @@ class Gui:
         listTemp = []
         listTemp.append(loadMove)
         listTemp.append(unloadMove)
-        self.saveNumExecutions("3")
+        self.saveNumExecutions(tk.StringVar("3"))
         self.startExecuteThread(listTemp)
         self.alphaVals.append(self.powerPlot.maxValY - self.powerPlot.minValY)
         alpha_vals_temp_label = ttk.Label(frame, text="alpha values: " + str(self.alphaVals))
