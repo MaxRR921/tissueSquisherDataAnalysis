@@ -251,7 +251,7 @@ class Gui:
         compression_height_entry.pack(fill="x", pady=5)
 
         # Add button to collect power difference
-        collect_button = ttk.Button(frame, text="Collect Power Difference", command=lambda: self.__collectPowerDifference(sample_height_entry, compression_height_entry, instruction_label, frame))
+        collect_button = ttk.Button(frame, text="Collect Power Difference", command=lambda: self.__collectPowerDifference(sample_height_entry, compression_height_entry, instruction_label, frame, alpha_vals_temp_label))
         collect_button.pack(pady=10)
 
         alpha_vals_temp_label = ttk.Label(frame, text="alpha values: " + str(self.alphaVals))
