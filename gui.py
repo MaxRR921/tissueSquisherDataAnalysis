@@ -224,45 +224,45 @@ class Gui:
     def __alignAlpha(self):
         self.alphaVals = []
         # Create a new pop-up window
-        alignAlphaWindow = tk.Toplevel(self.window)  # Create a child window of the main application
-        alignAlphaWindow.title("Align Alpha")       # Set the title of the pop-up window
-        alignAlphaWindow.geometry("500x300")        # Set the size of the pop-up window
-        alignAlphaWindow.resizable(False, False)    # Make the pop-up window non-resizable
+        self.alignAlphaWindow = tk.Toplevel(self.window)  # Create a child window of the main application
+        self.alignAlphaWindow.title("Align Alpha")       # Set the title of the pop-up window
+        self.alignAlphaWindow.geometry("500x300")        # Set the size of the pop-up window
+        self.alignAlphaWindow.resizable(False, False)    # Make the pop-up window non-resizable
         
         # Create a frame within the pop-up window
-        frame = ttk.Frame(alignAlphaWindow, padding=10)
-        frame.pack(fill="both", expand=True)
+        self.alphaFrame = ttk.Frame(self.alignAlphaWindow, padding=10)
+        self.alphaFrame.pack(fill="both", expand=True)
 
         # Add label for instructions
-        instruction_label = ttk.Label(frame, text="Move to -20 degrees (toward user)", font=("Arial", 12))
-        instruction_label.pack(pady=(0, 10))
+        self.instruction_label = ttk.Label(self.alphaFrame, text="Move to -20 degrees (toward user)", font=("Arial", 12))
+        self.instruction_label.pack(pady=(0, 10))
 
 
         # Add text box for sample height
-        sample_height_label = ttk.Label(frame, text="Sample Height:")
-        sample_height_label.pack(anchor="w")
-        sample_height_entry = ttk.Entry(frame)
-        sample_height_entry.pack(fill="x", pady=5)
+        self.sample_height_label = ttk.Label(self.alphaFrame, text="Sample Height:")
+        self.sample_height_label.pack(anchor="w")
+        self.sample_height_entry = ttk.Entry(self.alphaFrame)
+        self.sample_height_entry.pack(fill="x", pady=5)
 
         # Add text box for compression height
-        compression_height_label = ttk.Label(frame, text="Compression Height:")
-        compression_height_label.pack(anchor="w")
-        compression_height_entry = ttk.Entry(frame)
-        compression_height_entry.pack(fill="x", pady=5)
+        self.compression_height_label = ttk.Label(self.alphaFrame, text="Compression Height:")
+        self.compression_height_label.pack(anchor="w")
+        self.compression_height_entry = ttk.Entry(self.alphaFrame)
+        self.compression_height_entry.pack(fill="x", pady=5)
 
         # Add button to collect power difference
-        collect_button = ttk.Button(frame, text="Collect Power Difference", command=lambda: self.__collectPowerDifference(sample_height_entry, compression_height_entry, instruction_label, frame, alpha_vals_temp_label, alignAlphaWindow))
-        collect_button.pack(pady=10)
+        self.collect_button = ttk.Button(self.alphaFrame, text="Collect Power Difference", command=lambda: self.__collectPowerDifference())
+        self.collect_button.pack(pady=10)
 
-        alpha_vals_temp_label = ttk.Label(frame, text="alpha values: " + str(self.alphaVals))
-        alpha_vals_temp_label.pack(pady=(0,10))
+        self.alpha_vals_temp_label = ttk.Label(self.alphaFrame, text="alpha values: " + str(self.alphaVals))
+        self.alpha_vals_temp_label.pack(pady=(0,10))
         
 
-    def __collectPowerDifference(self, sample_height_entry, compression_height_entry, instruction_label, frame, alpha_vals_temp_label, alignAlphaWindow):
+    def __collectPowerDifference(self):
         self.alphaFind = True
         # Placeholder for the logic to collect power difference
-        sampleHeight = sample_height_entry.get()
-        compressionHeight = compression_height_entry.get()
+        sampleHeight = self.sample_height_entry.get()
+        compressionHeight = self.compression_height_entry.get()
         print("TARGET HEIGHT: ", sampleHeight)
         print("COMPRESSION HEIGHT: ", compressionHeight)
         loadMove = move.Move(self.micrometerController)
@@ -275,16 +275,16 @@ class Gui:
         unloadMove.velocity = "1"
 
         if len(self.alphaVals) == 0:
-            instruction_label = ttk.Label(frame, text="Move to -20 degrees (toward user)", font=("Arial", 12))
+            instruction_label = ttk.Label(self.alphaFrame, text="Move to -20 degrees (toward user)", font=("Arial", 12))
             instruction_label.pack(pady=(0, 10))
         elif len(self.alphaVals) == 1:
-            instruction_label = ttk.Label(frame, text="Move to 0 degrees (away from user)", font=("Arial", 12))
+            instruction_label = ttk.Label(self.alphaFrame, text="Move to 0 degrees (away from user)", font=("Arial", 12))
             instruction_label.pack(pady=(0, 10))
         elif len(self.alphaVals) == 2:
-            instruction_label = ttk.Label(frame, text="Move to 20 degrees (away from user)", font=("Arial", 12))
+            instruction_label = ttk.Label(self.alphaFrame, text="Move to 20 degrees (away from user)", font=("Arial", 12))
             instruction_label.pack(pady=(0, 10))
         else:
-            instruction_label = ttk.Label(frame, text="error, len(alphaVals) should not have this length", font=("Arial", 12))
+            instruction_label = ttk.Label(self.alphaFrame, text="error, len(alphaVals) should not have this length", font=("Arial", 12))
             instruction_label.pack(pady=(0, 10))
         
          
@@ -299,8 +299,8 @@ class Gui:
         self.saveNumExecutions(tk.StringVar(alignAlphaWindow, "3"))
         self.startExecuteThread(listTemp)
         self.alphaVals.append(self.powerPlot.maxValY - self.powerPlot.minValY)
-        alpha_vals_temp_label = ttk.Label(frame, text="alpha values: " + str(self.alphaVals))
-        alpha_vals_temp_label.pack(pady=(0,10))
+        self.alpha_vals_temp_label = ttk.Label(self.alphaFrame, text="alpha values: " + str(self.alphaVals))
+        self.alpha_vals_temp_label.pack(pady=(0,10))
 
         
         
