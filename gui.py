@@ -332,6 +332,13 @@ class Gui:
         dropdownMenu.add_command(label="Polarimter Δpol vs. Time ", command=self.__option3)
         dropdownMenu.add_command(label="power1 vs. distance ", command=self.__option4)
         dropdownMenu.add_command(label="power2 vs. distance ", command=self.__option5)
+
+        dropdownMenu.add_command(label="power dif vs. time", command=self.__option6)
+
+        dropdownMenu.add_command(label="power 1 vs. time", command=self.__option7)
+
+        dropdownMenu.add_command(label="power 2 vs. time", command=self.__option8)
+
         dropdownButton["menu"] = dropdownMenu
         dropdownButton.pack(side="left")
 
@@ -362,6 +369,20 @@ class Gui:
         self.pow2Plot = Plot2D('power 2 plot', 'distance', 'power')
         self.plotList.append(self.pow2Plot)
 
+    def __option6(self):
+        print("Option 6 selected")
+        self.noisePlotPowDif = Plot2D("power dif vs time", 'time', 'power dif')
+        self.plotList.append(self.noisePlotPowDif) 
+
+    def __option7(self):
+        print("Option 7 selected")
+        self.noisePlotPow1 = Plot2D("power 1 vs time", 'time', 'power dif')
+        self.plotList.append(self.noisePlotPowDif)
+
+    def __option8(self):
+        print("Option 8 selected")
+        self.noisePlotPow2 = Plot2D("power 2 vs time", 'time', 'power dif')
+        self.plotList.append(self.noisePlotPowDif)
 
     """adds all of the buttons in the bottom frame"""
     def addBottomFrameButtons(self, listFrame):
@@ -428,6 +449,15 @@ class Gui:
         for plot in self.plotList:
             plot.resetPlot()
         self.noiseThread = Thread(target=self.__collectNoise, args=t)
+
+    def __collectNoise(self, t):
+        start_time = time.time()
+        end_time = start_time 
+        if not self.updatingPlots:
+            self.updatingPlots = True
+        while(end_time - start_time < t):
+           end_time = time.time() 
+        self.updatingPlots = False
 
 
 
@@ -515,7 +545,21 @@ class Gui:
                 self.pow2Plot.updatePlot(self.micrometerController.micrometerPosition[3:].strip(), self.powermeter.device2Data)
             except:
                 print("not enough powermeters connected.")
+            
+            try:
+                self.noisePlotPowDif.updatePlot(time.time, abs(self.powermeter.device1Data - self.powermeter.device2Data))
+            except:
+                print("noise not going")
+            try:
+                self.noisePlotPow1.updatePlot(time.time, self.powermeter.device1Data)
+            except:
+                print("noise not going")
 
+            try:
+                self.noisePlotPowDif.updatePlot(time.time, self.powermeter.device1Data)
+            except:
+                print("noise not going")
+                
         if (self.executed == True): #right here all of the things that need to be done immediately after move(s) are done executing happen
             if self.polarimeter is not None:
                 self.polarimeter.run = False
