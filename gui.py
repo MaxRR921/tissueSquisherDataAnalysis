@@ -461,16 +461,16 @@ class Gui:
            print("waiting")
         self.updatingPlots = False
         try:
-            self.noisePlotPowDif.generateCsvFromPlot("power dif vs. time")
+            self.noisePlotPowDif.generateCsvFromPlot("power dif vs. time.csv")
         except:
             print("plot not open")
         try:
-            self.noisePlotPow1.generateCsvFromPlot("power 1 vs. time")
+            self.noisePlotPow1.generateCsvFromPlot("power 1 vs. time.csv")
         except:
             print("plot not open")
 
         try:
-            self.noisePlotPow2.generateCsvFromPlot("power 2 vs. time")
+            self.noisePlotPow2.generateCsvFromPlot("power 2 vs. time.csv")
         except:
             print("plot not open")
         
