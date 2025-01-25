@@ -557,7 +557,7 @@ class Gui:
                 print("noise not going")
 
             try:
-                self.noisePlotPowDif.updatePlot(time.time(), self.powermeter.device1Data)
+                self.noisePlotPow2.updatePlot(time.time(), self.powermeter.device2Data)
             except:
                 print("noise not going")
 
