@@ -460,9 +460,20 @@ class Gui:
            end_time = time.time() 
            print("waiting")
         self.updatingPlots = False
+        try:
+            self.noisePlotPowDif.generateCsvFromPlot()
+        except:
+            print("plot not open")
+        try:
+            self.noisePlotPow1.generateCsvFromPlot()
+        except:
+            print("plot not open")
 
-
-
+        try:
+            self.noisePlotPow2.generateCsvFromPlot()
+        except:
+            print("plot not open")
+        
     """collect is a lot of logic. !should make it just use self.movelist
     if the plots currently aren't updating, it calls the recursive updatePlots function to update the plots 
     every 100 ms. Should just have this instead of having all plots update all of the time.
