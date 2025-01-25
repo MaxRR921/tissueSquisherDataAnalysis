@@ -458,7 +458,6 @@ class Gui:
             self.updatingPlots = True
         while(end_time - start_time < t):
            end_time = time.time() 
-           print("RUNNING")
         self.updatingPlots = False
 
 
