@@ -362,6 +362,7 @@ class Gui:
         self.pow2Plot = Plot2D('power 2 plot', 'distance', 'power')
         self.plotList.append(self.pow2Plot)
 
+
     """adds all of the buttons in the bottom frame"""
     def addBottomFrameButtons(self, listFrame):
         numExec = tk.StringVar()
@@ -374,6 +375,9 @@ class Gui:
         
         executeAllMovesButton = ttk.Button(listFrame, text='execute all moves', command=lambda: (self.saveNumExecutions(numExec), self.startExecuteThread(self.moveList)))
         executeAllMovesButton.grid(row=2, column=0, sticky='sw', pady=5, padx=30)
+
+        recordNoiseButton = ttk.Button(listFrame, text='collect noise', command=lambda: (self.startNoiseThread()))
+        recordNoiseButton.grid(row=2, column=3, sticky='sw', pady=5, padx=30)
 
         addMoveButton = ttk.Button(listFrame, text='add move', command=lambda: self.__addMove(listFrame))
         addMoveButton.grid(row=1, column=0, sticky='sw', pady=5, padx=30)
@@ -418,6 +422,12 @@ class Gui:
             plot.resetPlot()
         self.executeThread = Thread(target=self.__collect, args=[moveList])
         self.executeThread.start()
+
+    def startNoiseThread(self):
+        t = 20
+        for plot in self.plotList:
+            plot.resetPlot()
+        self.noiseThread = Thread(target=self.__collectNoise, args=t)
 
 
 
