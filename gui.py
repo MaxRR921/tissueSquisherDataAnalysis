@@ -449,6 +449,7 @@ class Gui:
         for plot in self.plotList:
             plot.resetPlot()
         self.noiseThread = Thread(target=self.__collectNoise, args=t)
+        self.noiseThread.start()
 
     def __collectNoise(self, t):
         start_time = time.time()
@@ -559,7 +560,7 @@ class Gui:
                 self.noisePlotPowDif.updatePlot(time.time, self.powermeter.device1Data)
             except:
                 print("noise not going")
-                
+
         if (self.executed == True): #right here all of the things that need to be done immediately after move(s) are done executing happen
             if self.polarimeter is not None:
                 self.polarimeter.run = False
