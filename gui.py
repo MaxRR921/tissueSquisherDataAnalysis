@@ -520,6 +520,10 @@ class Gui:
                 self.powerPlot.generateCsvFromPlot("pow.csv")
             else:
                 print("no power plot open")
+            if self.pow1Plot is not None:
+                self.pow1Plot.generateCsvFromPlot("pow1.csv")
+            if self.pow2Plot is not None:
+                self.pow2Plot.generateCsvFromPlot("pow2.csv")
             print("PHASE")
             print(self.phase)
             print("STRAIN")
