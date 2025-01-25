@@ -445,13 +445,13 @@ class Gui:
         self.executeThread.start()
 
     def startNoiseThread(self):
-        t = 20
         for plot in self.plotList:
             plot.resetPlot()
-        self.noiseThread = Thread(target=self.__collectNoise, args=t)
+        self.noiseThread = Thread(target=self.__collectNoise)
         self.noiseThread.start()
 
-    def __collectNoise(self, t):
+    def __collectNoise(self):
+        t = 20
         start_time = time.time()
         end_time = start_time 
         if not self.updatingPlots:
