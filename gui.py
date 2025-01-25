@@ -61,7 +61,6 @@ class Gui:
         self.triedMicrometer = False
         self.executed = False
         self.startedPolarimeter = False
-        self.alphaFind = False
 
         #lists for phase and strain...bad.
         self.phase = np.array(np.zeros)
@@ -262,7 +261,6 @@ class Gui:
     the graphs have to come out still. Investigate more thoroughly 
     """
     def __collectPowerDifference(self):
-        self.alphaFind = True
         # Placeholder for the logic to collect power difference
         sampleHeight = self.sample_height_entry.get()
         compressionHeight = self.compression_height_entry.get()
@@ -460,7 +458,6 @@ class Gui:
                 else:
                     break
 
-        self.alphaFind = True
         self.executed = True
         self.updatingPlots = False
         print("DONE")
