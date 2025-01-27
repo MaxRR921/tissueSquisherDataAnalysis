@@ -283,16 +283,17 @@ class Gui:
 
 
                  
-        # if self.micrometerController.micrometerPosition.decode('utf-8')[3:6].strip() != unloadMove.targetHeight:
-        #     listTemp = []
-        #     listTemp.append(unloadMove)
-        #     self.startExecuteThread(listTemp)
-        #     self.executeThread.join()
+        if self.micrometerController.micrometerPosition.decode('utf-8')[3:6].strip() != unloadMove.targetHeight:
+            listTemp = []
+            listTemp.append(unloadMove)
+            self.startExecuteThread(listTemp)
+            self.executeThread.join()
+
         listTemp = []
         listTemp.append(loadMove)
         listTemp.append(unloadMove)
-        # self.saveNumExecutions(tk.StringVar(self.alignAlphaWindow, "3"))
-        # self.startExecuteThread(listTemp)
+        self.saveNumExecutions(tk.StringVar(self.alignAlphaWindow, "3"))
+        self.startExecuteThread(listTemp)
         
 
         if len(self.alphaVals) == 0:
