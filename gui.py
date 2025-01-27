@@ -284,11 +284,9 @@ class Gui:
 
                  
         if self.micrometerController.micrometerPosition.decode('utf-8')[3:6].strip() != unloadMove.targetHeight:
-            listTemp = []
-            listTemp.append(unloadMove)
-            self.startExecuteThread(listTemp)
-            self.executeThread.join()
-            print("JOINED!!!!!!!!")
+           self.micrometerController.setVelocity("2")
+           self.micrometerController.goToHeight(sampleHeight)
+           time.sleep(5)
 
         listTemp = []
         listTemp.append(loadMove)
