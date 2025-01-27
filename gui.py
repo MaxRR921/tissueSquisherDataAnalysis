@@ -283,11 +283,11 @@ class Gui:
 
 
                  
-        if self.micrometerController.micrometerPosition.decode('utf-8')[3:6].strip() != unloadMove.targetHeight:
-            listTemp = []
-            listTemp.append(unloadMove)
-            self.startExecuteThread(listTemp)
-            self.executeThread.join()
+        # if self.micrometerController.micrometerPosition.decode('utf-8')[3:6].strip() != unloadMove.targetHeight:
+        #     listTemp = []
+        #     listTemp.append(unloadMove)
+        #     self.startExecuteThread(listTemp)
+        #     self.executeThread.join()
 
         listTemp = []
         listTemp.append(loadMove)
