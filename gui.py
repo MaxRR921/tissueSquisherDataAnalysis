@@ -12,6 +12,7 @@ from tkinter import ttk
 from ttkthemes import ThemedTk
 import polarimeter
 import angleFinder
+import csv
 
 """!THINKING MAYBE I SHOULD JUSt iNitiAlize all of the threads in init, then call them later"""
 
@@ -73,6 +74,8 @@ class Gui:
         self.power2Text.set("p2 not reading") 
         
 
+        
+
         #one move by default
         defualtMove = move.Move(self.micrometerController)
         self.moveList = [defualtMove]
@@ -118,6 +121,8 @@ class Gui:
 
         #create the move list gui elements
         self.moveGui = moveGui.MoveGui(self.listFrame, self, self.moveList, 100, width=500)
+        
+        self.angleFind = angleFinder.AngleFinder()
         
        
         #updating all plots 
@@ -275,35 +280,41 @@ class Gui:
         unloadMove.targetHeight = sampleHeight 
         unloadMove.velocity = "1"
 
+
+
+                 
+        # if self.micrometerController.micrometerPosition.decode('utf-8')[3:6].strip() != unloadMove.targetHeight:
+        #     listTemp = []
+        #     listTemp.append(unloadMove)
+        #     self.startExecuteThread(listTemp)
+        #     self.executeThread.join()
+        listTemp = []
+        listTemp.append(loadMove)
+        listTemp.append(unloadMove)
+        # self.saveNumExecutions(tk.StringVar(self.alignAlphaWindow, "3"))
+        # self.startExecuteThread(listTemp)
+        
+
         if len(self.alphaVals) == 0:
-            instruction_label = ttk.Label(self.alphaFrame, text="Move to -20 degrees (toward user)", font=("Arial", 12))
-            instruction_label.pack(pady=(0, 10))
+            self.alphaVals.append(0.85)
+            self.instruction_label.config(text="move to 0 degrees (away from user)") 
+            self.alpha_vals_temp_label.config(text="alpha values: " + str(self.alphaVals))
+            print("none")
         elif len(self.alphaVals) == 1:
-            instruction_label = ttk.Label(self.alphaFrame, text="Move to 0 degrees (away from user)", font=("Arial", 12))
-            instruction_label.pack(pady=(0, 10))
+            self.alphaVals.append(0.35)
+            self.instruction_label.config(text="move to 20 degrees (away from user)") 
+            self.alpha_vals_temp_label.config(text="alpha values: " + str(self.alphaVals))
         elif len(self.alphaVals) == 2:
-            instruction_label = ttk.Label(self.alphaFrame, text="Move to 20 degrees (away from user)", font=("Arial", 12))
-            instruction_label.pack(pady=(0, 10))
+            self.alphaVals.append(-0.65)
+            self.alpha_vals_temp_label.config(text="alpha values: " + str(self.alphaVals))
+            self.ideal_alpha = self.angleFind.findAngle(self.alphaVals)
+            self.__saveIdealAlpha(self.ideal_alpha)
+            self.instruction_label.config(text="ideal alpha: " + str(self.ideal_alpha))
         else:
             instruction_label = ttk.Label(self.alphaFrame, text="error, len(alphaVals) should not have this length", font=("Arial", 12))
             instruction_label.pack(pady=(0, 10))
         
-         
-        if self.micrometerController.micrometerPosition.decode('utf-8')[3:6].strip() != unloadMove.targetHeight:
-            listTemp = []
-            listTemp.append(unloadMove)
-            self.startExecuteThread(listTemp)
-            self.executeThread.join()
-        listTemp = []
-        listTemp.append(loadMove)
-        listTemp.append(unloadMove)
-        self.saveNumExecutions(tk.StringVar(self.alignAlphaWindow, "3"))
-        self.startExecuteThread(listTemp)
-        self.alphaVals.append(self.powerPlot.maxValY - self.powerPlot.minValY)
-        self.alpha_vals_temp_label = ttk.Label(self.alphaFrame, text="alpha values: " + str(self.alphaVals))
-        self.alpha_vals_temp_label.pack(pady=(0,10))
 
-        
         
 
         print("Collecting power difference...")
@@ -608,3 +619,13 @@ class Gui:
             self.power1Text.set(str(self.powermeter.device1Data))
             self.power2Text.set(str(self.powermeter.device2Data))
         self.root.after(10, self.updatePlotsFromData)
+
+
+    def __saveIdealAlpha(self, ideal_alpha):
+            # Ensure that the data is in the format of lists of equal length
+            with open("alpha.txt", "w") as f:
+                pass
+            with open("alpha.txt", "w") as f:
+                f.write(str(ideal_alpha))
+
+
