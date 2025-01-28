@@ -406,6 +406,7 @@ class Gui:
         print("Option 1 selected")
         def remove_plot(plot):
             self.plotList.remove(plot)
+            self.micrometerPlot = None  # Clear the reference
             print(f"Plot '{plot.title}' closed and removed from plotList.")
         
         self.micrometerPlot = Plot2D('micrometer plot', 'time', 'distance', on_close=remove_plot)
@@ -415,6 +416,7 @@ class Gui:
         print("Option 2 selected")
         def remove_plot(plot):
             self.plotList.remove(plot)
+            self.powerPlot = None  # Clear the reference
             print(f"Plot '{plot.title}' closed and removed from plotList.")
         
         self.powerPlot = Plot2D('power plot', 'distance (mm)', 'power (um)', True, on_close=remove_plot)
@@ -424,6 +426,7 @@ class Gui:
         print("Option 3 selected")
         def remove_plot(plot):
             self.plotList.remove(plot)
+            self.polPlot = None  # Clear the reference
             print(f"Plot '{plot.title}' closed and removed from plotList.")
         
         self.polPlot = Plot2D('polarimeter plot', 'strain', 'phase', on_close=remove_plot)
@@ -433,6 +436,7 @@ class Gui:
         print("Option 4 selected")
         def remove_plot(plot):
             self.plotList.remove(plot)
+            self.pow1Plot = None  # Clear the reference
             print(f"Plot '{plot.title}' closed and removed from plotList.")
         
         self.pow1Plot = Plot2D('power 1 plot', 'distance', 'power', on_close=remove_plot)
@@ -442,6 +446,7 @@ class Gui:
         print("Option 5 selected")
         def remove_plot(plot):
             self.plotList.remove(plot)
+            self.pow2Plot = None  # Clear the reference
             print(f"Plot '{plot.title}' closed and removed from plotList.")
         
         self.pow2Plot = Plot2D('power 2 plot', 'distance', 'power', on_close=remove_plot)
@@ -451,6 +456,7 @@ class Gui:
         print("Option 6 selected")
         def remove_plot(plot):
             self.plotList.remove(plot)
+            self.noisePlotPowDif = None  # Clear the reference
             print(f"Plot '{plot.title}' closed and removed from plotList.")
         
         self.noisePlotPowDif = Plot2D("power dif vs time", 'time', 'power dif', on_close=remove_plot)
@@ -460,6 +466,7 @@ class Gui:
         print("Option 7 selected")
         def remove_plot(plot):
             self.plotList.remove(plot)
+            self.noisePlotPow1 = None  # Clear the reference
             print(f"Plot '{plot.title}' closed and removed from plotList.")
         
         self.noisePlotPow1 = Plot2D("power 1 vs time", 'time', 'power dif', on_close=remove_plot)
@@ -469,10 +476,12 @@ class Gui:
         print("Option 8 selected")
         def remove_plot(plot):
             self.plotList.remove(plot)
+            self.noisePlotPow2 = None  # Clear the reference
             print(f"Plot '{plot.title}' closed and removed from plotList.")
         
         self.noisePlotPow2 = Plot2D("power 2 vs time", 'time', 'power dif', on_close=remove_plot)
         self.plotList.append(self.noisePlotPow2)
+            
             
 
     """adds all of the buttons in the bottom frame"""
