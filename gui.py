@@ -415,6 +415,7 @@ class Gui:
     def __option2(self):
         print("Option 2 selected")
         def remove_plot(plot):
+            print("CLOSES THE PLOT!!!!")
             self.plotList.remove(plot)
             self.powerPlot = None  # Clear the reference
             print(f"Plot '{plot.title}' closed and removed from plotList.")
