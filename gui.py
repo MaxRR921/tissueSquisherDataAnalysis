@@ -269,6 +269,11 @@ class Gui:
         # Placeholder for the logic to collect power difference
         sampleHeight = self.sample_height_entry.get()
         compressionHeight = self.compression_height_entry.get()
+        #TODO: add this to the normal text boxes as well!!!
+        if not "." in sampleHeight:
+            sampleHeight = sampleHeight + ".0"
+        if not "." in compressionHeight:
+            compressionHeight = compressionHeight + ".0"
         print("TARGET HEIGHT: ", sampleHeight)
         print("COMPRESSION HEIGHT: ", compressionHeight)
         loadMove = move.Move(self.micrometerController)
