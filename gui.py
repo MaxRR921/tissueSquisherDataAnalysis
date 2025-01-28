@@ -182,7 +182,7 @@ class Gui:
 
     #ALL BUTTONS IN TOP MENU
 
-    def __idealAlphaLabel(frameTopMenu):
+    def __idealAlphaLabel(self, frameTopMenu):
         try:
             with open("alpha.txt", "r") as f:
                 idealAlphaString = f.read()
