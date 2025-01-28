@@ -71,6 +71,7 @@ class Plot2D:
     I'm thinking the manipulation of the data to fit into the plots should happen in their respective classes instead this 
     method runs from gui every 10 ms to make plots update in real time"""
     def updatePlot(self, xData, yData):
+        print("PLOTS!!!")
         if not isinstance(xData, list):           
             xData = float(xData)
             if(xData < self.minValX):
