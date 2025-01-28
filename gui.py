@@ -390,42 +390,77 @@ class Gui:
     def __option1(self):
         print("Option 1 selected")
         self.micrometerPlot = Plot2D('micrometer plot', 'time', 'distance')
+        self.micrometerPlot.window.protocol("WM_DELETE_WINDOW", lambda: self.__closePlot('micrometerPlot'))
         self.plotList.append(self.micrometerPlot)
 
     def __option2(self):
         print("Option 2 selected")
         self.powerPlot = Plot2D('power plot', 'distance (mm)', 'power (um)', True)
+        self.powerPlot.window.protocol("WM_DELETE_WINDOW", lambda: self.__closePlot('powerPlot'))
         self.plotList.append(self.powerPlot)
 
     def __option3(self):
         print("Option 3 selected")
         self.polPlot = Plot2D('polarimeter plot', 'strain', 'phase')
+        self.polPlot.window.protocol("WM_DELETE_WINDOW", lambda: self.__closePlot('polPlot'))
         self.plotList.append(self.polPlot)
 
     def __option4(self):
-        print("Option 3 selected")
+        print("Option 4 selected")
         self.pow1Plot = Plot2D('power 1 plot', 'distance', 'power')
+        self.pow1Plot.window.protocol("WM_DELETE_WINDOW", lambda: self.__closePlot('pow1Plot'))
         self.plotList.append(self.pow1Plot)
 
     def __option5(self):
-        print("Option 3 selected")
+        print("Option 5 selected")
         self.pow2Plot = Plot2D('power 2 plot', 'distance', 'power')
+        self.pow2Plot.window.protocol("WM_DELETE_WINDOW", lambda: self.__closePlot('pow2Plot'))
         self.plotList.append(self.pow2Plot)
 
     def __option6(self):
         print("Option 6 selected")
         self.noisePlotPowDif = Plot2D("power dif vs time", 'time', 'power dif')
-        self.plotList.append(self.noisePlotPowDif) 
+        self.noisePlotPowDif.window.protocol("WM_DELETE_WINDOW", lambda: self.__closePlot('noisePlotPowDif'))
+        self.plotList.append(self.noisePlotPowDif)
 
     def __option7(self):
         print("Option 7 selected")
         self.noisePlotPow1 = Plot2D("power 1 vs time", 'time', 'power dif')
-        self.plotList.append(self.noisePlotPowDif)
+        self.noisePlotPow1.window.protocol("WM_DELETE_WINDOW", lambda: self.__closePlot('noisePlotPow1'))
+        self.plotList.append(self.noisePlotPow1)
 
     def __option8(self):
         print("Option 8 selected")
         self.noisePlotPow2 = Plot2D("power 2 vs time", 'time', 'power dif')
-        self.plotList.append(self.noisePlotPowDif)
+        self.noisePlotPow2.window.protocol("WM_DELETE_WINDOW", lambda: self.__closePlot('noisePlotPow2'))
+        self.plotList.append(self.noisePlotPow2)
+
+
+    def __closePlot(self, plotName):
+        """Handles when a plot window is closed."""
+        print(f"Closing plot: {plotName}")
+        
+        # Dynamically set the corresponding plot to None
+        if plotName == 'micrometerPlot':
+            self.micrometerPlot = None
+        elif plotName == 'powerPlot':
+            self.powerPlot = None
+        elif plotName == 'polPlot':
+            self.polPlot = None
+        elif plotName == 'pow1Plot':
+            self.pow1Plot = None
+        elif plotName == 'pow2Plot':
+            self.pow2Plot = None
+        elif plotName == 'noisePlotPowDif':
+            self.noisePlotPowDif = None
+        elif plotName == 'noisePlotPow1':
+            self.noisePlotPow1 = None
+        elif plotName == 'noisePlotPow2':
+            self.noisePlotPow2 = None
+
+        # Remove the plot from the list of active plots
+        self.plotList = [plot for plot in self.plotList if plot != getattr(self, plotName)]
+        
 
     """adds all of the buttons in the bottom frame"""
     def addBottomFrameButtons(self, listFrame):
