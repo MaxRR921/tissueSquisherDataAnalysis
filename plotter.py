@@ -19,6 +19,8 @@ class Plot2D:
         self.xAxisTitle = xAxisTitle
         self.yAxisTitle = yAxisTitle
         self.update = False
+
+        self.on_close = None
         ######
 
         self.fig = Figure(figsize=(6, 4), dpi=100)
@@ -57,7 +59,13 @@ class Plot2D:
        
         self.fig.tight_layout()
         self.canvas.draw()
-        
+
+    """Handles window close event."""
+    def _on_close(self):
+        if self.on_close:
+            self.on_close(self)
+        self.window.destroy()
+            
     """updatePlot !appends data to the plot's x and y data but the method isn't very standardized 
     because each type of plot's data will be in different  forms, so the checking of the data happens here
     I'm thinking the manipulation of the data to fit into the plots should happen in their respective classes instead this 

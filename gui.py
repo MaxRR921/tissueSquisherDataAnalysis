@@ -404,45 +404,76 @@ class Gui:
     !!!TODO: BIG TODO: looks like plots still take data and generate csvs and try to draw even when they are closed. i need to figurew out a way to fix this."""
     def __option1(self):
         print("Option 1 selected")
-        self.micrometerPlot = Plot2D('micrometer plot', 'time', 'distance')
+        def remove_plot(plot):
+            self.plotList.remove(plot)
+            print(f"Plot '{plot.title}' closed and removed from plotList.")
+        
+        self.micrometerPlot = Plot2D('micrometer plot', 'time', 'distance', on_close=remove_plot)
         self.plotList.append(self.micrometerPlot)
 
     def __option2(self):
         print("Option 2 selected")
-        self.powerPlot = Plot2D('power plot', 'distance (mm)', 'power (um)', True)
+        def remove_plot(plot):
+            self.plotList.remove(plot)
+            print(f"Plot '{plot.title}' closed and removed from plotList.")
+        
+        self.powerPlot = Plot2D('power plot', 'distance (mm)', 'power (um)', True, on_close=remove_plot)
         self.plotList.append(self.powerPlot)
 
     def __option3(self):
         print("Option 3 selected")
-        self.polPlot = Plot2D('polarimeter plot', 'strain', 'phase')
+        def remove_plot(plot):
+            self.plotList.remove(plot)
+            print(f"Plot '{plot.title}' closed and removed from plotList.")
+        
+        self.polPlot = Plot2D('polarimeter plot', 'strain', 'phase', on_close=remove_plot)
         self.plotList.append(self.polPlot)
 
     def __option4(self):
         print("Option 4 selected")
-        self.pow1Plot = Plot2D('power 1 plot', 'distance', 'power')
+        def remove_plot(plot):
+            self.plotList.remove(plot)
+            print(f"Plot '{plot.title}' closed and removed from plotList.")
+        
+        self.pow1Plot = Plot2D('power 1 plot', 'distance', 'power', on_close=remove_plot)
         self.plotList.append(self.pow1Plot)
 
     def __option5(self):
         print("Option 5 selected")
-        self.pow2Plot = Plot2D('power 2 plot', 'distance', 'power')
+        def remove_plot(plot):
+            self.plotList.remove(plot)
+            print(f"Plot '{plot.title}' closed and removed from plotList.")
+        
+        self.pow2Plot = Plot2D('power 2 plot', 'distance', 'power', on_close=remove_plot)
         self.plotList.append(self.pow2Plot)
 
     def __option6(self):
         print("Option 6 selected")
-        self.noisePlotPowDif = Plot2D("power dif vs time", 'time', 'power dif')
+        def remove_plot(plot):
+            self.plotList.remove(plot)
+            print(f"Plot '{plot.title}' closed and removed from plotList.")
+        
+        self.noisePlotPowDif = Plot2D("power dif vs time", 'time', 'power dif', on_close=remove_plot)
         self.plotList.append(self.noisePlotPowDif)
 
     def __option7(self):
         print("Option 7 selected")
-        self.noisePlotPow1 = Plot2D("power 1 vs time", 'time', 'power dif')
+        def remove_plot(plot):
+            self.plotList.remove(plot)
+            print(f"Plot '{plot.title}' closed and removed from plotList.")
+        
+        self.noisePlotPow1 = Plot2D("power 1 vs time", 'time', 'power dif', on_close=remove_plot)
         self.plotList.append(self.noisePlotPow1)
 
     def __option8(self):
         print("Option 8 selected")
-        self.noisePlotPow2 = Plot2D("power 2 vs time", 'time', 'power dif')
-        self.plotList.append(self.noisePlotPow2)
-
+        def remove_plot(plot):
+            self.plotList.remove(plot)
+            print(f"Plot '{plot.title}' closed and removed from plotList.")
         
+        self.noisePlotPow2 = Plot2D("power 2 vs time", 'time', 'power dif', on_close=remove_plot)
+        self.plotList.append(self.noisePlotPow2)
+            
 
     """adds all of the buttons in the bottom frame"""
     def addBottomFrameButtons(self, listFrame):
