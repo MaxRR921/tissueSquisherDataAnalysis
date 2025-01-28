@@ -305,15 +305,15 @@ class Gui:
         elif len(self.alphaVals) == 1:
             self.alphaVals.append(self.powerPlot.maxValY - self.powerPlot.minValY)
             self.instruction_label.config(text="move to 20 degrees (away from user)") 
-            self.alpha_vals_temp_label.config(text="alpha values: " + str(self.alphaVals))
+            self.alpha_vals_temp_label.config(text="alpha values: " + str(self.alphaVals[1:2]))
         elif len(self.alphaVals) == 2:
             self.alphaVals.append(self.powerPlot.maxValY - self.powerPlot.minValY)
-            self.alpha_vals_temp_label.config(text="alpha values: " + str(self.alphaVals))
+            self.alpha_vals_temp_label.config(text="alpha values: " + str(self.alphaVals[1:3]))
             self.collect_button.config(text="compute ideal alpha")
         elif len(self.alphaVals) == 3:
             self.alphaVals.append(self.powerPlot.maxValY - self.powerPlot.minValY)
-            self.alpha_vals_temp_label.config(text="alpha values: " + str(self.alphaVals))
-            self.ideal_alpha = self.angleFind.findAngle(self.alphaVals)
+            self.alpha_vals_temp_label.config(text="alpha values: " + str(self.alphaVals[1:4]))
+            self.ideal_alpha = self.angleFind.findAngle(self.alphaVals[1:4])
             self.__saveIdealAlpha(self.ideal_alpha)
             self.instruction_label.config(text="ideal alpha: " + str(self.ideal_alpha))
         else:
