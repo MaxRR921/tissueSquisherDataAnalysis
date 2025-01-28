@@ -21,7 +21,6 @@ class Plot2D:
         self.update = False
 
         self.on_close = on_close
-        self.window.protocol("WM_DELETE_WINDOW", self._on_close)
         ######
 
         self.fig = Figure(figsize=(6, 4), dpi=100)
@@ -32,9 +31,12 @@ class Plot2D:
         self.maxValY = float(-10000000)
         self.minValY = float(10000000)
 
-        self.window = tk.Tk()
+        self.window = tk.Toplevel()  # No master required
         self.window.title("Graph")
         self.window.geometry("400x400")
+
+        self.window.protocol("WM_DELETE_WINDOW", self._on_close)
+        
         self.framePlot = tk.Frame(self.window, bg='white')
         self.framePlot.pack(fill=tk.BOTH, expand=True)
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.framePlot)
