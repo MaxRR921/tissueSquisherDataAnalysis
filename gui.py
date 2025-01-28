@@ -90,7 +90,9 @@ class Gui:
         self.micrometerPlot = None
         self.pow1Plot = None
         self.pow2Plot = None
-        
+        self.noisePlotPowDif = None
+        self.noisePlotPow1 = None
+        self.noisePlotPow2 = None 
         #list of times recorded
         self.timeList = []
         #alpha values for calibration
@@ -415,7 +417,6 @@ class Gui:
     def __option2(self):
         print("Option 2 selected")
         def remove_plot(plot):
-            print("CLOSES THE PLOT!!!!")
             self.plotList.remove(plot)
             self.powerPlot = None  # Clear the reference
             print(f"Plot '{plot.title}' closed and removed from plotList.")
