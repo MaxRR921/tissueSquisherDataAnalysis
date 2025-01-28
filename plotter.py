@@ -10,7 +10,7 @@ class Plot2D:
     """init takes in a title for the x and y axes. It then initializes all of the plot things and then
     !CAlls reset plot which i feel shouldn't be necessary because I'm setting the title to the default plot titles, 
     then calling reset, whic sets it to the real title which seems really weird"""
-    def __init__(self, title='untitled', xAxisTitle='x', yAxisTitle='y', showMinMax=False):
+    def __init__(self, title='untitled', xAxisTitle='x', yAxisTitle='y', showMinMax=False, on_close=None):
         #set up window
         self.color = 'blue'
         self.showMinMax = showMinMax
@@ -20,7 +20,7 @@ class Plot2D:
         self.yAxisTitle = yAxisTitle
         self.update = False
 
-        self.on_close = None
+        self.on_close = on_close
         ######
 
         self.fig = Figure(figsize=(6, 4), dpi=100)
