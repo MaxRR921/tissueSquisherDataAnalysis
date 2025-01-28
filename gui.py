@@ -178,8 +178,19 @@ class Gui:
         self.__dropdownButton(self.topMenuFrame)
         self.__browseDataFileButton(self.topMenuFrame)
         self.__alignAlphaButton(self.topMenuFrame)
+        self.__idealAlphaLabel(self.topMenuFrame)
 
     #ALL BUTTONS IN TOP MENU
+
+    def __idealAlphaLabel(frameTopMenu):
+        try:
+            with open("alpha.txt", "r") as f:
+                idealAlphaString = f.read()
+            idealAlphaLabel = ttk.Label(frameTopMenu, text=idealAlphaString)
+            idealAlphaLabel.pack(side='left')
+        except:
+            idealAlphaLabel = ttk.Label(frameTopMenu, text="no ideal alpha save file")
+            idealAlphaLabel.pack(side='left')
 
     """browseDataFile button creates the button for browsing for the data files."""
     def __browseDataFileButton(self, frameTopMenu):
