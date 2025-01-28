@@ -226,41 +226,44 @@ class Gui:
         3. 
     '''
     def __alignAlpha(self):
-        self.alphaVals = []
-        # Create a new pop-up window
-        self.alignAlphaWindow = tk.Toplevel(self.window)  # Create a child window of the main application
-        self.alignAlphaWindow.title("Align Alpha")       # Set the title of the pop-up window
-        self.alignAlphaWindow.geometry("500x300")        # Set the size of the pop-up window
-        self.alignAlphaWindow.resizable(False, False)    # Make the pop-up window non-resizable
-        
-        # Create a frame within the pop-up window
-        self.alphaFrame = ttk.Frame(self.alignAlphaWindow, padding=10)
-        self.alphaFrame.pack(fill="both", expand=True)
+        if(self.powerPlot is not None):
+            self.alphaVals = []
+            # Create a new pop-up window
+            self.alignAlphaWindow = tk.Toplevel(self.window)  # Create a child window of the main application
+            self.alignAlphaWindow.title("Align Alpha")       # Set the title of the pop-up window
+            self.alignAlphaWindow.geometry("500x300")        # Set the size of the pop-up window
+            self.alignAlphaWindow.resizable(False, False)    # Make the pop-up window non-resizable
+            
+            # Create a frame within the pop-up window
+            self.alphaFrame = ttk.Frame(self.alignAlphaWindow, padding=10)
+            self.alphaFrame.pack(fill="both", expand=True)
 
-        # Add label for instructions
-        self.instruction_label = ttk.Label(self.alphaFrame, text="Move to -20 degrees (toward user)", font=("Arial", 12))
-        self.instruction_label.pack(pady=(0, 10))
+            # Add label for instructions
+            self.instruction_label = ttk.Label(self.alphaFrame, text="Move to -20 degrees (toward user)", font=("Arial", 12))
+            self.instruction_label.pack(pady=(0, 10))
 
 
-        # Add text box for sample height
-        self.sample_height_label = ttk.Label(self.alphaFrame, text="Sample Height:")
-        self.sample_height_label.pack(anchor="w")
-        self.sample_height_entry = ttk.Entry(self.alphaFrame)
-        self.sample_height_entry.pack(fill="x", pady=5)
+            # Add text box for sample height
+            self.sample_height_label = ttk.Label(self.alphaFrame, text="Sample Height:")
+            self.sample_height_label.pack(anchor="w")
+            self.sample_height_entry = ttk.Entry(self.alphaFrame)
+            self.sample_height_entry.pack(fill="x", pady=5)
 
-        # Add text box for compression height
-        self.compression_height_label = ttk.Label(self.alphaFrame, text="Compression Height:")
-        self.compression_height_label.pack(anchor="w")
-        self.compression_height_entry = ttk.Entry(self.alphaFrame)
-        self.compression_height_entry.pack(fill="x", pady=5)
+            # Add text box for compression height
+            self.compression_height_label = ttk.Label(self.alphaFrame, text="Compression Height:")
+            self.compression_height_label.pack(anchor="w")
+            self.compression_height_entry = ttk.Entry(self.alphaFrame)
+            self.compression_height_entry.pack(fill="x", pady=5)
 
-        # Add button to collect power difference
-        self.collect_button = ttk.Button(self.alphaFrame, text="Collect Power Difference", command=lambda: self.__collectPowerDifference())
-        self.collect_button.pack(pady=10)
+            # Add button to collect power difference
+            self.collect_button = ttk.Button(self.alphaFrame, text="Collect Power Difference", command=lambda: self.__collectPowerDifference())
+            self.collect_button.pack(pady=10)
 
-        self.alpha_vals_temp_label = ttk.Label(self.alphaFrame, text="alpha values: " + str(self.alphaVals))
-        self.alpha_vals_temp_label.pack(pady=(0,10))
-        
+            self.alpha_vals_temp_label = ttk.Label(self.alphaFrame, text="alpha values: " + str(self.alphaVals))
+            self.alpha_vals_temp_label.pack(pady=(0,10))
+        else:
+            print("NEED TO OPEN POWER PLOT!!")
+            
     """
     the issue here is that start execute thread goes, but the other stuff happens before the data is gathered. I want to join start execute, but the problem is that 
     the graphs have to come out still. Investigate more thoroughly 
