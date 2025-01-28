@@ -637,41 +637,43 @@ class Gui:
     def updatePlotsFromData(self):
         self.timeStamp = time.time()
         if self.updatingPlots:
-            try:
-                if(self.micrometerController.downward):
-                    self.micrometerPlot.updatePlot(self.timeStamp, self.micrometerController.micrometerPosition[3:].strip())
-            except:
-                print("micrometer not found")
-            
-            try:
-                self.powerPlot.updatePlot(self.micrometerController.micrometerPosition[3:].strip(), abs(self.powermeter.device1Data - self.powermeter.device2Data))
-            except:
-                print("not enough powermeters connected.")
+            if(self.micrometerPlot is not None):
+                try:
+                    if(self.micrometerController.downward):
+                        self.micrometerPlot.updatePlot(self.timeStamp, self.micrometerController.micrometerPosition[3:].strip())
+                except:
+                    print("micrometer not found")
+            if self.powerPlot is not None: 
+                try:
+                    self.powerPlot.updatePlot(self.micrometerController.micrometerPosition[3:].strip(), abs(self.powermeter.device1Data - self.powermeter.device2Data))
+                except:
+                    print("not enough powermeters connected.")
+            if self.pow1Plot is not None:
+                try:
+                    self.pow1Plot.updatePlot(self.micrometerController.micrometerPosition[3:].strip(), self.powermeter.device1Data)
 
-            try:
-                self.pow1Plot.updatePlot(self.micrometerController.micrometerPosition[3:].strip(), self.powermeter.device1Data)
-
-            except:
-                print("not enough powermeters connected.")
-
-            try:
-                self.pow2Plot.updatePlot(self.micrometerController.micrometerPosition[3:].strip(), self.powermeter.device2Data)
-            except:
-                print("not enough powermeters connected.")
-            
-            try:
-                self.noisePlotPowDif.updatePlot(time.time(), abs(self.powermeter.device1Data - self.powermeter.device2Data))
-            except:
-                print("noise not going")
-            try:
-                self.noisePlotPow1.updatePlot(time.time(), self.powermeter.device1Data)
-            except:
-                print("noise not going")
-
-            try:
-                self.noisePlotPow2.updatePlot(time.time(), self.powermeter.device2Data)
-            except:
-                print("noise not going")
+                except:
+                    print("not enough powermeters connected.")
+            if self.pow2Plot is not None:
+                try:
+                    self.pow2Plot.updatePlot(self.micrometerController.micrometerPosition[3:].strip(), self.powermeter.device2Data)
+                except:
+                    print("not enough powermeters connected.")
+            if self.noisePlotPowDif is not None:  
+                try:
+                    self.noisePlotPowDif.updatePlot(time.time(), abs(self.powermeter.device1Data - self.powermeter.device2Data))
+                except:
+                    print("noise not going")
+            if self.noisePlotPow1 is not None:
+                try:
+                    self.noisePlotPow1.updatePlot(time.time(), self.powermeter.device1Data)
+                except:
+                    print("noise not going")
+            if self.noisePlotPow2 is not None:
+                try:
+                    self.noisePlotPow2.updatePlot(time.time(), self.powermeter.device2Data)
+                except:
+                    print("noise not going")
 
         if (self.executed == True): #right here all of the things that need to be done immediately after move(s) are done executing happen
             if self.polarimeter is not None:
