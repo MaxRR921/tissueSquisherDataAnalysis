@@ -186,11 +186,11 @@ class Gui:
         try:
             with open("alpha.txt", "r") as f:
                 idealAlphaString = f.read()
-            idealAlphaLabel = ttk.Label(frameTopMenu, text="ideal alpha: " + idealAlphaString)
-            idealAlphaLabel.pack(side='left')
+            self.idealAlphaLabel = ttk.Label(frameTopMenu, text="ideal alpha: " + idealAlphaString)
+            self.idealAlphaLabel.pack(side='left')
         except:
-            idealAlphaLabel = ttk.Label(frameTopMenu, text="no ideal alpha save file")
-            idealAlphaLabel.pack(side='left')
+            self.idealAlphaLabel = ttk.Label(frameTopMenu, text="no ideal alpha save file")
+            self.idealAlphaLabel.pack(side='left')
 
     """browseDataFile button creates the button for browsing for the data files."""
     def __browseDataFileButton(self, frameTopMenu):
@@ -675,5 +675,6 @@ class Gui:
                 pass
             with open("alpha.txt", "w") as f:
                 f.write(str(ideal_alpha))
+                self.idealAlphaLabel.config(text="ideal alpha: " + ideal_alpha)
 
 
