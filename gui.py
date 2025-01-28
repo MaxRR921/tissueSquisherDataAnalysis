@@ -296,24 +296,22 @@ class Gui:
            print("SLEEPING")
            time.sleep(5)
 
-        listTemp = []
-        listTemp.append(loadMove)
-        listTemp.append(unloadMove)
-        self.saveNumExecutions(tk.StringVar(self.alignAlphaWindow, "3"))
-        self.startExecuteThread(listTemp)
         
-
         if len(self.alphaVals) == 0:
-            self.alphaVals.append(0.85)
             self.instruction_label.config(text="move to 0 degrees (away from user)") 
             self.alpha_vals_temp_label.config(text="alpha values: " + str(self.alphaVals))
             print("none")
+            self.alphaVals.append(0)
         elif len(self.alphaVals) == 1:
-            self.alphaVals.append(0.35)
+            self.alphaVals.append(self.powerPlot.maxValY - self.powerPlot.minValY)
             self.instruction_label.config(text="move to 20 degrees (away from user)") 
             self.alpha_vals_temp_label.config(text="alpha values: " + str(self.alphaVals))
         elif len(self.alphaVals) == 2:
-            self.alphaVals.append(-0.65)
+            self.alphaVals.append(self.powerPlot.maxValY - self.powerPlot.minValY)
+            self.alpha_vals_temp_label.config(text="alpha values: " + str(self.alphaVals))
+            self.collect_button.config(text="compute ideal alpha")
+        elif len(self.alphaVals) == 3:
+            self.alphaVals.append(self.powerPlot.maxValY - self.powerPlot.minValY)
             self.alpha_vals_temp_label.config(text="alpha values: " + str(self.alphaVals))
             self.ideal_alpha = self.angleFind.findAngle(self.alphaVals)
             self.__saveIdealAlpha(self.ideal_alpha)
@@ -322,6 +320,14 @@ class Gui:
             instruction_label = ttk.Label(self.alphaFrame, text="error, len(alphaVals) should not have this length", font=("Arial", 12))
             instruction_label.pack(pady=(0, 10))
         
+        listTemp = []
+        listTemp.append(loadMove)
+        listTemp.append(unloadMove)
+        self.saveNumExecutions(tk.StringVar(self.alignAlphaWindow, "3"))
+        self.startExecuteThread(listTemp)
+        
+
+       
 
         
 
