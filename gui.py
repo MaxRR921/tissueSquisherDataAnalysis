@@ -675,6 +675,6 @@ class Gui:
                 pass
             with open("alpha.txt", "w") as f:
                 f.write(str(ideal_alpha))
-                self.idealAlphaLabel.config(text="ideal alpha: " + ideal_alpha)
+                self.idealAlphaLabel.config(text="ideal alpha: " + str(ideal_alpha))
 
 
