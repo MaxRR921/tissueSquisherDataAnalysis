@@ -285,7 +285,9 @@ class Gui:
                  
         if self.micrometerController.micrometerPosition.decode('utf-8')[3:6].strip() != unloadMove.targetHeight:
            self.micrometerController.setVelocity("2")
-           self.micrometerController.goToHeight(sampleHeight)
+           self.micrometerController.goToHeight(unloadMove.targetHeight)
+           print(self.micrometerController.micrometerPosition.decode('utf-8')[3:6].strip()) 
+           print(unloadMove.targetHeight)
            print("SLEEPING")
            time.sleep(5)
 
