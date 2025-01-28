@@ -186,7 +186,7 @@ class Gui:
         try:
             with open("alpha.txt", "r") as f:
                 idealAlphaString = f.read()
-            idealAlphaLabel = ttk.Label(frameTopMenu, text=idealAlphaString)
+            idealAlphaLabel = ttk.Label(frameTopMenu, text="ideal alpha" + idealAlphaString)
             idealAlphaLabel.pack(side='left')
         except:
             idealAlphaLabel = ttk.Label(frameTopMenu, text="no ideal alpha save file")
