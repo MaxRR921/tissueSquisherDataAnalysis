@@ -302,14 +302,34 @@ class Gui:
             self.alpha_vals_temp_label.config(text="alpha values: " + str(self.alphaVals))
             print("none")
             self.alphaVals.append(0)
+
+            listTemp = []
+            listTemp.append(loadMove)
+            listTemp.append(unloadMove)
+            self.saveNumExecutions(tk.StringVar(self.alignAlphaWindow, "3"))
+            self.startExecuteThread(listTemp)
         elif len(self.alphaVals) == 1:
             self.alphaVals.append(self.powerPlot.maxValY - self.powerPlot.minValY)
             self.instruction_label.config(text="move to 20 degrees (away from user)") 
             self.alpha_vals_temp_label.config(text="alpha values: " + str(self.alphaVals[1:2]))
+
+            listTemp = []
+            listTemp.append(loadMove)
+            listTemp.append(unloadMove)
+            self.saveNumExecutions(tk.StringVar(self.alignAlphaWindow, "3"))
+            self.startExecuteThread(listTemp)
+
         elif len(self.alphaVals) == 2:
             self.alphaVals.append(self.powerPlot.maxValY - self.powerPlot.minValY)
             self.alpha_vals_temp_label.config(text="alpha values: " + str(self.alphaVals[1:3]))
             self.collect_button.config(text="compute ideal alpha")
+
+            listTemp = []
+            listTemp.append(loadMove)
+            listTemp.append(unloadMove)
+            self.saveNumExecutions(tk.StringVar(self.alignAlphaWindow, "3"))
+            self.startExecuteThread(listTemp)
+
         elif len(self.alphaVals) == 3:
             self.alphaVals.append(self.powerPlot.maxValY - self.powerPlot.minValY)
             self.alpha_vals_temp_label.config(text="alpha values: " + str(self.alphaVals[1:4]))
@@ -320,11 +340,6 @@ class Gui:
             instruction_label = ttk.Label(self.alphaFrame, text="error, len(alphaVals) should not have this length", font=("Arial", 12))
             instruction_label.pack(pady=(0, 10))
         
-        listTemp = []
-        listTemp.append(loadMove)
-        listTemp.append(unloadMove)
-        self.saveNumExecutions(tk.StringVar(self.alignAlphaWindow, "3"))
-        self.startExecuteThread(listTemp)
         
 
        
