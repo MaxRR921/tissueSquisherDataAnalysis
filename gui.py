@@ -402,8 +402,7 @@ class Gui:
 
 
     """options are all of the options to select the plots you want to see displayed in real time (semi real time
-    in the case of the polarimeter plot). iti initializes all of the plot2D objects 
-    !!!TODO: BIG TODO: looks like plots still take data and generate csvs and try to draw even when they are closed. i need to figurew out a way to fix this."""
+    in the case of the polarimeter plot). iti initializes all of the plot2D objects""" 
     def __option1(self):
         print("Option 1 selected")
         def remove_plot(plot):
@@ -721,5 +720,3 @@ class Gui:
             with open("alpha.txt", "w") as f:
                 f.write(str(ideal_alpha))
                 self.idealAlphaLabel.config(text="ideal alpha: " + str(ideal_alpha))
-
-
