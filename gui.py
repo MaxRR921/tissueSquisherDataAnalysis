@@ -241,6 +241,7 @@ class Gui:
     def __alignAlpha(self):
         if self.powerPlot is None:
             self.powerPlot = Plot2D('power plot', 'distance (mm)', 'power (um)', True)
+            self.plotList.append(self.powerPlot)
         
         self.alphaVals = []
         # Create a new pop-up window
@@ -295,12 +296,12 @@ class Gui:
         print("COMPRESSION HEIGHT: ", compressionHeight)
         loadMove = move.Move(self.micrometerController)
         loadMove.targetHeight = compressionHeight
-        loadMove.velocity = "1"
+        loadMove.velocity = ".1"
         
 
         unloadMove = move.Move(self.micrometerController)
         unloadMove.targetHeight = sampleHeight 
-        unloadMove.velocity = "1"
+        unloadMove.velocity = ".1"
 
 
 
@@ -552,7 +553,7 @@ class Gui:
         self.noiseThread.start()
 
     def __collectNoise(self):
-        t = 20
+        t = 60
         start_time = time.time()
         end_time = start_time 
         if not self.updatingPlots:
