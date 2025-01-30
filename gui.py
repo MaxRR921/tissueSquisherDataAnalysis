@@ -49,13 +49,13 @@ class Gui:
             print("Polarimeter Connection Error")
             self.polarimeter = None
 
-        try:
-            self.powermeter = powermeter.Powermeter()
-            self.powermeterThread = Thread(target=self.powermeter.start, args=[])
-            print("Powermeters connected successfully")
-        except:
-            print("Powermeter Connection Error. You need two powermeters connected at all times.")
-            self.powermeter = None
+        # try:
+        self.powermeter = powermeter.Powermeter()
+        self.powermeterThread = Thread(target=self.powermeter.start, args=[])
+        print("Powermeters connected successfully")
+        # except:
+        print("Powermeter Connection Error. You need two powermeters connected at all times.")
+        self.powermeter = None
 
         # Event booleans
         self.updatingPlots = False 
