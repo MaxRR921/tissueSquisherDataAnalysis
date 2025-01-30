@@ -8,7 +8,7 @@ except ImportError:
     print("win32 modules are not available on this platform. Continuing without them.")
 
 import time
-from threading import Thread
+import threading
 import numpy as np
 
 ###IMPORTANT!!! THREADS FOR EAHC POWERMETER SHARE A COMMON RUN VARIABLE BEWARE OF RACE CONDITIONS BUT DOESN"T MATTER BC
@@ -43,7 +43,7 @@ class Powermeter:
             self.device2ZeroTime = 0.0
             self.device1Data = 0.0
             self.device2Data = 0.0
-            self.run = Thread.Event()
+            self.run = threading.Event()
             self.run.set()  # to start running
             print("RUN is: ", self.run)
         # except OSError as err:
@@ -61,8 +61,8 @@ class Powermeter:
     or there is an error, but !!I want to make it so one device could be connected...?"""
     def start(self):
         try:
-            power1 = Thread(target = self.__runDevice1, args=[self.deviceList[0]])
-            power2 = Thread(target = self.__runDevice2, args=[self.deviceList[1]])
+            power1 = threading.Thread(target = self.__runDevice1, args=[self.deviceList[0]])
+            power2 = threading.Thread(target = self.__runDevice2, args=[self.deviceList[1]])
             power1.start()
             power2.start()
             power1.join()
