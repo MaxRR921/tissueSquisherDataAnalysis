@@ -28,7 +28,7 @@ class Powermeter:
     devices even when we aren't trying to take measurements which i guess is good for seeing results even when nothing is happening.)
     """
     def __init__(self):
-        # try:
+        try:
             pythoncom.CoInitialize()
             self.OphirCom = win32com.client.Dispatch("OphirLMMeasurement.CoLMMeasurement")
             # Stop & Close all devices
@@ -45,16 +45,13 @@ class Powermeter:
             self.device2Data = 0.0
             self.run = threading.Event()
             self.run.set()  # to start running
-            print("RUN is: ", self.run)
-        # except OSError as err:
-        #     print("OS error: {0}".format(err))
-        # except ModuleNotFoundError as e:
-        #     print("Module not found error:", e)
-        # except:
-        #     print("no powermeters connected. Note: you must be on windows.")
+        except OSError as err:
+            print("OS error: {0}".format(err))
+        except ModuleNotFoundError as e:
+            print("Module not found error:", e)
+        except:
+            print("no powermeters connected. Note: you must be on windows.")
         # Stop & Close all devices
-        # thread = Thread(target = self.start, args=[])
-        # thread.start()
 
 
     """start creates one thread for each powermeter device that should be connected. it's in a try catch block incase two devices are connected
