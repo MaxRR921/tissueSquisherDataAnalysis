@@ -43,8 +43,8 @@ class Powermeter:
             self.device2ZeroTime = 0.0
             self.device1Data = 0.0
             self.device2Data = 0.0
-            self.run_event = Thread.Event()
-            self.run_event.set()  # to start running
+            self.run = Thread.Event()
+            self.run.set()  # to start running
         except OSError as err:
             print("OS error: {0}".format(err))
         except ModuleNotFoundError as e:
@@ -83,7 +83,7 @@ class Powermeter:
             # print('\n----------Data for S/N {0} ---------------'.format(device))
             # An Example for data retrieving
             self.OphirCom.StartStream(deviceHandle, 0)# start measuring
-            while self.run_event.is_set():  
+            while self.run.is_set():  
                 time.sleep(.2)# wait a little for data
                 data = self.OphirCom.GetData(deviceHandle, 0)
                 if len(data[0]) > 0: # if any data available, print the first one from the batch
@@ -115,7 +115,7 @@ class Powermeter:
             # print('\n----------Data for S/N {0} ---------------'.format(device))
             # An Example for data retrieving
             self.OphirCom.StartStream(deviceHandle, 0)# start measuring
-            while self.run_event.is_set():
+            while self.run.is_set():
                 time.sleep(.2)# wait a little for data
                 data = self.OphirCom.GetData(deviceHandle, 0)
                 if len(data[0]) > 0: # if any data available, print the first one from the batch
