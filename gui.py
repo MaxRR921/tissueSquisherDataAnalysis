@@ -49,13 +49,13 @@ class Gui:
             print("Polarimeter Connection Error")
             self.polarimeter = None
 
-        # try:
-        self.powermeter = powermeter.Powermeter()
-        self.powermeterThread = Thread(target=self.powermeter.start, args=[])
-        print("Powermeters connected successfully")
-        # except:
-        print("Powermeter Connection Error. You need two powermeters connected at all times.")
-        self.powermeter = None
+        try:
+            self.powermeter = powermeter.Powermeter()
+            self.powermeterThread = Thread(target=self.powermeter.start, args=[])
+            print("Powermeters connected successfully")
+        except:
+            print("Powermeter Connection Error. You need two powermeters connected at all times.")
+            self.powermeter = None
 
         # Event booleans
         self.updatingPlots = False 
@@ -241,7 +241,6 @@ class Gui:
     def __alignAlpha(self):
         if self.powerPlot is None:
             self.powerPlot = Plot2D('power plot', 'distance (mm)', 'power (um)', True)
-            self.plotList.append(self.powerPlot)
         
         self.alphaVals = []
         # Create a new pop-up window
@@ -296,12 +295,12 @@ class Gui:
         print("COMPRESSION HEIGHT: ", compressionHeight)
         loadMove = move.Move(self.micrometerController)
         loadMove.targetHeight = compressionHeight
-        loadMove.velocity = ".1"
+        loadMove.velocity = "1"
         
 
         unloadMove = move.Move(self.micrometerController)
         unloadMove.targetHeight = sampleHeight 
-        unloadMove.velocity = ".1"
+        unloadMove.velocity = "1"
 
 
 
@@ -553,7 +552,7 @@ class Gui:
         self.noiseThread.start()
 
     def __collectNoise(self):
-        t = 60
+        t = 20
         start_time = time.time()
         end_time = start_time 
         if not self.updatingPlots:
