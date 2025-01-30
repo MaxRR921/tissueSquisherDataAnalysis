@@ -133,7 +133,7 @@ class Powermeter:
             print('\nNo Sensor attached to {0} !!!'.format(device))
 
     def stop(self):
-        self.run_event.clear()
+        self.run.clear()
 
     def __printData(self):
         print('\n----------Data for S/N {0} ---------------'.format(self.deviceList[0]))
