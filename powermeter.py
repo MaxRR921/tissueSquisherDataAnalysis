@@ -45,6 +45,7 @@ class Powermeter:
             self.device2Data = 0.0
             self.run = Thread.Event()
             self.run.set()  # to start running
+            print("RUN is: ", self.run)
         except OSError as err:
             print("OS error: {0}".format(err))
         except ModuleNotFoundError as e:
