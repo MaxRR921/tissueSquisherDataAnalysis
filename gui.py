@@ -245,6 +245,7 @@ class Gui:
     def __alignAlpha(self):
         if self.powerPlot is None:
             self.powerPlot = Plot2D('power plot', 'distance (mm)', 'power (um)', True)
+            self.plotList.append(self.powerPlot)
         
         self.alphaVals = []
         # Create a new pop-up window
