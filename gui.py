@@ -715,6 +715,7 @@ class Gui:
                 
             self.executed.clear()
             self.stopExecution = False
+
             if self.aligningAlpha.is_set():
                 self.aligningAlpha.clear()
                 tempList = []
