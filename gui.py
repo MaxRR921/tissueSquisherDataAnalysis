@@ -663,7 +663,7 @@ class Gui:
                     print("not enough powermeters connected.")
             if self.noisePlotPowDif is not None:  
                 try:
-                    self.noisePlotPowDif.updatePlot(time.time(), abs(self.powermeter.device1Data - self.powermeter.device2Data))
+                    self.noisePlotPowDif.updatePlot(time.time(), self.powermeter.device1Data - self.powermeter.device2Data)
                 except:
                     print("noise not going")
             if self.noisePlotPow1 is not None:

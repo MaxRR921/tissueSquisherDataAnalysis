@@ -32,7 +32,7 @@ def ex():
         ExList = np.zeros(npoints, dtype=complex)
         EyList = np.zeros(npoints, dtype=complex)
 
-        f = np.linspace(0, 9, npoints)  # Force in N/m (2D analysis)
+        f = np.linspace(0, 10.36436, npoints)  # Force in N/m (2D analysis)
         l = np.linspace(7.25, 20, npoints)  # Interaction length, about 18 mm
         Ex_0 = 1
         lambda_light = 1550e-9  # Wavelength of light in fiber
