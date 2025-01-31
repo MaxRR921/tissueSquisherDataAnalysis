@@ -315,6 +315,7 @@ class Gui:
            m.velocity = "2"
            m.targetHeight = unloadMove.targetHeight 
            self.startExecuteThread(m)
+           print("THIS rRUNNS!!!!!")
            self.executeThread.join()
 
         
