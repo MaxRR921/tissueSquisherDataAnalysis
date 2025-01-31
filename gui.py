@@ -314,10 +314,12 @@ class Gui:
            m = move.Move(self.micrometerController)
            m.velocity = "2"
            m.targetHeight = unloadMove.targetHeight 
-           self.startExecuteThread(m)
            print("THIS rRUNNS!!!!!")
+           self.startExecuteThread(m)
            self.executeThread.join()
 
+        
+        time.sleep(10)
         
         self.aligningAlpha.set()
 
