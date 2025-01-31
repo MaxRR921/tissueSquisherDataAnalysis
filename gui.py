@@ -321,6 +321,8 @@ class Gui:
            self.startExecuteThread(temp)
            self.executeThread.join()
 
+        print("SLEEPING")
+        time.sleep(10)
         self.aligningAlpha.set() 
 
         if len(self.alphaVals) == 0:
