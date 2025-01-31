@@ -7,7 +7,7 @@ from plotter import Plot2D
 import time
 import move
 import moveGui
-from threading import Thread
+import threading
 from tkinter import ttk
 from ttkthemes import ThemedTk
 import polarimeter
@@ -44,21 +44,22 @@ class Gui:
 
         try:
             self.polarimeter = polarimeter.Polarimeter(self.micrometerController)
-            self.polarimeterThread = Thread(target=self.polarimeter.start, args=[])
+            self.polarimeterThread = threading.Thread(target=self.polarimeter.start, args=[])
         except:
             print("Polarimeter Connection Error")
             self.polarimeter = None
 
         try:
             self.powermeter = powermeter.Powermeter()
-            self.powermeterThread = Thread(target=self.powermeter.start, args=[])
+            self.powermeterThread = threading.Thread(target=self.powermeter.start, args=[])
             print("Powermeters connected successfully")
         except:
             print("Powermeter Connection Error. You need two powermeters connected at all times.")
             self.powermeter = None
 
         # Event booleans
-        self.updatingPlots = False 
+        self.updatingPlots = threading.Event() 
+        self.updatingPlots.clear()
         self.triedMicrometer = False
         self.executed = False
         self.startedPolarimeter = False
@@ -149,7 +150,7 @@ class Gui:
         if self.powermeter is not None:
             self.powermeter.stop()
         self.stopExecution = True
-        self.updatingPlots = False
+        self.updatingPlots.clear() 
         try:
             self.executeThread.join()
         except:
@@ -377,7 +378,7 @@ class Gui:
     """startpolarimeterthread starts the thread for data collection from the powlarimeter. This thread runs polarimeter.start"""
     def __startPolarimeterThread(self):
         print("SHOULD START")
-        self.polarimeterThread = Thread(target=self.polarimeter.start, args=[])
+        self.polarimeterThread = threading.Thread(target=self.polarimeter.start, args=[])
         self.polarimeterThread.start()
 
     """dropdownButton creates the dropdown button for all of the graphs that the user has the option to add"""
@@ -542,25 +543,25 @@ class Gui:
     def startExecuteThread(self, moveList):
         for plot in self.plotList:
             plot.resetPlot()
-        self.executeThread = Thread(target=self.__collect, args=[moveList])
+        self.executeThread = threading.Thread(target=self.__collect, args=[moveList])
         self.executeThread.start()
 
     def startNoiseThread(self):
         for plot in self.plotList:
             plot.resetPlot()
-        self.noiseThread = Thread(target=self.__collectNoise)
+        self.noiseThread = threading.Thread(target=self.__collectNoise)
         self.noiseThread.start()
 
     def __collectNoise(self):
         t = 20
         start_time = time.time()
         end_time = start_time 
-        if not self.updatingPlots:
-            self.updatingPlots = True
+        if not self.updatingPlots.is_set():
+            self.updatingPlots.set()
         while(end_time - start_time < t):
            end_time = time.time() 
            print("waiting")
-        self.updatingPlots = False
+        self.updatingPlots.clear()
         try:
             self.noisePlotPowDif.generateCsvFromPlot("power dif vs. time.csv")
         except:
@@ -591,8 +592,8 @@ class Gui:
     """
     def __collect(self, moveList):
         print("collecting data")
-        if not self.updatingPlots:
-            self.updatingPlots = True
+        if not self.updatingPlots.is_set():
+            self.updatingPlots.set() 
 
         #POLARIMETER NEEDS TO START RUNNING BEFORE MOVES EXECUTE. IT DOESN'T CONSTANTLY RUN LIKE THE POWERMETER.
         if(self.polarimeter is not None):
@@ -613,7 +614,7 @@ class Gui:
                     break
 
         self.executed = True
-        self.updatingPlots = False
+        self.updatingPlots.clear()
         print("DONE")
 
 
@@ -637,7 +638,7 @@ class Gui:
     """DEAL WITH PLOTTING TRY CATCH""" 
     def updatePlotsFromData(self):
         self.timeStamp = time.time()
-        if self.updatingPlots:
+        if self.updatingPlots.is_set():
             if(self.micrometerPlot is not None):
                 try:
                     if(self.micrometerController.downward):
@@ -695,7 +696,7 @@ class Gui:
             print(self.phase)
             print("STRAIN")
             print(self.strain)
-            self.updatingPlots = False
+            self.updatingPlots.clear() 
             if self.polPlot is not None:
                 self.polPlot.updatePlot(self.polarimeter.positionList, self.phase.tolist())
                 self.polPlot.colorLines()
