@@ -709,6 +709,12 @@ class Gui:
             if self.powerPlot is not None:
                 self.powerPlot.colorLines()
             
+                        
+
+                
+                
+            self.executed.clear()
+            self.stopExecution = False
             if self.aligningAlpha.is_set():
                 self.aligningAlpha.clear()
                 tempList = []
@@ -718,12 +724,6 @@ class Gui:
                 tempList.append(m)
                 self.startExecuteThread(tempList)
 
-            
-
-                
-                
-            self.executed.clear()
-            self.stopExecution = False
 
             
         
