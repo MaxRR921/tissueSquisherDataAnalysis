@@ -320,10 +320,7 @@ class Gui:
            self.startExecuteThread(temp)
            self.executeThread.join()
 
-        
-        time.sleep(10)
-        
-        self.aligningAlpha.set()
+        self.aligningAlpha.set() 
 
         if len(self.alphaVals) == 0:
             self.instruction_label.config(text="move to 0 degrees (away from user)") 
@@ -724,13 +721,8 @@ class Gui:
 
             if self.aligningAlpha.is_set():
                 self.aligningAlpha.clear()
-                tempList = []
-                m = move.Move(self.micrometerController)
-                m.targetHeight = "12" 
-                m.velocity = "1"
-                tempList.append(m)
-                self.startExecuteThread(tempList)
-
+                self.micrometerController.setVelocity("2")
+                self.micrometerController.goToHeight("12")
 
             
         
