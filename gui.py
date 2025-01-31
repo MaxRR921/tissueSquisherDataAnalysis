@@ -289,7 +289,6 @@ class Gui:
     """
     def __collectPowerDifference(self):
         # Placeholder for the logic to collect power difference
-        self.aligningAlpha.set()
         sampleHeight = self.sample_height_entry.get()
         compressionHeight = self.compression_height_entry.get()
         #TODO: add this to the normal text boxes as well!!!
@@ -312,14 +311,15 @@ class Gui:
 
                  
         if self.micrometerController.micrometerPosition.decode('utf-8')[3:6].strip() != unloadMove.targetHeight:
-           self.micrometerController.setVelocity("2")
-           self.micrometerController.goToHeight(unloadMove.targetHeight)
-           print(self.micrometerController.micrometerPosition.decode('utf-8')[3:6].strip()) 
-           print(unloadMove.targetHeight)
-           print("SLEEPING")
+           m = move.Move(self.micrometerController)
+           m.velocity = "2"
+           m.targetHeight = unloadMove.targetHeight 
+           self.startExecuteThread(m)
            time.sleep(5)
 
         
+        self.aligningAlpha.set()
+
         if len(self.alphaVals) == 0:
             self.instruction_label.config(text="move to 0 degrees (away from user)") 
             self.alpha_vals_temp_label.config(text="alpha values: " + str(self.alphaVals))
