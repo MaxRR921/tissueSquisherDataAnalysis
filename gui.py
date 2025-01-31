@@ -322,6 +322,7 @@ class Gui:
            self.executeThread.join()
 
         print("SLEEPING")
+        print("SELF. updating plots is: ", self.updatingPlots.is_set())
         time.sleep(10)
         self.aligningAlpha.set() 
 
