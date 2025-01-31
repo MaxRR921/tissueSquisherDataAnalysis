@@ -359,9 +359,9 @@ class Gui:
         elif len(self.alphaVals) == 3:
             self.alphaVals.append(self.powerPlot.maxValY - self.powerPlot.minValY)
             self.alpha_vals_temp_label.config(text="alpha values: " + str(self.alphaVals[1:4]))
-            self.ideal_alpha = self.angleFind.findAngle(self.alphaVals[1:4])
-            self.__saveIdealAlpha(self.ideal_alpha)
-            self.instruction_label.config(text="ideal alpha: " + str(self.ideal_alpha))
+            # self.ideal_alpha = self.angleFind.findAngle(self.alphaVals[1:4])
+            # self.__saveIdealAlpha(self.ideal_alpha)
+            self.instruction_label.config(text="ideal alpha: " + "Hello")
         else:
             instruction_label = ttk.Label(self.alphaFrame, text="error, len(alphaVals) should not have this length", font=("Arial", 12))
             instruction_label.pack(pady=(0, 10))
