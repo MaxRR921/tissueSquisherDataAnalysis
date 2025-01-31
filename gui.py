@@ -61,7 +61,8 @@ class Gui:
         self.updatingPlots = threading.Event() 
         self.updatingPlots.clear()
         self.triedMicrometer = False
-        self.executed = False
+        self.executed = threading.Event()
+        self.executed.clear()
         self.startedPolarimeter = False
 
         #lists for phase and strain...bad.
@@ -613,7 +614,7 @@ class Gui:
                 else:
                     break
 
-        self.executed = True
+        self.executed.set()
         self.updatingPlots.clear()
         print("DONE")
 
@@ -677,7 +678,7 @@ class Gui:
                 except:
                     print("noise not going")
 
-        if (self.executed == True): #right here all of the things that need to be done immediately after move(s) are done executing happen
+        if (self.executed.is_set()): #right here all of the things that need to be done immediately after move(s) are done executing happen
             if self.polarimeter is not None:
                 self.polarimeter.run = False
                 self.strain, self.phase  = dataAnalysisVmaster.analyzeData(self.polarimeter.s1List, self.polarimeter.s2List, self.polarimeter.s3List, self.polarimeter.timeList)
@@ -705,8 +706,10 @@ class Gui:
             if self.powerPlot is not None:
                 self.powerPlot.colorLines()
                 
-            self.executed = False
+            self.executed.clear()
             self.stopExecution = False
+
+            
         
         if self.powermeter is not None:
             self.power1Text.set(str(self.powermeter.device1Data))
