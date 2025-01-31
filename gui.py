@@ -296,12 +296,12 @@ class Gui:
         print("COMPRESSION HEIGHT: ", compressionHeight)
         loadMove = move.Move(self.micrometerController)
         loadMove.targetHeight = compressionHeight
-        loadMove.velocity = "1"
+        loadMove.velocity = "0.1"
         
 
         unloadMove = move.Move(self.micrometerController)
         unloadMove.targetHeight = sampleHeight 
-        unloadMove.velocity = "1"
+        unloadMove.velocity = "0.1"
 
 
 
