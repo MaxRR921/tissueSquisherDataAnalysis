@@ -317,6 +317,7 @@ class Gui:
            temp = []
            temp.append(m)
            print("THIS rRUNNS!!!!!")
+           self.saveNumExecutions(tk.StringVar(self.alignAlphaWindow, "1"))
            self.startExecuteThread(temp)
            self.executeThread.join()
 
@@ -729,6 +730,7 @@ class Gui:
                 m.targetHeight = "12" 
                 m.velocity = "1"
                 tempList.append(m)
+                self.saveNumExecutions(tk.StringVar(self.alignAlphaWindow, "1"))
                 self.startExecuteThread(tempList)
 
 
