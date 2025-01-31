@@ -64,6 +64,8 @@ class Gui:
         self.executed = threading.Event()
         self.executed.clear()
         self.startedPolarimeter = False
+        self.aligningAlpha = threading.Event()
+        self.aligningAlpha.clear()
 
         #lists for phase and strain...bad.
         self.phase = np.array(np.zeros)
@@ -286,6 +288,7 @@ class Gui:
     """
     def __collectPowerDifference(self):
         # Placeholder for the logic to collect power difference
+        self.aligningAlpha.set()
         sampleHeight = self.sample_height_entry.get()
         compressionHeight = self.compression_height_entry.get()
         #TODO: add this to the normal text boxes as well!!!
@@ -705,6 +708,19 @@ class Gui:
             
             if self.powerPlot is not None:
                 self.powerPlot.colorLines()
+            
+            if self.aligningAlpha.is_set():
+                self.aligningAlpha.clear()
+                tempList = []
+                m = move.Move(self.micrometerController)
+                m.targetHeight = "12" 
+                m.velocity = "1"
+                tempList.append(m)
+                self.startExecuteThread(tempList)
+
+            
+
+                
                 
             self.executed.clear()
             self.stopExecution = False
