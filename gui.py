@@ -317,6 +317,7 @@ class Gui:
            temp = []
            temp.append(m)
            print("THIS rRUNNS!!!!!")
+           self.saveNumExecutions(tk.StringVar(self.alignAlphaWindow, "1"))
            self.startExecuteThread(temp)
            self.executeThread.join()
 
