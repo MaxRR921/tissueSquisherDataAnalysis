@@ -315,7 +315,7 @@ class Gui:
            m.velocity = "2"
            m.targetHeight = unloadMove.targetHeight 
            self.startExecuteThread(m)
-           time.sleep(5)
+           self.executeThread.join()
 
         
         self.aligningAlpha.set()
