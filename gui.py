@@ -710,7 +710,6 @@ class Gui:
             print(self.phase)
             print("STRAIN")
             print(self.strain)
-            self.updatingPlots.clear() 
             if self.polPlot is not None:
                 self.polPlot.updatePlot(self.polarimeter.positionList, self.phase.tolist())
                 self.polPlot.colorLines()
