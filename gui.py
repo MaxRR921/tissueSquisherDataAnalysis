@@ -310,7 +310,7 @@ class Gui:
         if self.micrometerController.micrometerPosition.decode('utf-8')[3:6].strip() != unloadMove.targetHeight:
            m = move.Move(self.micrometerController)
            m.velocity = "2"
-           m.targetHeight = "2"  
+           m.targetHeight = unloadMove.targetHeight  
            temp = []
            temp.append(m)
            self.saveNumExecutions(tk.StringVar(self.alignAlphaWindow, "1"))
