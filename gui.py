@@ -319,6 +319,7 @@ class Gui:
            self.startExecuteThread(temp)
            self.executeThread.join()
            print("JOINED!")
+           time.sleep(3)
 
         self.aligningAlpha.set()
 
