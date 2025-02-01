@@ -64,6 +64,8 @@ class Gui:
         self.executed = threading.Event()
         self.executed.clear()
         self.startedPolarimeter = False
+        self.aligningAlpha = threading.Event()
+        self.aligningAlpha.clear()
 
         #lists for phase and strain...bad.
         self.phase = np.array(np.zeros)
@@ -287,6 +289,7 @@ class Gui:
     """
     def __collectPowerDifference(self):
         # Placeholder for the logic to collect power difference
+        self.aligningAlpha.set()
         sampleHeight = self.sample_height_entry.get()
         compressionHeight = self.compression_height_entry.get()
         #TODO: add this to the normal text boxes as well!!!
@@ -337,9 +340,12 @@ class Gui:
             listTemp.append(loadMove)
             listTemp.append(unloadMove)
             self.saveNumExecutions(tk.StringVar(self.alignAlphaWindow, "3"))
+            
             self.startExecuteThread(listTemp)
         elif len(self.alphaVals) == 1:
             self.alphaVals.append(self.powerPlot.maxValY - self.powerPlot.minValY)
+            for plot in self.plotList:
+                plot.resetPlot()
             self.instruction_label.config(text="move to 20 degrees (away from user)") 
             self.alpha_vals_temp_label.config(text="alpha values: " + str(self.alphaVals[1:2]))
 
@@ -351,8 +357,11 @@ class Gui:
 
         elif len(self.alphaVals) == 2:
             self.alphaVals.append(self.powerPlot.maxValY - self.powerPlot.minValY)
+            for plot in self.plotList:
+                plot.resetPlot()
             self.alpha_vals_temp_label.config(text="alpha values: " + str(self.alphaVals[1:3]))
             self.collect_button.config(text="compute ideal alpha")
+            self.aligningAlpha.clear()
 
             listTemp = []
             listTemp.append(loadMove)
