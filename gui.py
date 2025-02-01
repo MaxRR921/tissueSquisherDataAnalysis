@@ -315,6 +315,7 @@ class Gui:
            temp.append(m)
            self.startExecuteThread(temp)
            self.executeThread.join()
+           print("JOINED!")
            time.sleep(10)
 
         #    self.micrometerController.setVelocity("2")
