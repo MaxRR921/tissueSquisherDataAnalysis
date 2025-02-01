@@ -66,8 +66,6 @@ class Gui:
         self.startedPolarimeter = False
         self.aligningAlpha = threading.Event()
         self.aligningAlpha.clear()
-        self.isRaisingMicrometer = threading.Event()
-        self.isRaisingMicrometer.clear()
 
         #lists for phase and strain...bad.
         self.phase = np.array(np.zeros)
@@ -556,7 +554,6 @@ class Gui:
         listTemp = []
         listTemp.append(raiseMove)
         self.saveNumExecutions(tk.StringVar(self.root, "1"))
-        self.isRaisingMicrometer.set()
         self.startExecuteThread(listTemp)
 
         
@@ -664,7 +661,7 @@ class Gui:
     """DEAL WITH PLOTTING TRY CATCH""" 
     def updatePlotsFromData(self):
         self.timeStamp = time.time()
-        if self.updatingPlots.is_set() and not self.isRaisingMicrometer.is_set():
+        if self.updatingPlots.is_set():
             if(self.micrometerPlot is not None):
                 try:
                     if(self.micrometerController.downward):
@@ -731,7 +728,6 @@ class Gui:
                 self.powerPlot.colorLines()
                 
             self.executed.clear()
-            self.isRaisingMicrometer.clear()
             self.stopExecution = False
 
             
