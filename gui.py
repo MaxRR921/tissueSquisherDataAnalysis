@@ -564,8 +564,9 @@ class Gui:
     thecollect method. 
     !! should make it just use self.movelist...."""
     def startExecuteThread(self, moveList):
-        for plot in self.plotList:
-            plot.resetPlot()
+        if not self.aligningAlpha.is_set():
+            for plot in self.plotList:
+                plot.resetPlot()
         self.executeThread = threading.Thread(target=self.__collect, args=[moveList])
         self.executeThread.start()
 
