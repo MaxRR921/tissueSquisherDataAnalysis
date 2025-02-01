@@ -308,12 +308,19 @@ class Gui:
 
                  
         if self.micrometerController.micrometerPosition.decode('utf-8')[3:6].strip() != unloadMove.targetHeight:
-           self.micrometerController.setVelocity("2")
-           self.micrometerController.goToHeight(unloadMove.targetHeight)
-           print(self.micrometerController.micrometerPosition.decode('utf-8')[3:6].strip()) 
-           print(unloadMove.targetHeight)
-           print("SLEEPING")
-           time.sleep(5)
+           m = move.Move(self.micrometerController)
+           m.velocity = "2"
+           m.targetHeight = "12"
+           temp = []
+           temp.append(m)
+           self.startExecuteThread(m)
+           self.executeThread.join()
+        #    self.micrometerController.setVelocity("2")
+        #    self.micrometerController.goToHeight(unloadMove.targetHeight)
+        #    print(self.micrometerController.micrometerPosition.decode('utf-8')[3:6].strip()) 
+        #    print(unloadMove.targetHeight)
+        #    print("SLEEPING")
+        #    time.sleep(10)
 
         
         if len(self.alphaVals) == 0:
