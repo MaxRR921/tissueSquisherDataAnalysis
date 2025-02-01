@@ -21,9 +21,7 @@ import csv
 !it also initializs self.phase and self.strain np.arrays which is kind of weird
 it then adds a default move to the move list, which is fine
 after that it initializes some more gui elements.
-
 !THIS METHOD ALSO STARTS THE POWERMETERS THREAD, WHICH THAT THREAD THEN SPAWNS A THREAD FOR EACH POWERMETER AND WAITS UNTIL both of those join.
-
 !starts updating all of the graphs. this is bad because that method sucks rn. because of a few reasons.
 """
 class Gui:
@@ -70,15 +68,15 @@ class Gui:
         #lists for phase and strain...bad.
         self.phase = np.array(np.zeros)
         self.strain = np.array(np.zeros)
-       
+
         #setting up powermeter text in ui
         self.power1Text = tk.StringVar()
         self.power2Text = tk.StringVar()
         self.power1Text.set("p1 not reading")
         self.power2Text.set("p2 not reading") 
-        
 
-        
+
+
 
         #one move by default
         defualtMove = move.Move(self.micrometerController)
@@ -112,7 +110,7 @@ class Gui:
         self.topMenuFrame.grid(row=0, column=0, columnspan=2, sticky="new")
         self.topMenuFrame.grid_propagate(False)
         self.addTopMenuButtons()
-        
+
         #create bottomFrame 
         self.bottomFrame = tk.Frame(self.window, height=80, background="light grey")
         self.bottomFrame.grid(row=1, column=0, columnspan=2, sticky='sew')
@@ -127,17 +125,17 @@ class Gui:
 
         #create the move list gui elements
         self.moveGui = moveGui.MoveGui(self.listFrame, self, self.moveList, 100, width=500)
-        
+
         self.angleFind = angleFinder.AngleFinder()
-        
-       
+
+
         #updating all plots 
         self.root.protocol('WM_DELETE_WINDOW', self.stop)
         self.root.after(10, self.updatePlotsFromData)
         self.stopExecution = False
 
-        
-        
+
+
 
     """stop tells the powermeters to stop collecting data. 
     !There is no detection right now of whether the powermeters are even connected...
@@ -146,7 +144,6 @@ class Gui:
     !THEN JOINS POLARIMETER THREAD... I FEEL LIKE THIS SHOULD FOLLOW A SIMILAR THING TO POWERMETER THREADS IDK
     WHY ITS IN A TRY CATCH RIGHT NOW...
     then tells polaremter and micrometer to stop and tells powermeter threads to join
-
     THis method is in need of a restructure... why does some stuff lie in try catches, should just put in if's
     """
     def stop(self):
@@ -170,7 +167,7 @@ class Gui:
             self.micrometerController.stop()
         else:
             print("No micrometer connected")
-            
+
         self.powermeterThread.join()
 
         self.root.destroy()
@@ -203,7 +200,7 @@ class Gui:
         browseDataFileButton = ttk.Button(frameTopMenu, text="browse for data file", command=lambda: self.__browseFile())
         browseDataFileButton.pack(side='left')
 
-    
+
 
 
     """browseFile opens the file browser, is executed from the button"""
@@ -211,7 +208,7 @@ class Gui:
         self.filePath = tk.filedialog.askopenfilename(filetypes=[('CSV Files', '*.csv')])
         if self.filePath:
             self.__plot()
-    
+
     def __alignAlphaButton(self, frameTopMenu):
         calibrateButton = ttk.Button(frameTopMenu, text="Align Alpha", command=lambda: self.__alignAlpha())
         calibrateButton.pack(side="left")
@@ -236,7 +233,6 @@ class Gui:
         - send three values to anglefinder.py 
         - display graph and maximum!!!!
         
-
         it's actually not that simple. 
         1. move the micrometer to sample height without collecting data.
         2. execute (loadmove, unloadmove) 3 times 
@@ -246,14 +242,14 @@ class Gui:
         if self.powerPlot is None:
             self.powerPlot = Plot2D('power plot', 'distance (mm)', 'power (um)', True)
             self.plotList.append(self.powerPlot)
-        
+
         self.alphaVals = []
         # Create a new pop-up window
         self.alignAlphaWindow = tk.Toplevel(self.window)  # Create a child window of the main application
         self.alignAlphaWindow.title("Align Alpha")       # Set the title of the pop-up window
         self.alignAlphaWindow.geometry("500x300")        # Set the size of the pop-up window
         self.alignAlphaWindow.resizable(False, False)    # Make the pop-up window non-resizable
-        
+
         # Create a frame within the pop-up window
         self.alphaFrame = ttk.Frame(self.alignAlphaWindow, padding=10)
         self.alphaFrame.pack(fill="both", expand=True)
@@ -282,7 +278,7 @@ class Gui:
         self.alpha_vals_temp_label = ttk.Label(self.alphaFrame, text="alpha values: " + str(self.alphaVals))
         self.alpha_vals_temp_label.pack(pady=(0,10))
 
-        
+
     """
     the issue here is that start execute thread goes, but the other stuff happens before the data is gathered. I want to join start execute, but the problem is that 
     the graphs have to come out still. Investigate more thoroughly 
@@ -302,7 +298,7 @@ class Gui:
         loadMove = move.Move(self.micrometerController)
         loadMove.targetHeight = compressionHeight
         loadMove.velocity = "0.1"
-        
+
 
         unloadMove = move.Move(self.micrometerController)
         unloadMove.targetHeight = sampleHeight 
@@ -310,7 +306,7 @@ class Gui:
 
 
 
-                 
+
         if self.micrometerController.micrometerPosition.decode('utf-8')[3:6].strip() != unloadMove.targetHeight:
            m = move.Move(self.micrometerController)
            m.velocity = "2"
@@ -329,7 +325,7 @@ class Gui:
         #    print("SLEEPING")
         #    time.sleep(10)
 
-        
+
         if len(self.alphaVals) == 0:
             self.instruction_label.config(text="move to 0 degrees (away from user)") 
             self.alpha_vals_temp_label.config(text="alpha values: " + str(self.alphaVals))
@@ -378,22 +374,22 @@ class Gui:
         else:
             instruction_label = ttk.Label(self.alphaFrame, text="error, len(alphaVals) should not have this length", font=("Arial", 12))
             instruction_label.pack(pady=(0, 10))
-        
-        
 
-       
 
-        
+
+
+
+
 
         print("Collecting power difference...")
 
 
-        
 
 
 
-    
-        
+
+
+
 
 
     """startpolarimeterthread starts the thread for data collection from the powlarimeter. This thread runs polarimeter.start"""
@@ -431,7 +427,7 @@ class Gui:
             self.plotList.remove(plot)
             self.micrometerPlot = None  # Clear the reference
             print(f"Plot '{plot.title}' closed and removed from plotList.")
-        
+
         self.micrometerPlot = Plot2D('micrometer plot', 'time', 'distance', on_close=remove_plot)
         self.plotList.append(self.micrometerPlot)
 
@@ -441,7 +437,7 @@ class Gui:
             self.plotList.remove(plot)
             self.powerPlot = None  # Clear the reference
             print(f"Plot '{plot.title}' closed and removed from plotList.")
-        
+
         self.powerPlot = Plot2D('power plot', 'distance (mm)', 'power (um)', True, on_close=remove_plot)
         self.plotList.append(self.powerPlot)
 
@@ -451,7 +447,7 @@ class Gui:
             self.plotList.remove(plot)
             self.polPlot = None  # Clear the reference
             print(f"Plot '{plot.title}' closed and removed from plotList.")
-        
+
         self.polPlot = Plot2D('polarimeter plot', 'strain', 'phase', on_close=remove_plot)
         self.plotList.append(self.polPlot)
 
@@ -461,7 +457,7 @@ class Gui:
             self.plotList.remove(plot)
             self.pow1Plot = None  # Clear the reference
             print(f"Plot '{plot.title}' closed and removed from plotList.")
-        
+
         self.pow1Plot = Plot2D('power 1 plot', 'distance', 'power', on_close=remove_plot)
         self.plotList.append(self.pow1Plot)
 
@@ -471,7 +467,7 @@ class Gui:
             self.plotList.remove(plot)
             self.pow2Plot = None  # Clear the reference
             print(f"Plot '{plot.title}' closed and removed from plotList.")
-        
+
         self.pow2Plot = Plot2D('power 2 plot', 'distance', 'power', on_close=remove_plot)
         self.plotList.append(self.pow2Plot)
 
@@ -481,7 +477,7 @@ class Gui:
             self.plotList.remove(plot)
             self.noisePlotPowDif = None  # Clear the reference
             print(f"Plot '{plot.title}' closed and removed from plotList.")
-        
+
         self.noisePlotPowDif = Plot2D("power dif vs time", 'time', 'power dif', on_close=remove_plot)
         self.plotList.append(self.noisePlotPowDif)
 
@@ -491,7 +487,7 @@ class Gui:
             self.plotList.remove(plot)
             self.noisePlotPow1 = None  # Clear the reference
             print(f"Plot '{plot.title}' closed and removed from plotList.")
-        
+
         self.noisePlotPow1 = Plot2D("power 1 vs time", 'time', 'power dif', on_close=remove_plot)
         self.plotList.append(self.noisePlotPow1)
 
@@ -501,11 +497,11 @@ class Gui:
             self.plotList.remove(plot)
             self.noisePlotPow2 = None  # Clear the reference
             print(f"Plot '{plot.title}' closed and removed from plotList.")
-        
+
         self.noisePlotPow2 = Plot2D("power 2 vs time", 'time', 'power dif', on_close=remove_plot)
         self.plotList.append(self.noisePlotPow2)
-            
-            
+
+
 
     """adds all of the buttons in the bottom frame"""
     def addBottomFrameButtons(self, listFrame):
@@ -516,7 +512,7 @@ class Gui:
         listFrame.grid_columnconfigure(1, weight=0)
         listFrame.grid_columnconfigure(2, weight=1)
         listFrame.grid_columnconfigure(3, weight=2)
-        
+
         executeAllMovesButton = ttk.Button(listFrame, text='execute all moves', command=lambda: (self.saveNumExecutions(numExec), self.startExecuteThread(self.moveList)))
         executeAllMovesButton.grid(row=2, column=0, sticky='sw', pady=5, padx=30)
 
@@ -529,7 +525,7 @@ class Gui:
         stopExecutionButton = ttk.Button(listFrame, text='Stop Execution', command=lambda: setattr(self, 'stopExecution', True))
         stopExecutionButton.grid(row=1, column=1, sticky='sw', pady=5, padx=30)
 
-        
+
         raiseMicrometerButton = ttk.Button(listFrame, text='Raise Micrometer', command=lambda: self.__raiseMicrometer())
         raiseMicrometerButton.grid(row=1, column=2, sticky='sw', pady=5, padx=30)
 
@@ -557,15 +553,15 @@ class Gui:
         self.startExecuteThread(listTemp)
         self.executeThread.join()
 
-        
+
+
 
     """startExecuteThread resets all of the constantly polling plots... starts the execute thread which calls 
     thecollect method. 
     !! should make it just use self.movelist...."""
     def startExecuteThread(self, moveList):
-        if not self.aligningAlpha.is_set():
-            for plot in self.plotList:
-                plot.resetPlot()
+        for plot in self.plotList:
+            plot.resetPlot()
         self.executeThread = threading.Thread(target=self.__collect, args=[moveList])
         self.executeThread.start()
 
@@ -598,7 +594,7 @@ class Gui:
             self.noisePlotPow2.generateCsvFromPlot("power 2 vs. time.csv")
         except:
             print("plot not open")
-        
+
     """collect is a lot of logic. !should make it just use self.movelist
     if the plots currently aren't updating, it calls the recursive updatePlots function to update the plots 
     every 100 ms. Should just have this instead of having all plots update all of the time.
@@ -662,7 +658,6 @@ class Gui:
     """DEAL WITH PLOTTING TRY CATCH""" 
     def updatePlotsFromData(self):
         self.timeStamp = time.time()
-        print("PLOTS UPDATING?: ", self.updatingPlots.is_set())
         if self.updatingPlots.is_set():
             if(self.micrometerPlot is not None):
                 try:
@@ -725,15 +720,15 @@ class Gui:
                 self.polPlot.updatePlot(self.polarimeter.positionList, self.phase.tolist())
                 self.polPlot.colorLines()
                 self.polPlot.generateCsvFromPlot("pol.csv")
-            
+
             if self.powerPlot is not None:
                 self.powerPlot.colorLines()
-                
+
             self.executed.clear()
             self.stopExecution = False
 
-            
-        
+
+
         if self.powermeter is not None:
             self.power1Text.set(str(self.powermeter.device1Data))
             self.power2Text.set(str(self.powermeter.device2Data))
@@ -746,4 +741,3 @@ class Gui:
                 pass
             with open("alpha.txt", "w") as f:
                 f.write(str(ideal_alpha))
-                self.idealAlphaLabel.config(text="ideal alpha: " + str(ideal_alpha))
