@@ -555,6 +555,7 @@ class Gui:
         listTemp.append(raiseMove)
         self.saveNumExecutions(tk.StringVar(self.root, "1"))
         self.startExecuteThread(listTemp)
+        self.executeThread.join()
 
         
 
