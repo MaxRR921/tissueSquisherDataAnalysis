@@ -604,6 +604,7 @@ class Gui:
     def __collect(self, moveList):
         print("collecting data")
         if not self.updatingPlots.is_set():
+            print("SETTING power")
             self.updatingPlots.set() 
 
         #POLARIMETER NEEDS TO START RUNNING BEFORE MOVES EXECUTE. IT DOESN'T CONSTANTLY RUN LIKE THE POWERMETER.
