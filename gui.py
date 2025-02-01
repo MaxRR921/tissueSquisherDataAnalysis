@@ -64,8 +64,6 @@ class Gui:
         self.executed = threading.Event()
         self.executed.clear()
         self.startedPolarimeter = False
-        self.aligningAlpha = threading.Event()
-        self.aligningAlpha.clear()
 
         #lists for phase and strain...bad.
         self.phase = np.array(np.zeros)
@@ -319,9 +317,6 @@ class Gui:
            self.startExecuteThread(temp)
            self.executeThread.join()
            print("JOINED!")
-           time.sleep(3)
-
-        self.aligningAlpha.set()
 
         #    self.micrometerController.setVelocity("2")
         #    self.micrometerController.goToHeight(unloadMove.targetHeight)
@@ -723,16 +718,6 @@ class Gui:
                 
             self.executed.clear()
             self.stopExecution = False
-            if(self.aligningAlpha.is_set()):
-                self.aligningAlpha.clear()
-                m = move.Move(self.micrometerController)
-                m.velocity = "2"
-                m.targetHeight = "12" 
-                temp = []
-                temp.append(m)
-                self.saveNumExecutions(tk.StringVar(self.alignAlphaWindow, "1"))
-                self.startExecuteThread(temp)
-                self.executeThread.join()               
 
             
         
