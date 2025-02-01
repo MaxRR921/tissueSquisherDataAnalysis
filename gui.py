@@ -313,6 +313,7 @@ class Gui:
            m.targetHeight = "2"  
            temp = []
            temp.append(m)
+           self.saveNumExecutions(tk.StringVar(self.alignAlphaWindow, "1"))
            self.startExecuteThread(temp)
            self.executeThread.join()
            print("JOINED!")
