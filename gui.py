@@ -543,7 +543,9 @@ class Gui:
         raiseMove.targetHeight = "12"
         listTemp = []
         listTemp.append(raiseMove)
+        self.saveNumExecutions(tk.StringVar(self.alignAlphaWindow, "1"))
         self.startExecuteThread(listTemp)
+        self.executeThread.join()
 
 
         
