@@ -310,11 +310,13 @@ class Gui:
         if self.micrometerController.micrometerPosition.decode('utf-8')[3:6].strip() != unloadMove.targetHeight:
            m = move.Move(self.micrometerController)
            m.velocity = "2"
-           m.targetHeight = "12"
+           m.targetHeight = unloadMove.targetHeight 
            temp = []
            temp.append(m)
            self.startExecuteThread(m)
            self.executeThread.join()
+           time.sleep(10)
+
         #    self.micrometerController.setVelocity("2")
         #    self.micrometerController.goToHeight(unloadMove.targetHeight)
         #    print(self.micrometerController.micrometerPosition.decode('utf-8')[3:6].strip()) 
