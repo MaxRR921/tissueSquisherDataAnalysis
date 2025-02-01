@@ -313,7 +313,7 @@ class Gui:
            m.targetHeight = "2"  
            temp = []
            temp.append(m)
-           self.startExecuteThread(m)
+           self.startExecuteThread(temp)
            self.executeThread.join()
            time.sleep(10)
 
