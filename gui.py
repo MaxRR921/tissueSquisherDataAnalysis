@@ -324,7 +324,6 @@ class Gui:
         print("SLEEPING")
         print("SELF. updating plots is: ", self.updatingPlots.is_set())
         time.sleep(10)
-        self.aligningAlpha.set() 
 
         if len(self.alphaVals) == 0:
             self.instruction_label.config(text="move to 0 degrees (away from user)") 
@@ -337,6 +336,7 @@ class Gui:
             listTemp.append(unloadMove)
             self.saveNumExecutions(tk.StringVar(self.alignAlphaWindow, "3"))
             self.startExecuteThread(listTemp)
+
         elif len(self.alphaVals) == 1:
             self.alphaVals.append(self.powerPlot.maxValY - self.powerPlot.minValY)
             self.instruction_label.config(text="move to 20 degrees (away from user)") 
