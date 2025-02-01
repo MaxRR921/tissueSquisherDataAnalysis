@@ -649,6 +649,7 @@ class Gui:
     """DEAL WITH PLOTTING TRY CATCH""" 
     def updatePlotsFromData(self):
         self.timeStamp = time.time()
+        print("IS SELF.uptadingPlots set? ", self.updatingPlots.is_set())
         if self.updatingPlots.is_set():
             if(self.micrometerPlot is not None):
                 try:
