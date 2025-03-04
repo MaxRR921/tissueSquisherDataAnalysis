@@ -98,13 +98,25 @@ class Controller:
         print("disconnected")
 
 
+    """invert input takes in an input string and inverts it."""
+    def invertHeight(self, num_str):
+        try:
+            num = float(num_str)  # Convert to float to handle decimals
+            if 0 <= num <= 12:
+                return str(12 - num)  # Convert back to string
+            else:
+                raise ValueError("Number must be between 0 and 12")
+        except ValueError:
+            raise ValueError("Invalid input: must be a number between 0 and 12")
+
     """goToHeight takes in an input height and writes the command to the controller to got o that height
     for some reason i'm doing all this other bs here too but i'm too scared to change it right now 
     !TODO: look into this. LOOK INTO THIS LATER"""
     def goToHeight(self, inputHeight):
-        
-        
-        positionCommand = "1" + "PA" + "-1" + inputHeight + "\r\n"
+
+        inputHeight = self.invertHeight(inputHeight) 
+
+        positionCommand = "1" + "PA" + inputHeight + "\r\n"
         inBytes = bytes(positionCommand, 'utf-8')
         self.ser.write(inBytes)
 
