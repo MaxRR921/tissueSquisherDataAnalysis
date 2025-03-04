@@ -103,8 +103,8 @@ class Controller:
     !TODO: look into this. LOOK INTO THIS LATER"""
     def goToHeight(self, inputHeight):
         
-
-        positionCommand = "1" + "PA" + inputHeight + "\r\n"
+        
+        positionCommand = "1" + "PA" + "-1" + inputHeight + "\r\n"
         inBytes = bytes(positionCommand, 'utf-8')
         self.ser.write(inBytes)
 
