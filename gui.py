@@ -64,8 +64,6 @@ class Gui:
         self.executed = threading.Event()
         self.executed.clear()
         self.startedPolarimeter = False
-        self.aligningAlpha = threading.Event()
-        self.aligningAlpha.clear()
 
         #lists for phase and strain...bad.
         self.phase = np.array(np.zeros)
@@ -99,8 +97,6 @@ class Gui:
         self.noisePlotPow2 = None 
         #list of times recorded
         self.timeList = []
-        #alpha values for calibration
-        self.alphaVals = []
 
         # adding listFrame
         self.listFrame = tk.Frame(self.window, width=800, height=1000)  # Adjust the width here for the left panel
@@ -183,20 +179,9 @@ class Gui:
     def addTopMenuButtons(self):
         self.__dropdownButton(self.topMenuFrame)
         self.__browseDataFileButton(self.topMenuFrame)
-        self.__alignAlphaButton(self.topMenuFrame)
-        self.__idealAlphaLabel(self.topMenuFrame)
 
     #ALL BUTTONS IN TOP MENU
 
-    def __idealAlphaLabel(self, frameTopMenu):
-        try:
-            with open("alpha.txt", "r") as f:
-                idealAlphaString = f.read()
-            self.idealAlphaLabel = ttk.Label(frameTopMenu, text="ideal alpha: " + idealAlphaString)
-            self.idealAlphaLabel.pack(side='left')
-        except:
-            self.idealAlphaLabel = ttk.Label(frameTopMenu, text="no ideal alpha save file")
-            self.idealAlphaLabel.pack(side='left')
 
     """browseDataFile button creates the button for browsing for the data files."""
     def __browseDataFileButton(self, frameTopMenu):
@@ -212,172 +197,9 @@ class Gui:
         if self.filePath:
             self.__plot()
     
-    def __alignAlphaButton(self, frameTopMenu):
-        calibrateButton = ttk.Button(frameTopMenu, text="Align Alpha", command=lambda: self.__alignAlpha())
-        calibrateButton.pack(side="left")
 
-
-
-    '''
-        How is this going to work????
-        - text box: sample height
-        - text box: low height
-        direction:
-        - tell user move to -20 (toward user 5 deg marks)
-        - execute 
-        - record and display power dif
-         - tell user move to 0 (away from user 5 deg marks)
-        - execute 
-        - record and display power dif
-         - tell user move to 20 (away from user 5 deg marks)
-        - execute 
-        - record and display power dif
-        process:
-        - send three values to anglefinder.py 
-        - display graph and maximum!!!!
-        
-
-        it's actually not that simple. 
-        1. move the micrometer to sample height without collecting data.
-        2. execute (loadmove, unloadmove) 3 times 
-        3. 
-    '''
-    def __alignAlpha(self):
-        if self.powerPlot is None:
-            self.powerPlot = Plot2D('power plot', 'distance (mm)', 'power (um)', True)
-            self.plotList.append(self.powerPlot)
-        
-        self.alphaVals = []
-        # Create a new pop-up window
-        self.alignAlphaWindow = tk.Toplevel(self.window)  # Create a child window of the main application
-        self.alignAlphaWindow.title("Align Alpha")       # Set the title of the pop-up window
-        self.alignAlphaWindow.geometry("500x300")        # Set the size of the pop-up window
-        self.alignAlphaWindow.resizable(False, False)    # Make the pop-up window non-resizable
-        
-        # Create a frame within the pop-up window
-        self.alphaFrame = ttk.Frame(self.alignAlphaWindow, padding=10)
-        self.alphaFrame.pack(fill="both", expand=True)
-
-        # Add label for instructions
-        self.instruction_label = ttk.Label(self.alphaFrame, text="Move to -20 degrees (toward user)", font=("Arial", 12))
-        self.instruction_label.pack(pady=(0, 10))
-
-
-        # Add text box for sample height
-        self.sample_height_label = ttk.Label(self.alphaFrame, text="Sample Height:")
-        self.sample_height_label.pack(anchor="w")
-        self.sample_height_entry = ttk.Entry(self.alphaFrame)
-        self.sample_height_entry.pack(fill="x", pady=5)
-
-        # Add text box for compression height
-        self.compression_height_label = ttk.Label(self.alphaFrame, text="Compression Height:")
-        self.compression_height_label.pack(anchor="w")
-        self.compression_height_entry = ttk.Entry(self.alphaFrame)
-        self.compression_height_entry.pack(fill="x", pady=5)
-
-        # Add button to collect power difference
-        self.collect_button = ttk.Button(self.alphaFrame, text="Collect Power Difference", command=lambda: self.__collectPowerDifference())
-        self.collect_button.pack(pady=10)
-
-        self.alpha_vals_temp_label = ttk.Label(self.alphaFrame, text="alpha values: " + str(self.alphaVals))
-        self.alpha_vals_temp_label.pack(pady=(0,10))
 
         
-    """
-    the issue here is that start execute thread goes, but the other stuff happens before the data is gathered. I want to join start execute, but the problem is that 
-    the graphs have to come out still. Investigate more thoroughly 
-    """
-    def __collectPowerDifference(self):
-        # Placeholder for the logic to collect power difference
-        sampleHeight = self.sample_height_entry.get()
-        compressionHeight = self.compression_height_entry.get()
-        #TODO: add this to the normal text boxes as well!!!
-        if not "." in sampleHeight:
-            sampleHeight = sampleHeight + ".0"
-        if not "." in compressionHeight:
-            compressionHeight = compressionHeight + ".0"
-        print("TARGET HEIGHT: ", sampleHeight)
-        print("COMPRESSION HEIGHT: ", compressionHeight)
-        loadMove = move.Move(self.micrometerController)
-        loadMove.targetHeight = compressionHeight
-        loadMove.velocity = "0.1"
-        
-
-        unloadMove = move.Move(self.micrometerController)
-        unloadMove.targetHeight = sampleHeight 
-        unloadMove.velocity = "0.1"
-
-
-
-                 
-        if self.micrometerController.micrometerPosition.decode('utf-8')[3:6].strip() != unloadMove.targetHeight:
-           m = move.Move(self.micrometerController)
-           m.velocity = "2"
-           m.targetHeight = unloadMove.targetHeight 
-           temp = []
-           temp.append(m)
-           print("THIS rRUNNS!!!!!")
-           self.saveNumExecutions(tk.StringVar(self.alignAlphaWindow, "1"))
-           self.startExecuteThread(temp)
-           self.executeThread.join()
-
-        print("SLEEPING")
-        print("SELF. updating plots is: ", self.updatingPlots.is_set())
-        time.sleep(10)
-
-        if len(self.alphaVals) == 0:
-            self.instruction_label.config(text="move to 0 degrees (away from user)") 
-            self.alpha_vals_temp_label.config(text="alpha values: " + str(self.alphaVals))
-            print("none")
-            self.alphaVals.append(0)
-
-            listTemp = []
-            listTemp.append(loadMove)
-            listTemp.append(unloadMove)
-            self.saveNumExecutions(tk.StringVar(self.alignAlphaWindow, "3"))
-            self.startExecuteThread(listTemp)
-
-        elif len(self.alphaVals) == 1:
-            self.alphaVals.append(self.powerPlot.maxValY - self.powerPlot.minValY)
-            self.instruction_label.config(text="move to 20 degrees (away from user)") 
-            self.alpha_vals_temp_label.config(text="alpha values: " + str(self.alphaVals[1:2]))
-
-            listTemp = []
-            listTemp.append(loadMove)
-            listTemp.append(unloadMove)
-            self.saveNumExecutions(tk.StringVar(self.alignAlphaWindow, "3"))
-            self.startExecuteThread(listTemp)
-
-        elif len(self.alphaVals) == 2:
-            self.alphaVals.append(self.powerPlot.maxValY - self.powerPlot.minValY)
-            self.alpha_vals_temp_label.config(text="alpha values: " + str(self.alphaVals[1:3]))
-            self.collect_button.config(text="compute ideal alpha")
-
-            listTemp = []
-            listTemp.append(loadMove)
-            listTemp.append(unloadMove)
-            self.saveNumExecutions(tk.StringVar(self.alignAlphaWindow, "3"))
-            self.startExecuteThread(listTemp)
-
-        elif len(self.alphaVals) == 3:
-            self.alphaVals.append(self.powerPlot.maxValY - self.powerPlot.minValY)
-            self.alpha_vals_temp_label.config(text="alpha values: " + str(self.alphaVals[1:4]))
-            # self.ideal_alpha = self.angleFind.findAngle(self.alphaVals[1:4])
-            # self.__saveIdealAlpha(self.ideal_alpha)
-            self.instruction_label.config(text="ideal alpha: " + "Hello")
-        else:
-            instruction_label = ttk.Label(self.alphaFrame, text="error, len(alphaVals) should not have this length", font=("Arial", 12))
-            instruction_label.pack(pady=(0, 10))
-        
-        
-
-       
-
-        
-
-        print("Collecting power difference...")
-
-
         
 
 
@@ -723,10 +545,6 @@ class Gui:
             self.executed.clear()
             self.stopExecution = False
 
-            if self.aligningAlpha.is_set():
-                self.aligningAlpha.clear()
-                self.micrometerController.setVelocity("2")
-                self.micrometerController.goToHeight("12")
 
             
         
@@ -735,11 +553,3 @@ class Gui:
             self.power2Text.set(str(self.powermeter.device2Data))
         self.root.after(10, self.updatePlotsFromData)
 
-
-    def __saveIdealAlpha(self, ideal_alpha):
-            # Ensure that the data is in the format of lists of equal length
-            with open("alpha.txt", "w") as f:
-                pass
-            with open("alpha.txt", "w") as f:
-                f.write(str(ideal_alpha))
-                self.idealAlphaLabel.config(text="ideal alpha: " + str(ideal_alpha))
