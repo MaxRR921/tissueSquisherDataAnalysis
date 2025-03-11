@@ -2,7 +2,7 @@ import serial
 import time
 import tkinter as tk
 #NOTE: EACH COMMAND SENT TO THE CONTROLLER TAKES ABOUT 10 ms from command sent to result returned to computer. (for error)
-
+"""new branch"""
 class Controller:
     """init sets the usb serial settings for the micrometer controller, telling what port it should be in 
     !!!! add dynamic port checking so that you don't have to manually go into the code and change the port to the right
