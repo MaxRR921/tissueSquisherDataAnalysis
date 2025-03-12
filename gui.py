@@ -174,6 +174,12 @@ class Gui:
             
         self.powermeterThread.join()
 
+
+        if self.pyqt_process is not None and self.pyqt_process.is_alive():
+                print("Terminating PyQt process...")
+                self.pyqt_process.terminate()
+                self.pyqt_process.join()
+
         self.root.destroy()
 
     """run begins the main loop. this is fine just a tkinter thing"""
