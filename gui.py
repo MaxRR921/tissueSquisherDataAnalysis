@@ -13,6 +13,8 @@ from ttkthemes import ThemedTk
 import polarimeter
 import angleFinder
 import csv
+import multiprocessing
+import graphingProcess
 
 """!THINKING MAYBE I SHOULD JUSt iNitiAlize all of the threads in init, then call them later"""
 
@@ -97,6 +99,9 @@ class Gui:
         self.noisePlotPow2 = None 
         #list of times recorded
         self.timeList = []
+        
+
+        self.pyqt_process = None
 
         # adding listFrame
         self.listFrame = tk.Frame(self.window, width=800, height=1000)  # Adjust the width here for the left panel
@@ -179,6 +184,8 @@ class Gui:
     def addTopMenuButtons(self):
         self.__dropdownButton(self.topMenuFrame)
         self.__browseDataFileButton(self.topMenuFrame)
+        self.__startGraphingButton(self.topMenuFrame)
+        
 
     #ALL BUTTONS IN TOP MENU
 
@@ -233,7 +240,20 @@ class Gui:
         dropdownButton["menu"] = dropdownMenu
         dropdownButton.pack(side="left")
 
+    def __startGraphingButton(self, frameTopMenu):
+        startPyQtButton = ttk.Button(frameTopMenu, text='Start PyQt Plot', command=lambda: self.startPyqtProcess())
+        startPyQtButton.pack(side="left")
 
+    def startPyqtProcess(self):
+        """Spawn a separate process that runs the PyQt/pyqtgraph event loop."""
+        # If not already running (or if the process has ended), start it
+        if self.pyqt_process is None or not self.pyqt_process.is_alive():
+            print("Starting PyQt process...")
+            self.pyqt_process = multiprocessing.Process(target=graphingProcess.run_pyqt_app,
+                                                        args=())
+            self.pyqt_process.start()
+        else:
+            print("PyQt process is already running!")        
 
     """options are all of the options to select the plots you want to see displayed in real time (semi real time
     in the case of the polarimeter plot). iti initializes all of the plot2D objects""" 

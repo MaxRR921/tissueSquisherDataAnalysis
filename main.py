@@ -1,4 +1,7 @@
 import gui
+import multiprocessing
 """main just initializes a gui object and runs it!"""
-programGui = gui.Gui()
-programGui.run()
+
+if __name__ == '__main__':
+    programGui = gui.Gui()
+    programGui.run()
