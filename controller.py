@@ -1,6 +1,8 @@
 import serial
 import time
 import tkinter as tk
+import threading
+import queue
 #NOTE: EACH COMMAND SENT TO THE CONTROLLER TAKES ABOUT 10 ms from command sent to result returned to computer. (for error)
 """new branch"""
 class Controller:
@@ -26,6 +28,12 @@ class Controller:
         parity = serial.PARITY_NONE
         stopBits = serial.STOPBITS_ONE
         dataBits = serial.EIGHTBITS
+        self.updatingCsvQueue = threading.Event()
+        self.updatingCsvQueue.clear()
+        self.csvQueue = queue.Queue()
+        self.updatingPlotQueue = threading.Event()
+        self.updatingPlotQueue.clear()
+
 
         #self.root.after(100, self.updatePlotFromData)
         
@@ -136,6 +144,9 @@ class Controller:
             inBytes = bytes(getPositionCommand, 'utf-8')
             self.ser.write(inBytes)
             self.micrometerPosition = self.ser.readline()
+            if(self.updatingCsvQueue.is_set()):
+                self.csvQueue.put(float(self.micrometerPosition))
+                print("CSV QUEUE: ", self.csvQueue.get())
             # print(self.micrometerPosition)
             self.timeStamp = time.time()
             self.ser.write(b'1TS\r\n')

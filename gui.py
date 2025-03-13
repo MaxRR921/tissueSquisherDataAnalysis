@@ -449,10 +449,33 @@ class Gui:
     """
     this starts the collection thread, each move.execute blocks the thread until the move completes 
     """
+
+    #two options for the plotting: 
+    #1. plots constantly update even when moves aren't executing 
+    #2. only update when moves are executing 
+    # conclusion: make both
+    # how should we do it? 
+    # 1. enable plotting button after window is open. This sends a signal to all devices saying that it's time to start adding to the queues
+    # 2. Reset plots button: clears the plots
+    # 3. if plots are disabled when execution is started, all of the plots are reset and enabled. 
+
+
+    #collection sequence:
+    #1. make a new flag: executing 
+    #2. when executing is set, sensors add to their Queue.queue's 
+    #3. When executing is set, sensors add to their multiprocessing.queue's
+    #. when executed is set, gui takes all the sensor Queue.queue's and copies them to arrays, then writes the arrays to csv's (check if you
+    # can write a queue directly to a csv. It will write micrometer position vs. power 1 and 2 to the csvs to start.)
+    
+
+
     def __collect(self, moveList):
         print("collecting data")
         if not self.updatingPlots.is_set():
             self.updatingPlots.set() 
+
+        if not self.micrometerController.updatingCsvQueue.is_set():
+            self.micrometerController.updatingCsvQueue.set()
 
         #POLARIMETER NEEDS TO START RUNNING BEFORE MOVES EXECUTE. IT DOESN'T CONSTANTLY RUN LIKE THE POWERMETER.
         if(self.polarimeter is not None):
@@ -460,6 +483,7 @@ class Gui:
             self.__startPolarimeterThread()
         else:
             print("No polarimeter Connected")
+
         #WARNING: BECAUSE of comparing move.targethiehgt to micrometer position, can only have one decimal place micrometer movement
         # ALSO: won't recognize values like 0.1 and .1 as being the same. I'll fix this later.
         for i in range(self.numExecutions):
@@ -474,6 +498,7 @@ class Gui:
 
         self.executed.set()
         self.updatingPlots.clear()
+        self.micrometerController.updatingCsvQueue.clear()
         print("DONE")
 
 
