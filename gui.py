@@ -256,7 +256,7 @@ class Gui:
         if self.pyqt_process is None or not self.pyqt_process.is_alive():
             print("Starting PyQt process...")
             self.pyqt_process = multiprocessing.Process(target=graphingProcess.run_pyqt_app,
-                                                        args=())
+                                                        args=(self.updatingPlots, self.micrometerController.plotQueue))
             self.pyqt_process.start()
         else:
             print("PyQt process is already running!")        
