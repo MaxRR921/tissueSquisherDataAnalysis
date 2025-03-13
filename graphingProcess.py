@@ -6,12 +6,11 @@ from PyQt5 import QtWidgets, QtCore
 import pyqtgraph as pg
 
 class GraphingProcess(QtWidgets.QMainWindow):
-    def __init__(self, updatingPlots, micrometerQueue):
+    def __init__(self, micrometerQueue):
         super().__init__()
         self.setWindowTitle("Multiple Subplots in a 2x2 Grid")
 
         self.micrometerQueue = micrometerQueue
-        self.updatingPlots = updatingPlots
         # Create a container widget and a QGridLayout
         container = QtWidgets.QWidget()
         layout = QtWidgets.QGridLayout(container)
@@ -75,8 +74,8 @@ class GraphingProcess(QtWidgets.QMainWindow):
 
         self.curve.setData(self.x_data, self.y_data)
 
-def run_pyqt_app(updatingPlots, micrometerQueue):
+def run_pyqt_app(micrometerQueue):
     app = QtWidgets.QApplication(sys.argv)
-    window = GraphingProcess(updatingPlots, micrometerQueue)
+    window = GraphingProcess(micrometerQueue)
     window.show()
     sys.exit(app.exec_())
