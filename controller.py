@@ -3,6 +3,7 @@ import time
 import tkinter as tk
 import threading
 import queue
+import multiprocessing
 #NOTE: EACH COMMAND SENT TO THE CONTROLLER TAKES ABOUT 10 ms from command sent to result returned to computer. (for error)
 """new branch"""
 class Controller:
@@ -33,6 +34,7 @@ class Controller:
         self.csvQueue = queue.Queue()
         self.updatingPlotQueue = threading.Event()
         self.updatingPlotQueue.clear()
+        self.plotQueue = multiprocessing.Queue()
 
 
         #self.root.after(100, self.updatePlotFromData)
@@ -146,6 +148,8 @@ class Controller:
             self.micrometerPosition = self.ser.readline()
             if(self.updatingCsvQueue.is_set()):
                 self.csvQueue.put((float(self.micrometerPosition[3:].strip()), time.time()))
+            if(self.updatingPlotQueue.is_set()):
+                self.plotQueue.put(float(self.micrometerPosition[3:].strip()))
             # print(self.micrometerPosition)
             self.timeStamp = time.time()
             self.ser.write(b'1TS\r\n')

@@ -6,10 +6,12 @@ from PyQt5 import QtWidgets, QtCore
 import pyqtgraph as pg
 
 class GraphingProcess(QtWidgets.QMainWindow):
-    def __init__(self):
+    def __init__(self, updatingPlots, micrometerQueue):
         super().__init__()
         self.setWindowTitle("Multiple Subplots in a 2x2 Grid")
 
+        self.micrometerQueue = micrometerQueue
+        self.updatingPlots = updatingPlots
         # Create a container widget and a QGridLayout
         container = QtWidgets.QWidget()
         layout = QtWidgets.QGridLayout(container)
@@ -55,26 +57,26 @@ class GraphingProcess(QtWidgets.QMainWindow):
         self.x_data4 = []
         self.y_data4 = []
         # Timer to poll queue
-        # self.timer = QtCore.QTimer()
-        # self.timer.timeout.connect(self.check_queue)
-        # self.timer.start(100)  # 10 Hz
+        self.timer = QtCore.QTimer()
+        self.timer.timeout.connect(self.check_queue)
+        self.timer.start(100)  # 10 Hz
 
-        # self.setCentralWidget(self.plot_widget)
+        self.setCentralWidget(self.plot_widget)
 
     def check_queue(self):
         """Pull all items from the queue and update the plot."""
         while not self.queue.empty():
             try:
-                x, y = self.queue.get_nowait()
+                (x, y)= self.micrometerQueue.get_nowait()
             except:
                 break
-            self.x_data.append(x)
-            self.y_data.append(y)
+            self.x_data1.append(x)
+            self.y_data1.append(y)
 
         self.curve.setData(self.x_data, self.y_data)
 
-def run_pyqt_app():
+def run_pyqt_app(updatingPlots, micrometerQueue):
     app = QtWidgets.QApplication(sys.argv)
-    window = GraphingProcess()
+    window = GraphingProcess(updatingPlots, micrometerQueue)
     window.show()
     sys.exit(app.exec_())
