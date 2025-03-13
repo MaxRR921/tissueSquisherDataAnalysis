@@ -145,7 +145,7 @@ class Controller:
             self.ser.write(inBytes)
             self.micrometerPosition = self.ser.readline()
             if(self.updatingCsvQueue.is_set()):
-                self.csvQueue.put(float(self.micrometerPosition))
+                self.csvQueue.put(float(self.micrometerPosition[3:].strip()))
                 print("CSV QUEUE: ", self.csvQueue.get())
             # print(self.micrometerPosition)
             self.timeStamp = time.time()
