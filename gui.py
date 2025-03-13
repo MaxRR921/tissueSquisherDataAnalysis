@@ -497,10 +497,25 @@ class Gui:
                     break
 
         self.executed.set()
+        self.generateCsvs()
         self.updatingPlots.clear()
         self.micrometerController.updatingCsvQueue.clear()
         print("DONE")
 
+    def generateCsvs(self):
+        micrometerArray = []
+        while not self.micrometerController.csvQueue.empty():
+            micrometerArray.append(self.micrometerController.csvQueue.get())
+        
+        with open("my_data.csv", mode="w", newline="") as f:
+            writer = csv.writer(f)
+            
+            # Optionally, write a header row first:
+            writer.writerow(["position (mm)", "time (seconds since jan 1 1975)"])
+            
+            # Each element of the tuple goes into its own CSV column
+            for row_tuple in micrometerArray:
+                writer.writerow(row_tuple)
 
     """addmove adds the move to the movelist and then udpates the move gui adding the move"""
     def __addMove(self, frameMoveList):

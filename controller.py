@@ -120,7 +120,7 @@ class Controller:
     """goToHeight takes in an input height and writes the command to the controller to got o that height
     for some reason i'm doing all this other bs here too but i'm too scared to change it right now 
     !TODO: look into this. LOOK INTO THIS LATER"""
-    def goToHeight(self, inputHeight):
+    def goToHeight(self, inputHeight): #polling rate is pretty consistently .03 - .04 seconds = 30 miliseconds as of 3/13/2025
 
         inputHeight = self.invertHeight(inputHeight) 
 
@@ -146,7 +146,6 @@ class Controller:
             self.micrometerPosition = self.ser.readline()
             if(self.updatingCsvQueue.is_set()):
                 self.csvQueue.put((float(self.micrometerPosition[3:].strip()), time.time()))
-                print("CSV QUEUE: ", self.csvQueue.get())
             # print(self.micrometerPosition)
             self.timeStamp = time.time()
             self.ser.write(b'1TS\r\n')
