@@ -10,8 +10,6 @@ class GraphingProcess(QtWidgets.QMainWindow):
         super().__init__()
         self.setWindowTitle("Multiple Subplots in a 2x2 Grid")
 
-        for i in range (1000):
-            print("HELLO!!")
         self.micrometerQueue = micrometerQueue
         # Create a container widget and a QGridLayout
         container = QtWidgets.QWidget()
@@ -62,7 +60,6 @@ class GraphingProcess(QtWidgets.QMainWindow):
         self.timer.timeout.connect(self.check_queue)
         self.timer.start(100)  # 10 Hz
 
-        self.setCentralWidget(self.plot1)
 
     def check_queue(self):
         """Pull all items from the queue and update the plot."""
