@@ -10,6 +10,8 @@ class GraphingProcess(QtWidgets.QMainWindow):
         super().__init__()
         self.setWindowTitle("Multiple Subplots in a 2x2 Grid")
 
+        for i in range (1000):
+            print("HELLO!!")
         self.micrometerQueue = micrometerQueue
         # Create a container widget and a QGridLayout
         container = QtWidgets.QWidget()
