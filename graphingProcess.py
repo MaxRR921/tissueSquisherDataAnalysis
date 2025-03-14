@@ -60,7 +60,7 @@ class GraphingProcess(QtWidgets.QMainWindow):
         self.timer.timeout.connect(self.check_queue)
         self.timer.start(100)  # 10 Hz
 
-        self.setCentralWidget(self.plot_widget)
+        self.setCentralWidget(self.plot1)
 
     def check_queue(self):
         """Pull all items from the queue and update the plot."""
