@@ -72,7 +72,7 @@ class GraphingProcess(QtWidgets.QMainWindow):
             self.x_data1.append(x)
             self.y_data1.append(y)
 
-        self.curve.setData(self.x_data, self.y_data)
+        self.curve1.setData(self.x_data, self.y_data)
 
 def run_pyqt_app(micrometerQueue):
     app = QtWidgets.QApplication(sys.argv)
