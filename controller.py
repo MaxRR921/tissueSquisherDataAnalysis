@@ -149,7 +149,7 @@ class Controller:
             if(self.updatingCsvQueue.is_set()):
                 self.csvQueue.put((float(self.micrometerPosition[3:].strip()), time.time()))
             if(self.updatingPlotQueue.is_set()):
-                self.plotQueue.put(float(time.time()), float(self.micrometerPosition[3:].strip()))
+                self.plotQueue.put(float(self.micrometerPosition[3:].strip()))
             # print(self.micrometerPosition)
             self.timeStamp = time.time()
             self.ser.write(b'1TS\r\n')

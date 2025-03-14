@@ -64,7 +64,8 @@ class GraphingProcess(QtWidgets.QMainWindow):
     def check_queue(self):
         """Pull all items from the queue and update the plot."""
         while not self.micrometerQueue.empty():
-            (x, y)= self.micrometerQueue.get_nowait()
+            x = time.time()
+            y= self.micrometerQueue.get_nowait()
             print("ADDED")
             self.x_data1.append(x)
             self.y_data1.append(y)
