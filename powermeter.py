@@ -10,6 +10,8 @@ except ImportError:
 import time
 import threading
 import numpy as np
+import queue
+import multiprocessing
 
 ###IMPORTANT!!! THREADS FOR EAHC POWERMETER SHARE A COMMON RUN VARIABLE BEWARE OF RACE CONDITIONS BUT DOESN"T MATTER BC
 ###ITS ALWAYS TRUE RIGHT NOW.
@@ -43,6 +45,15 @@ class Powermeter:
             self.device2ZeroTime = 0.0
             self.device1Data = 0.0
             self.device2Data = 0.0
+            self.device1CsvQueue = queue.Queue()
+            self.device2CsvQueue = queue.Queue()
+            self.device1PlotQueue = multiprocessing.Queue()
+            self.device2PlotQueue = multiprocessing.Queue()
+            self.updatingDevice1PlotQueue = threading.Event()
+            self.updatingDevice2PlotQueue = threading.Event()
+            self.updatingDevice1CsvQueue = threading.Event()
+            self.updatingDevice2CsvQueue = threading.Event()
+
             self.run = threading.Event()
             self.run.set()  # to start running
         except OSError as err:
@@ -96,6 +107,10 @@ class Powermeter:
                     newData = np.array([[data[0][0], deltaTime, data[2][0]]])
                     #self.device1Data = np.append(self.device1Data, newData, axis=0) 
                     self.device1Data = data[0][0]
+                    if(self.updatingDevice1CsvQueue.is_set()):
+                        self.device1CsvQueue.put(float(data[0][0]))
+                    if(self.updatingDevice1PlotQueue.is_set()):
+                        self.device1PlotQueue.put(float(data[0][0]))
                     # print("DATA:", self.device1Data)
                 i=i+1
 
@@ -127,6 +142,10 @@ class Powermeter:
 
                     newData = np.array([[data[0][0], deltaTime, data[2][0]]])
                     self.device2Data = data[0][0]
+                    if(self.updatingDevice2CsvQueue.is_set()):
+                        self.device2CsvQueue.put(data[0][0])
+                    if(self.updatingDevice2PlotQueue.is_set()):
+                        self.device2PlotQueue.put(data[0][0])
                     # print("DATA:", self.device2Data)
                 i=i+1
         else:

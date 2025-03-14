@@ -476,9 +476,17 @@ class Gui:
 
         if not self.micrometerController.updatingCsvQueue.is_set():
             self.micrometerController.updatingCsvQueue.set()
+            
+        if not self.powermeter.updatingDevice1CsvQueue.is_set():
+            self.powermeter.updatingDevice1CsvQueue.set()
+        
+        if not self.powermeter.updatingDevice2CsvQueue.is_set():
+            self.powermeter.updatingDevice2CsvQueue.set()
 
         if self.pyqt_process is not None or self.pyqt_process.is_alive():
             self.micrometerController.updatingPlotQueue.set()
+            self.powermeter.updatingDevice1PlotQueue.set()
+            self.powermeter.updatingDevice2PlotQueue.set()
 
         #POLARIMETER NEEDS TO START RUNNING BEFORE MOVES EXECUTE. IT DOESN'T CONSTANTLY RUN LIKE THE POWERMETER.
         if(self.polarimeter is not None):
@@ -503,6 +511,11 @@ class Gui:
         self.generateCsvs()
         self.updatingPlots.clear()
         self.micrometerController.updatingCsvQueue.clear()
+        self.micrometerController.updatingPlotQueue.clear()
+        self.powermeter.updatingDevice1CsvQueue.clear()
+        self.powermeter.updatingDevice2CsvQueue.clear()
+        self.powermeter.updatingDevice1PlotQueue.clear()
+        self.powermeter.updatingDevice2PlotQueue.clear()
         print("DONE")
 
     def generateCsvs(self):

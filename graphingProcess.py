@@ -6,11 +6,13 @@ from PyQt5 import QtWidgets, QtCore
 import pyqtgraph as pg
 
 class GraphingProcess(QtWidgets.QMainWindow):
-    def __init__(self, micrometerQueue):
+    def __init__(self, micrometerQueue, powermeter1Queue, powermeter2Queue):
         super().__init__()
         self.setWindowTitle("Multiple Subplots in a 2x2 Grid")
 
         self.micrometerQueue = micrometerQueue
+        self.powermeter1Queue = powermeter1Queue
+        self.powermeter2Queue = powermeter2Queue
         # Create a container widget and a QGridLayout
         container = QtWidgets.QWidget()
         layout = QtWidgets.QGridLayout(container)
@@ -65,15 +67,25 @@ class GraphingProcess(QtWidgets.QMainWindow):
         """Pull all items from the queue and update the plot."""
         while not self.micrometerQueue.empty():
             x = time.time()
-            y= self.micrometerQueue.get_nowait()
+            y = self.micrometerQueue.get_nowait()
             print("ADDED")
             self.x_data1.append(x)
             self.y_data1.append(y)
+        
+        while not self.powermeter1Queue.empty():
+            if(len(self.y_data1) == 0):
+                self.x_data2.append(0)
+            else:
+                self.x_data2 + self.y_data1
+                self.y_data2.append(self.powermeter1Queue.get_nowait())
+                
+
 
         self.curve1.setData(self.x_data1, self.y_data1)
+        self.curve2.setData(self.x_data2, self.y_data2)
 
-def run_pyqt_app(micrometerQueue):
+def run_pyqt_app(micrometerQueue, powermeter1Queue, powermeter2Queue):
     app = QtWidgets.QApplication(sys.argv)
-    window = GraphingProcess(micrometerQueue)
+    window = GraphingProcess(micrometerQueue, powermeter1Queue, powermeter2Queue)
     window.show()
     sys.exit(app.exec_())
