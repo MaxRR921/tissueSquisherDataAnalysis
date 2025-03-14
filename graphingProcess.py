@@ -67,6 +67,7 @@ class GraphingProcess(QtWidgets.QMainWindow):
         while not self.micrometerQueue.empty():
             try:
                 (x, y)= self.micrometerQueue.get_nowait()
+                print("ADDED")
             except:
                 break
             self.x_data1.append(x)
