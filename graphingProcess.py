@@ -63,6 +63,7 @@ class GraphingProcess(QtWidgets.QMainWindow):
 
     def check_queue(self):
         print("HELLO")
+        print("MICROMETER: ")
         """Pull all items from the queue and update the plot."""
         while not self.micrometerQueue.empty():
             try:

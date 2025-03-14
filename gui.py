@@ -477,6 +477,9 @@ class Gui:
         if not self.micrometerController.updatingCsvQueue.is_set():
             self.micrometerController.updatingCsvQueue.set()
 
+        if self.pyqt_process is not None or self.pyqt_process.is_alive():
+            self.micrometerController.updatingPlotQueue.set()
+
         #POLARIMETER NEEDS TO START RUNNING BEFORE MOVES EXECUTE. IT DOESN'T CONSTANTLY RUN LIKE THE POWERMETER.
         if(self.polarimeter is not None):
             self.polarimeter.run = True
