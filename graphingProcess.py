@@ -75,12 +75,14 @@ class GraphingProcess(QtWidgets.QMainWindow):
         while not self.powermeter1Queue.empty():
             if(len(self.y_data1) == 0):
                 self.x_data2.append(0)
+                self.y_data2.append(self.powermeter1Queue.get_nowait())
             else:
                 self.x_data2 + self.y_data1
                 self.y_data2.append(self.powermeter1Queue.get_nowait())
+                print(self.y_data2)
                 
 
-
+        
         self.curve1.setData(self.x_data1, self.y_data1)
         self.curve2.setData(self.x_data2, self.y_data2)
 
