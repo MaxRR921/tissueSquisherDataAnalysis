@@ -65,25 +65,21 @@ class GraphingProcess(QtWidgets.QMainWindow):
 
     def check_queue(self):
         """Pull all items from the queue and update the plot."""
-        while not self.micrometerQueue.empty():
-            x = time.time()
-            y = self.micrometerQueue.get_nowait()
-            print("ADDED")
-            self.x_data1.append(x)
-            self.y_data1.append(y)
+        # while not self.micrometerQueue.empty():
+        #     x = time.time()
+        #     y = self.micrometerQueue.get_nowait()
+        #     print("ADDED")
+        #     self.x_data1.append(x)
+        #     self.y_data1.append(y)
         
-        while not self.powermeter1Queue.empty():
-            if(len(self.y_data1) == 0):
-                self.x_data2.append(0)
-                self.y_data2.append(self.powermeter1Queue.get_nowait())
-            else:
-                self.x_data2 = self.x_data2 + self.y_data1
+        while not self.powermeter1Queue.empty() and not self.micrometerQueue.empty():
+                self.x_data2 = self.micrometerQueue.get_nowait() 
                 self.y_data2.append(self.powermeter1Queue.get_nowait())
                 print(self.y_data2)
                 
 
         
-        self.curve1.setData(self.x_data1, self.y_data1)
+        # self.curve1.setData(self.x_data1, self.y_data1)
         self.curve2.setData(self.x_data2, self.y_data2)
 
 def run_pyqt_app(micrometerQueue, powermeter1Queue, powermeter2Queue):
