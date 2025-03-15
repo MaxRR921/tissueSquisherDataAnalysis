@@ -77,7 +77,7 @@ class GraphingProcess(QtWidgets.QMainWindow):
                 self.x_data2.append(0)
                 self.y_data2.append(self.powermeter1Queue.get_nowait())
             else:
-                self.x_data2 + self.y_data1
+                self.x_data2 = self.x_data2 + self.y_data1
                 self.y_data2.append(self.powermeter1Queue.get_nowait())
                 print(self.y_data2)
                 
