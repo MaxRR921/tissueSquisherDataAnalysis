@@ -73,7 +73,7 @@ class GraphingProcess(QtWidgets.QMainWindow):
         #     self.y_data1.append(y)
         
         while not self.powermeter1Queue.empty() and not self.micrometerQueue.empty():
-                self.x_data2 = self.micrometerQueue.get_nowait() 
+                self.x_data2.append(self.micrometerQueue.get_nowait())
                 self.y_data2.append(self.powermeter1Queue.get_nowait())
                 print(self.y_data2)
                 
