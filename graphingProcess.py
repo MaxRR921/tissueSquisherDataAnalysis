@@ -62,7 +62,7 @@ class GraphingProcess(QtWidgets.QMainWindow):
         self.timer.timeout.connect(self.check_queue)
         self.timer.start(100)  # 10 Hz
 
-
+   #NOTE: POWERMETER IS ACTUALLY POLLING QUITE SLOW.... so i made it update only when powermeter updates and the graph is way slower. 
     def check_queue(self):
         """Pull all items from the queue and update the plot."""
         # while not self.micrometerQueue.empty():
@@ -74,6 +74,7 @@ class GraphingProcess(QtWidgets.QMainWindow):
         
         while not self.powermeter1Queue.empty() and not self.micrometerQueue.empty():
                 self.x_data2.append(self.micrometerQueue.get_nowait())
+                print(self.x_data2)
                 self.y_data2.append(self.powermeter1Queue.get_nowait())
                 print(self.y_data2)
                 
