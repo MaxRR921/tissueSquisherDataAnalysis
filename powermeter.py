@@ -114,7 +114,6 @@ class Powermeter:
                         self.device1CsvQueue.put(float(data[0][0]), time.time())
                     if(self.updatingDevice1PlotQueue.is_set()):
                         self.device1PlotQueue.put(float(data[0][0]))
-                        print("PUTTING!!!!")
                     # print("DATA:", self.device1Data)
                 i=i+1
 
