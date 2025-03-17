@@ -111,7 +111,7 @@ class Powermeter:
                     #self.device1Data = np.append(self.device1Data, newData, axis=0) 
                     self.device1Data = data[0][0]
                     if(self.updatingDevice1CsvQueue.is_set()):
-                        self.device1CsvQueue.put(float(data[0][0]), time.time())
+                        self.device1CsvQueue.put((float(data[0][0]), time.time()))
                     if(self.updatingDevice1PlotQueue.is_set()):
                         self.device1PlotQueue.put(float(data[0][0]))
                     # print("DATA:", self.device1Data)
@@ -145,7 +145,7 @@ class Powermeter:
                     newData = np.array([[data[0][0], deltaTime, data[2][0]]])
                     self.device2Data = data[0][0]
                     if(self.updatingDevice2CsvQueue.is_set()):
-                        self.device2CsvQueue.put(float(data[0][0]), time.time())
+                        self.device2CsvQueue.put((float(data[0][0]), time.time()))
                     if(self.updatingDevice2PlotQueue.is_set()):
                         self.device2PlotQueue.put(float(data[0][0]))
                     # print("DATA:", self.device2Data)
