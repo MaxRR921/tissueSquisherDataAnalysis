@@ -539,21 +539,21 @@ class Gui:
             for row_tuple in micrometerArray:
                 writer.writerow(row_tuple)
 
-        with open("power1time.csv", mode="w", newline="") as f:
-            writer = csv.writer(f)
-            # Optionally, write a header row first:
-            writer.writerow(["power 1 (W)", "time (seconds since jan 1 1975)"])
-            # Each element of the tuple goes into its own CSV column
-            for row_tuple in powermeter1Array:
-                writer.writerow(row_tuple)
+        # with open("power1time.csv", mode="w", newline="") as f:
+        #     writer = csv.writer(f)
+        #     # Optionally, write a header row first:
+        #     writer.writerow(["power 1 (W)", "time (seconds since jan 1 1975)"])
+        #     # Each element of the tuple goes into its own CSV column
+        #     for row_tuple in powermeter1Array:
+        #         writer.writerow(row_tuple)
 
-        with open("power2time.csv", mode="w", newline="") as f:
-            writer = csv.writer(f)
-            # Optionally, write a header row first:
-            writer.writerow(["power 2 (W)", "time (seconds since jan 1 1975)"])
-            # Each element of the tuple goes into its own CSV column
-            for row_tuple in powermeter2Array:
-                writer.writerow(row_tuple)
+        # with open("power2time.csv", mode="w", newline="") as f:
+        #     writer = csv.writer(f)
+        #     # Optionally, write a header row first:
+        #     writer.writerow(["power 2 (W)", "time (seconds since jan 1 1975)"])
+        #     # Each element of the tuple goes into its own CSV column
+        #     for row_tuple in powermeter2Array:
+        #         writer.writerow(row_tuple)
                 
 
     """addmove adds the move to the movelist and then udpates the move gui adding the move"""
