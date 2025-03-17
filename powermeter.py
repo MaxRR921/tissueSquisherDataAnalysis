@@ -50,9 +50,13 @@ class Powermeter:
             self.device1PlotQueue = multiprocessing.Queue()
             self.device2PlotQueue = multiprocessing.Queue()
             self.updatingDevice1PlotQueue = threading.Event()
+            self.updatingDevice1PlotQueue.clear()
             self.updatingDevice2PlotQueue = threading.Event()
+            self.updatingDevice2PlotQueue.clear()
             self.updatingDevice1CsvQueue = threading.Event()
+            self.updatingDevice1CsvQueue.clear()
             self.updatingDevice2CsvQueue = threading.Event()
+            self.updatingDevice2CsvQueue.clear()
 
             self.run = threading.Event()
             self.run.set()  # to start running
