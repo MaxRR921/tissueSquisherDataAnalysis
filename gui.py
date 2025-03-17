@@ -527,10 +527,12 @@ class Gui:
 
         while not self.powermeter.device1CsvQueue.empty():
             powermeter1Array.append(self.powermeter.device1CsvQueue.get())
+            print("POWERMETER 1 ARRAY: ", powermeter1Array)
 
         while not self.powermeter.device2CsvQueue.empty():
             powermeter2Array.append(self.powermeter.device2CsvQueue.get())
-            
+            print("POWERMETER 2 ARRAY: ", powermeter2Array)
+
         with open("micrometertime.csv", mode="w", newline="") as f:
             writer = csv.writer(f)
             # Optionally, write a header row first:
