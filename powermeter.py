@@ -93,7 +93,6 @@ class Powermeter:
             # An Example for data retrieving
             self.OphirCom.StartStream(deviceHandle, 0)# start measuring
             while self.run.is_set():  
-                time.sleep(.2)# wait a little for data
                 data = self.OphirCom.GetData(deviceHandle, 0)
                 if len(data[0]) > 0: # if any data available, print the first one from the batch
                     # print('Reading = {0}, TimeStamp = {1}, Status = {2} '.format(data[0][0] ,data[1][0] ,data[2][0]))
@@ -108,9 +107,9 @@ class Powermeter:
                     #self.device1Data = np.append(self.device1Data, newData, axis=0) 
                     self.device1Data = data[0][0]
                     if(self.updatingDevice1CsvQueue.is_set()):
-                        self.device1CsvQueue.put(float(data[0][0]))
+                        self.device1CsvQueue.put(float(data[0][0]), time.time())
                     if(self.updatingDevice1PlotQueue.is_set()):
-                        self.device1PlotQueue.put(float(data[0][0]))
+                        self.device1PlotQueue.put(float(data[0][0]), time.time())
                         print("PUTTING!!!!")
                     # print("DATA:", self.device1Data)
                 i=i+1
@@ -130,7 +129,6 @@ class Powermeter:
             # An Example for data retrieving
             self.OphirCom.StartStream(deviceHandle, 0)# start measuring
             while self.run.is_set():
-                time.sleep(.2)# wait a little for data
                 data = self.OphirCom.GetData(deviceHandle, 0)
                 if len(data[0]) > 0: # if any data available, print the first one from the batch
                     # print('Reading = {0}, TimeStamp = {1}, Status = {2} '.format(data[0][0] ,data[1][0] ,data[2][0]))
@@ -144,9 +142,9 @@ class Powermeter:
                     newData = np.array([[data[0][0], deltaTime, data[2][0]]])
                     self.device2Data = data[0][0]
                     if(self.updatingDevice2CsvQueue.is_set()):
-                        self.device2CsvQueue.put(data[0][0])
+                        self.device2CsvQueue.put(float(data[0][0]), time.time())
                     if(self.updatingDevice2PlotQueue.is_set()):
-                        self.device2PlotQueue.put(data[0][0])
+                        self.device2PlotQueue.put(float(data[0][0]), time.time())
                     # print("DATA:", self.device2Data)
                 i=i+1
         else:
