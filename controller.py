@@ -149,7 +149,7 @@ class Controller:
             if(self.updatingCsvQueue.is_set()):
                 self.csvQueue.put((float(self.micrometerPosition[3:].strip()), time.time()))
             if(self.updatingPlotQueue.is_set()):
-                x = float(self.micrometerPosition[3:].strip())
+                x = 12 - float(self.micrometerPosition[3:].strip())
                 print("XINCONTROLLER: ", x)
                 self.plotQueue.put(x)
             # print(self.micrometerPosition)
