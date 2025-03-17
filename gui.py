@@ -520,18 +520,41 @@ class Gui:
 
     def generateCsvs(self):
         micrometerArray = []
+        powermeter1Array = []
+        powermeter2Array = []
         while not self.micrometerController.csvQueue.empty():
             micrometerArray.append(self.micrometerController.csvQueue.get())
-        
-        with open("my_data.csv", mode="w", newline="") as f:
-            writer = csv.writer(f)
+
+        while not self.powermeter.device1CsvQueue.empty():
+            powermeter1Array.append(self.powermeter.device1CsvQueue.get())
+
+        while not self.powermeter.device2CsvQueue.empty():
+            powermeter2Array.append(self.powermeter.device2CsvQueue.get())
             
+        with open("micrometertime.csv", mode="w", newline="") as f:
+            writer = csv.writer(f)
             # Optionally, write a header row first:
             writer.writerow(["position (mm)", "time (seconds since jan 1 1975)"])
-            
             # Each element of the tuple goes into its own CSV column
             for row_tuple in micrometerArray:
                 writer.writerow(row_tuple)
+
+        with open("power1time.csv", mode="w", newline="") as f:
+            writer = csv.writer(f)
+            # Optionally, write a header row first:
+            writer.writerow(["power 1 (W)", "time (seconds since jan 1 1975)"])
+            # Each element of the tuple goes into its own CSV column
+            for row_tuple in micrometerArray:
+                writer.writerow(row_tuple)
+
+        with open("power2time.csv", mode="w", newline="") as f:
+            writer = csv.writer(f)
+            # Optionally, write a header row first:
+            writer.writerow(["power 2 (W)", "time (seconds since jan 1 1975)"])
+            # Each element of the tuple goes into its own CSV column
+            for row_tuple in micrometerArray:
+                writer.writerow(row_tuple)
+                
 
     """addmove adds the move to the movelist and then udpates the move gui adding the move"""
     def __addMove(self, frameMoveList):
