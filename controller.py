@@ -152,6 +152,7 @@ class Controller:
                 x = float(self.micrometerPosition[3:].strip())
                 print("XINCONTROLLER: ", x)
                 self.plotQueue.put(x)
+                print("X IN QUEUE IS: ", self.plotQueue.get())
             # print(self.micrometerPosition)
             self.timeStamp = time.time()
             self.ser.write(b'1TS\r\n')
