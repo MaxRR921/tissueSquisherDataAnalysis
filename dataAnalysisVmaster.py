@@ -1,114 +1,146 @@
 import numpy as np
 import pandas as pd
+import multiprocessing 
+
 #TODO TAke out unnecessary imports 
 
-
-def analyzeData(s1List, s2List, s3List, timeList):
-    # Convert lists to numpy arrays
-    timeListNp = np.array(timeList)
-    s1ListNp = np.array(s1List)
-    s2ListNp = np.array(s2List)
-    s3ListNp = np.array(s3List)
-
-    # Check if input lists are empty
-    if len(s1ListNp) == 0 or len(s2ListNp) == 0 or len(s3ListNp) == 0 or len(timeListNp) == 0:
-        print("Error: One or more input lists are empty.")
-        return None, None
-
-    # Convert Stokes vector to polar coordinates
-    sx = np.sqrt((s1ListNp * s1ListNp) + (s2ListNp * s2ListNp))
-    theta = np.arctan2(s2ListNp, s1ListNp)
-    psi = np.arctan2(s3ListNp, sx)
-
-    wrapCount = 0
-    thetaCounter = np.zeros(len(theta))
-
-    # Fix sign issues in theta
-    for i in range(len(theta) - 1):
-        if np.sign(s1ListNp[i]) == -1:
-            if (np.sign(s2ListNp[i]) == 1) and (np.sign(s2ListNp[i + 1]) == -1):
-                wrapCount += 2 * np.pi
-            elif (np.sign(s2ListNp[i]) == -1) and (np.sign(s2ListNp[i + 1]) == 1):
-                wrapCount -= 2 * np.pi
-        thetaCounter[i+1] = wrapCount
-
-    theta = theta + thetaCounter
-
-    n = len(theta)
-    xx = theta * theta
-    yy = psi * psi
-    xy = theta * psi
-
-    A = np.array([[np.sum(theta), np.sum(psi), n],
-                  [np.sum(xy), np.sum(yy), np.sum(psi)],
-                  [np.sum(xx), np.sum(xy), np.sum(theta)]])
+class DataAnalyzer:
     
-    B = np.array([
-        -np.sum(xx + yy),
-        -np.sum(xx * psi + yy * psi),
-        -np.sum(xx * theta + xy * psi)
-    ])
-
-    # Print A and B to debug
-    print("Matrix A:", A)
-    print("Matrix B:", B)
-
-    # Add regularization to A to avoid singular matrix error
-    epsilon = 1e-10
-    A += epsilon * np.eye(A.shape[0])
-
-    try:
-        a = np.linalg.solve(A, B)
-    except np.linalg.LinAlgError as e:
-        print(f"Error solving linear system: {e}")
-        return None, None
-
-    xc = -0.5 * a[0]
-    yc = -0.5 * a[1]
-    R = np.sqrt((a[0] ** 2 + a[1] ** 2) / 4 - a[2])
-
-    # Create x and y coordinates with rotation
-    x = s1ListNp * np.sin(-xc) + s2ListNp * np.cos(-xc)
-    y = s3ListNp
-
-    # Find the angle of the circle (phase)
-    phase = np.arctan2(y, x) / np.pi
-
-    # Normalize the phase
-    k = len(phase)
-    phaseCounter = np.zeros(k)
-    wrapCount = 0
-
-    # Check for sign changes and update phaseCounter
-    for i in range(k-1):
-        if np.sign(x[i]) == -1:
-            if (np.sign(y[i]) == 1) and (np.sign(y[i+1]) == -1):
-                wrapCount += 2
-            elif (np.sign(y[i]) == -1) and (np.sign(y[i+1]) == 1):
-                wrapCount -= 2
-        phaseCounter[i+1] = wrapCount
-
-    if len(phase) == 0:
-        print("Error: phase array is empty.")
-        return None, None
-
-    phase = (phase + phaseCounter - phase[0])  # Normalize phase
-
-    # Convert time to strain based on rate of micrometer motion
-    thick = 5.28  # thickness of the samples in mm
-    rate = 0.1  # rate of the micrometer (compression rate in mm/s)
-    strain = (timeListNp * rate) / thick
+    def __init__(self):
+        self.strainQueue = multiprocessing.Queue()
+        self.phaseQueue = multiprocessing.Queue()
     
-    print("Time List:", timeListNp)
-    print("Strain:", strain)
-    try:
-        print("Phase:", phase)
-        print("S1 List:", s1ListNp)
-        print("S2 List:", s2ListNp)
-        print("S3 List: ", s3ListNp)
-    except:
-        print("UH OH")
-    return strain, phase
+
+
+    def analyzeData(self, s1Queue, s2Queue, s3Queue, timeQueue):
+        # Convert lists to numpy arrays
+        
+        s1List = []
+        s2List = []
+        s3List = []
+        timeList = []
+        while not s1Queue.empty():
+            s1List.append(s1Queue.get()) 
+
+        while not s2Queue.empty():
+            s2List.append(s2Queue.get()) 
+
+        while not s3Queue.empty():
+            s3List.append(s3Queue.get()) 
+
+        while not timeQueue.empty():
+            timeList.append(timeQueue.get())
+        s1ListNp = np.array(s1List)
+        s2ListNp = np.array(s2List)
+        s3ListNp = np.array(s3List)
+        timeListNp = np.array(timeList)
+
+        
+
+
+        # Check if input lists are empty
+        if len(s1ListNp) == 0 or len(s2ListNp) == 0 or len(s3ListNp) == 0 or len(timeListNp) == 0:
+            print("Error: One or more input lists are empty.")
+            return None, None
+
+        # Convert Stokes vector to polar coordinates
+        sx = np.sqrt((s1ListNp * s1ListNp) + (s2ListNp * s2ListNp))
+        theta = np.arctan2(s2ListNp, s1ListNp)
+        psi = np.arctan2(s3ListNp, sx)
+
+        wrapCount = 0
+        thetaCounter = np.zeros(len(theta))
+
+        # Fix sign issues in theta
+        for i in range(len(theta) - 1):
+            if np.sign(s1ListNp[i]) == -1:
+                if (np.sign(s2ListNp[i]) == 1) and (np.sign(s2ListNp[i + 1]) == -1):
+                    wrapCount += 2 * np.pi
+                elif (np.sign(s2ListNp[i]) == -1) and (np.sign(s2ListNp[i + 1]) == 1):
+                    wrapCount -= 2 * np.pi
+            thetaCounter[i+1] = wrapCount
+
+        theta = theta + thetaCounter
+
+        n = len(theta)
+        xx = theta * theta
+        yy = psi * psi
+        xy = theta * psi
+
+        A = np.array([[np.sum(theta), np.sum(psi), n],
+                    [np.sum(xy), np.sum(yy), np.sum(psi)],
+                    [np.sum(xx), np.sum(xy), np.sum(theta)]])
+        
+        B = np.array([
+            -np.sum(xx + yy),
+            -np.sum(xx * psi + yy * psi),
+            -np.sum(xx * theta + xy * psi)
+        ])
+
+        # Print A and B to debug
+        print("Matrix A:", A)
+        print("Matrix B:", B)
+
+        # Add regularization to A to avoid singular matrix error
+        epsilon = 1e-10
+        A += epsilon * np.eye(A.shape[0])
+
+        try:
+            a = np.linalg.solve(A, B)
+        except np.linalg.LinAlgError as e:
+            print(f"Error solving linear system: {e}")
+            return None, None
+
+        xc = -0.5 * a[0]
+        yc = -0.5 * a[1]
+        R = np.sqrt((a[0] ** 2 + a[1] ** 2) / 4 - a[2])
+
+        # Create x and y coordinates with rotation
+        x = s1ListNp * np.sin(-xc) + s2ListNp * np.cos(-xc)
+        y = s3ListNp
+
+        # Find the angle of the circle (phase)
+        phase = np.arctan2(y, x) / np.pi
+
+        # Normalize the phase
+        k = len(phase)
+        phaseCounter = np.zeros(k)
+        wrapCount = 0
+
+        # Check for sign changes and update phaseCounter
+        for i in range(k-1):
+            if np.sign(x[i]) == -1:
+                if (np.sign(y[i]) == 1) and (np.sign(y[i+1]) == -1):
+                    wrapCount += 2
+                elif (np.sign(y[i]) == -1) and (np.sign(y[i+1]) == 1):
+                    wrapCount -= 2
+            phaseCounter[i+1] = wrapCount
+
+        if len(phase) == 0:
+            print("Error: phase array is empty.")
+            return None, None
+
+        phase = (phase + phaseCounter - phase[0])  # Normalize phase
+
+        # Convert time to strain based on rate of micrometer motion
+        thick = 5.28  # thickness of the samples in mm
+        rate = 0.1  # rate of the micrometer (compression rate in mm/s)
+        strain = (timeListNp * rate) / thick
+        
+        print("Time List:", timeListNp)
+        print("Strain:", strain)
+        try:
+            print("Phase:", phase)
+            print("S1 List:", s1ListNp)
+            print("S2 List:", s2ListNp)
+            print("S3 List: ", s3ListNp)
+        except:
+            print("UH OH")
+        for s in strain:
+            self.strainQueue.put(s)
+        for p in phase:
+            self.phaseQueue.put(p)
+
 
    
 

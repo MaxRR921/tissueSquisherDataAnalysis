@@ -1,6 +1,8 @@
 import time
 from ctypes import *
-
+import threading 
+import queue 
+import dataAnalysisVmaster
 
 class Polarimeter():
 
@@ -13,12 +15,13 @@ class Polarimeter():
     def __init__(self, micrometer):
         # Load DLL library
         self.micrometer = micrometer
-        self.s1List = []
-        self.s2List = []
-        self.s3List = []
-        self.timeList = []
+        self.updatingCsvQueue = threading.Event()
+        self.updatingCsvQueue.clear()
+        self.s1Queue = queue.Queue()
+        self.s2Queue = queue.Queue()
+        self.s3Queue = queue.Queue()
+        self.timeQueue = queue.Queue()
         self.initTime = 0
-        self.positionList = []
         #you need to have a windows machine because that's the only one that can have this driver. this line loads this from the default
         #path this driver is installed in on your machine
         self.lib = cdll.LoadLibrary("C:\Program Files\IVI Foundation\VISA\Win64\Bin\TLPAX_64.dll")
@@ -29,6 +32,7 @@ class Polarimeter():
         self.resetDevice = False
         self.resource =  resource = create_string_buffer(256)
         self.deviceCount = c_int()
+        self.dataAnalyzer = dataAnalysisVmaster.DataAnalyzer()
 
         # Check how many PAX1000 are connected
         self.lib.TLPAX_findRsrc(self.instrumentHandle, byref(self.deviceCount))
@@ -104,30 +108,16 @@ class Polarimeter():
             s3 = c_double()
             self.lib.TLPAX_getPolarization(self.instrumentHandle, scanID.value, byref(azimuth), byref(ellipticity))
             self.lib.TLPAX_getStokesNormalized(self.instrumentHandle, scanID, byref(s1),byref(s2),byref(s3))
-            print("Azimuth [rad]: ", azimuth.value)
-            print("Ellipticity [rad]: ", ellipticity.value)
-            print("s1: ", s1)
-            print("s2: ", s2)
-            print("s3: ", s3)
-            self.s1List.append(s1.value)
-            self.s2List.append(s2.value)
-            self.s3List.append(s3.value)
-            t = time.time()
-            self.timeList.append(t - initTime)
-            print("s1List: ", self.s1List)
-            print("s2List: ", self.s2List)
-            print("s3List: ", self.s3List)
-           
+            # print("Azimuth [rad]: ", azimuth.value)
+            # print("Ellipticity [rad]: ", ellipticity.value)
+            # print("s1: ", s1)
+            # print("s2: ", s2)
+            # print("s3: ", s3)
+            self.s1Queue.put(s1.value)
+            self.s2Queue.put(s2.value)
+            self.s3Queue.put(s3.value)
+            self.timeQueue.put(c_double(time.time() - initTime))
             self.lib.TLPAX_releaseScan(self.instrumentHandle, scanID)
-            try:
-                self.positionList.append(self.micrometer.micrometerPosition.decode()[3:].strip())
-                print(self.positionList)
-            except:
-                print("polarimeter reading of position data is invalid.")
-                self.s1List.remove(s1.value)
-                self.s2List.remove(s2.value)
-                self.s3List.remove(s3.value)
-                self.timeList.remove(t-initTime)
             time.sleep(0.1)
 
         # Close

@@ -1,4 +1,3 @@
-import dataAnalysisVmaster
 import numpy as np
 import tkinter as tk
 import controller
@@ -191,7 +190,7 @@ class Gui:
         self.__dropdownButton(self.topMenuFrame)
         self.__browseDataFileButton(self.topMenuFrame)
         self.__startGraphingButton(self.topMenuFrame)
-        
+         
 
     #ALL BUTTONS IN TOP MENU
 
@@ -256,7 +255,7 @@ class Gui:
         if self.pyqt_process is None or not self.pyqt_process.is_alive():
             print("Starting PyQt process...")
             self.pyqt_process = multiprocessing.Process(target=graphingProcess.run_pyqt_app,
-                                                        args=(self.micrometerController.plotQueue, self.powermeter.device1PlotQueue, self.powermeter.device2PlotQueue,))
+                                                        args=(self.micrometerController.plotQueue, self.powermeter.device1PlotQueue, self.powermeter.device2PlotQueue, self.polarimeter.dataAnalyzer.phaseQueue, self.polarimeter.dataAnalyzer.strainQueue))
             self.pyqt_process.start()
         else:
             print("PyQt process is already running!")        
@@ -618,7 +617,6 @@ class Gui:
         if (self.executed.is_set()): #right here all of the things that need to be done immediately after move(s) are done executing happen
             if self.polarimeter is not None:
                 self.polarimeter.run = False
-                self.strain, self.phase  = dataAnalysisVmaster.analyzeData(self.polarimeter.s1List, self.polarimeter.s2List, self.polarimeter.s3List, self.polarimeter.timeList)
             else:
                 print("polarimeter could not be told to stop running because no polarimeter detected.")
 

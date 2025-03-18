@@ -6,13 +6,15 @@ from PyQt5 import QtWidgets, QtCore
 import pyqtgraph as pg
 
 class GraphingProcess(QtWidgets.QMainWindow):
-    def __init__(self, micrometerQueue, powermeter1Queue, powermeter2Queue):
+    def __init__(self, micrometerQueue, powermeter1Queue, powermeter2Queue, phaseQueue, strainQueue):
         super().__init__()
         self.setWindowTitle("Multiple Subplots in a 2x2 Grid")
 
         self.micrometerQueue = micrometerQueue
         self.powermeter1Queue = powermeter1Queue
         self.powermeter2Queue = powermeter2Queue
+        self.phaseQueue = phaseQueue
+        self.strainQueue = strainQueue
         # Create a container widget and a QGridLayout
         container = QtWidgets.QWidget()
         layout = QtWidgets.QGridLayout(container)
@@ -79,13 +81,25 @@ class GraphingProcess(QtWidgets.QMainWindow):
         while not self.powermeter2Queue.empty():
             self.x_data3.append(time.time())
             self.y_data3.append(self.powermeter2Queue.get_nowait())
+
+        
+        while not self.phaseQueue.empty():
+            self.x_data4.append(self.phaseQueue.get_nowait())
+
+        while not self.strainQueue.empty():
+            self.y_data4.append(self.strainQueue.get_nowait())
+
         
         self.curve1.setData(self.x_data1, self.y_data1)
         self.curve2.setData(self.x_data2, self.y_data2)
         self.curve3.setData(self.x_data3, self.y_data3)
+        self.curve4.setData(self.x_data4, self.y_data4)
 
-def run_pyqt_app(micrometerQueue, powermeter1Queue, powermeter2Queue):
+
+
+
+def run_pyqt_app(micrometerQueue, powermeter1Queue, powermeter2Queue, phaseQueue, strainQueue):
     app = QtWidgets.QApplication(sys.argv)
-    window = GraphingProcess(micrometerQueue, powermeter1Queue, powermeter2Queue)
+    window = GraphingProcess(micrometerQueue, powermeter1Queue, powermeter2Queue, )
     window.show()
     sys.exit(app.exec_())
