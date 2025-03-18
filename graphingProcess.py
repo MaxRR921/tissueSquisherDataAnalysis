@@ -82,12 +82,13 @@ class GraphingProcess(QtWidgets.QMainWindow):
             self.x_data3.append(time.time())
             self.y_data3.append(self.powermeter2Queue.get_nowait())
 
-        
-        while not self.phaseQueue.empty():
-            self.x_data4.append(self.phaseQueue.get_nowait())
+        if not self.phaseQueue == None:
+            while not self.phaseQueue.empty():
+                self.x_data4.append(self.phaseQueue.get_nowait())
 
-        while not self.strainQueue.empty():
-            self.y_data4.append(self.strainQueue.get_nowait())
+        if not self.phaseQueue == None:
+            while not self.strainQueue.empty():
+                self.y_data4.append(self.strainQueue.get_nowait())
 
         
         self.curve1.setData(self.x_data1, self.y_data1)
@@ -100,6 +101,6 @@ class GraphingProcess(QtWidgets.QMainWindow):
 
 def run_pyqt_app(micrometerQueue, powermeter1Queue, powermeter2Queue, phaseQueue, strainQueue):
     app = QtWidgets.QApplication(sys.argv)
-    window = GraphingProcess(micrometerQueue, powermeter1Queue, powermeter2Queue, )
+    window = GraphingProcess(micrometerQueue, powermeter1Queue, powermeter2Queue, phaseQueue, strainQueue)
     window.show()
     sys.exit(app.exec_())
