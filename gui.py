@@ -42,13 +42,14 @@ class Gui:
         except:
             print("Micrometer Connection Error")
             self.micrometerController = None
-
+            
+        self.polarimeter = None
         try:
             self.polarimeter = polarimeter.Polarimeter(self.micrometerController)
             self.polarimeterThread = threading.Thread(target=self.polarimeter.start, args=[])
         except:
             print("Polarimeter Connection Error")
-            self.polarimeter = None
+            
 
         try:
             self.powermeter = powermeter.Powermeter()
