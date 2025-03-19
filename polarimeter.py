@@ -120,6 +120,7 @@ class Polarimeter():
             self.lib.TLPAX_releaseScan(self.instrumentHandle, scanID)
             time.sleep(0.1)
         
+        print("ANALYZING DATA !!! !!! !! ")
         self.dataAnalyzer.analyzeData(self.s1Queue, self.s2Queue, self.s3Queue, self.timeQueue)
 
         # Close
