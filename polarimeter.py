@@ -87,11 +87,6 @@ class Polarimeter():
     polarimeter !might be able to run init() again rather than duplicating the initialization code here.  
     """
     def start(self):
-        self.s1List.clear()
-        self.s2List.clear()
-        self.s3List.clear()
-        self.timeList.clear()
-        self.positionList.clear()
         self.initTime = 0
         x = 0
         initTime = time.time()
