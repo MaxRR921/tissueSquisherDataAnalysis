@@ -89,7 +89,7 @@ class Polarimeter():
     def start(self):
         self.initTime = 0
         x = 0
-        initTime = time.time()
+        initTime = c_double(time.time())
         while self.run:
             revolutionCounter = c_int()
             scanID = c_int()
@@ -111,7 +111,7 @@ class Polarimeter():
             self.s1Queue.put(s1.value)
             self.s2Queue.put(s2.value)
             self.s3Queue.put(s3.value)
-            self.timeQueue.put(c_double(time.time() - initTime))
+            self.timeQueue.put(c_double(time.time()) - initTime)
             self.lib.TLPAX_releaseScan(self.instrumentHandle, scanID)
             time.sleep(0.1)
         
