@@ -49,8 +49,8 @@ class GraphingProcess(QtWidgets.QMainWindow):
         layout.addWidget(self.plot4, 1, 1)  # Row 1, Col 1
 
         self.plot5 = pg.PlotWidget()
-        self.plot5.setLabel('left', "Phase")
-        self.plot5.setLabel('bottom', "Strain")
+        self.plot5.setLabel('left', "Power Difference (W)")
+        self.plot5.setLabel('bottom', "Time")
         self.curve5 = self.plot5.plot([], [], pen='y')
         layout.addWidget(self.plot5, 0, 2)  # Row 1, Col 1
 
