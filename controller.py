@@ -151,7 +151,7 @@ class Controller:
             if(self.updatingPlotQueue.is_set()):
                 x = 12 - float(self.micrometerPosition[3:].strip())
                 print("XINCONTROLLER: ", x)
-                self.plotQueue.put(x, time.time())
+                self.plotQueue.put((x, time.time()))
             # print(self.micrometerPosition)
             self.timeStamp = time.time()
             self.ser.write(b'1TS\r\n')
