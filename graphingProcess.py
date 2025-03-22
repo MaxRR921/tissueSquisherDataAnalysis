@@ -74,12 +74,14 @@ class GraphingProcess(QtWidgets.QMainWindow):
             self.y_data1.append(y)
         
         while not self.powermeter1Queue.empty():
-            self.x_data2.append(time.time())
-            self.y_data2.append(self.powermeter1Queue.get_nowait())
+            x,y = self.powermeter1Queue.get_nowait()
+            self.x_data2.append(x)
+            self.y_data2.append(y)
                 
         while not self.powermeter2Queue.empty():
-            self.x_data3.append(time.time())
-            self.y_data3.append(self.powermeter2Queue.get_nowait())
+            x,y = self.powermeter2Queue.get_nowait()
+            self.x_data3.append(x)
+            self.y_data3.append(y)
 
         if not self.phaseQueue == None:
             while not self.phaseQueue.empty():
