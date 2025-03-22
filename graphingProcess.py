@@ -84,11 +84,11 @@ class GraphingProcess(QtWidgets.QMainWindow):
 
         if not self.phaseQueue == None:
             while not self.phaseQueue.empty():
-                self.x_data4.append(self.phaseQueue.get_nowait())
+                self.y_data4.append(self.phaseQueue.get_nowait())
 
         if not self.strainQueue == None:
             while not self.strainQueue.empty():
-                self.y_data4.append(self.strainQueue.get_nowait())
+                self.x_data4.append(self.strainQueue.get_nowait())
 
         
         self.curve1.setData(self.x_data1, self.y_data1)
