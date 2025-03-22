@@ -51,7 +51,7 @@ class GraphingProcess(QtWidgets.QMainWindow):
         self.plot5 = pg.PlotWidget()
         self.plot5.setLabel('left', "Power Difference (W)")
         self.plot5.setLabel('bottom', "Time")
-        self.curve5 = self.plot5.plot([], [], pen='y')
+        self.curve5 = self.plot5.plot([], [], pen='orange')
         layout.addWidget(self.plot5, 0, 2)  # Row 1, Col 1
 
         self.plot6 = pg.PlotWidget()
