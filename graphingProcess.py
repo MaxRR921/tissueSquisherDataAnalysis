@@ -21,29 +21,29 @@ class GraphingProcess(QtWidgets.QMainWindow):
 
         # Subplot 1
         self.plot1 = pg.PlotWidget()
-        self.plot1.setLabel('left', "Y Axis 1")
-        self.plot1.setLabel('bottom', "X Axis 1")
+        self.plot1.setLabel('left', "Micrometer Position (mm)")
+        self.plot1.setLabel('bottom', "Time")
         self.curve1 = self.plot1.plot([], [], pen='r')
         layout.addWidget(self.plot1, 0, 0)  # Row 0, Col 0
 
         # Subplot 2
         self.plot2 = pg.PlotWidget()
-        self.plot2.setLabel('left', "Y Axis 2")
-        self.plot2.setLabel('bottom', "X Axis 2")
+        self.plot2.setLabel('left', "Power 1 (W)")
+        self.plot2.setLabel('bottom', "Time")
         self.curve2 = self.plot2.plot([], [], pen='g')
         layout.addWidget(self.plot2, 0, 1)  # Row 0, Col 1
 
         # Subplot 3
         self.plot3 = pg.PlotWidget()
-        self.plot3.setLabel('left', "Y Axis 3")
-        self.plot3.setLabel('bottom', "X Axis 3")
+        self.plot3.setLabel('left', "Power 2 (W)")
+        self.plot3.setLabel('bottom', "Time")
         self.curve3 = self.plot3.plot([], [], pen='b')
         layout.addWidget(self.plot3, 1, 0)  # Row 1, Col 0
 
         # Subplot 4
         self.plot4 = pg.PlotWidget()
-        self.plot4.setLabel('left', "Y Axis 4")
-        self.plot4.setLabel('bottom', "X Axis 4")
+        self.plot4.setLabel('left', "Phase")
+        self.plot4.setLabel('bottom', "Strain")
         self.curve4 = self.plot4.plot([], [], pen='y')
         layout.addWidget(self.plot4, 1, 1)  # Row 1, Col 1
 
