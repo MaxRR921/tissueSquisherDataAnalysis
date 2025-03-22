@@ -47,6 +47,18 @@ class GraphingProcess(QtWidgets.QMainWindow):
         self.curve4 = self.plot4.plot([], [], pen='y')
         layout.addWidget(self.plot4, 1, 1)  # Row 1, Col 1
 
+        self.plot5 = pg.PlotWidget()
+        self.plot5.setLabel('left', "Phase")
+        self.plot5.setLabel('bottom', "Strain")
+        self.curve5 = self.plot5.plot([], [], pen='y')
+        layout.addWidget(self.plot5, 0, 2)  # Row 1, Col 1
+
+        self.plot6 = pg.PlotWidget()
+        self.plot6.setLabel('left', "Phase")
+        self.plot6.setLabel('bottom', "Strain")
+        self.curve6 = self.plot6.plot([], [], pen='y')
+        layout.addWidget(self.plot6, 2, 2)  # Row 1, Col 1
+
         # Put the container into the MainWindow
         self.setCentralWidget(container)
 
