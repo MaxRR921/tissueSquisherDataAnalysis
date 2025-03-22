@@ -57,7 +57,7 @@ class GraphingProcess(QtWidgets.QMainWindow):
         self.plot6.setLabel('left', "Phase")
         self.plot6.setLabel('bottom', "Strain")
         self.curve6 = self.plot6.plot([], [], pen='y')
-        layout.addWidget(self.plot6, 2, 2)  # Row 1, Col 1
+        layout.addWidget(self.plot6, 1, 2)  # Row 1, Col 1
 
         # Put the container into the MainWindow
         self.setCentralWidget(container)
