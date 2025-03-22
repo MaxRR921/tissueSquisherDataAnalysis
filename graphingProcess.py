@@ -4,6 +4,7 @@ import time
 import multiprocessing
 from PyQt5 import QtWidgets, QtCore
 import pyqtgraph as pg
+from scipy.interpolate import interp1d
 
 class GraphingProcess(QtWidgets.QMainWindow):
     def __init__(self, micrometerQueue, powermeter1Queue, powermeter2Queue, phaseQueue, strainQueue):
@@ -102,12 +103,17 @@ class GraphingProcess(QtWidgets.QMainWindow):
         if not self.strainQueue == None:
             while not self.strainQueue.empty():
                 self.x_data4.append(self.strainQueue.get_nowait())
+        
+        interp_func = interp1d(self.x_data3, self.y_data3, kind='linear', fill_value='extrapolate')
+        aligned_pow2 = interp_func(self.x_data2)
+        diff = self.y_data1 - aligned_pow2
 
         
         self.curve1.setData(self.x_data1, self.y_data1)
         self.curve2.setData(self.x_data2, self.y_data2)
         self.curve3.setData(self.x_data3, self.y_data3)
         self.curve4.setData(self.x_data4, self.y_data4)
+        self.curve5.setData(self.x_data2, diff)
 
 
 
