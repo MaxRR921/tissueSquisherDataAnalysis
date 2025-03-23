@@ -287,6 +287,7 @@ class Gui:
     thecollect method. 
     !! should make it just use self.movelist...."""
     def startExecuteThread(self, moveList):
+        self.signalGraph.put(1)
         for plot in self.plotList:
             plot.resetPlot()
         self.executeThread = threading.Thread(target=self.__collect, args=[moveList])
@@ -464,7 +465,6 @@ class Gui:
     def updatePlotsFromData(self):
         self.timeStamp = time.time()
         if (self.executed.is_set()): #right here all of the things that need to be done immediately after move(s) are done executing happen
-            self.signalGraph.put(1)
             if self.polarimeter is not None:
                 self.polarimeter.run = False
             else:
