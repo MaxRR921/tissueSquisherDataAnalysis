@@ -7,7 +7,7 @@ import pyqtgraph as pg
 from scipy.interpolate import interp1d
 
 class GraphingProcess(QtWidgets.QMainWindow):
-    def __init__(self, micrometerQueue, powermeter1Queue, powermeter2Queue, phaseQueue, strainQueue):
+    def __init__(self, signalGraph, micrometerQueue, powermeter1Queue, powermeter2Queue, phaseQueue, strainQueue):
         super().__init__()
         self.setWindowTitle("Multiple Subplots in a 2x2 Grid")
 
@@ -16,6 +16,7 @@ class GraphingProcess(QtWidgets.QMainWindow):
         self.powermeter2Queue = powermeter2Queue
         self.phaseQueue = phaseQueue
         self.strainQueue = strainQueue
+        self.signalGraph = signalGraph
         # Create a container widget and a QGridLayout
         container = QtWidgets.QWidget()
         layout = QtWidgets.QGridLayout(container)
@@ -81,6 +82,14 @@ class GraphingProcess(QtWidgets.QMainWindow):
     def check_queue(self):
         """Pull all items from the queue and update the plot."""
         diff = None
+        while not self.signalGraph.empty():
+            if self.signalGraph.get_nowait() == 1:
+                self.plot1.clear()
+                self.plot2.clear()
+                self.plot3.clear()
+                self.plot4.clear()
+                self.plot5.clear()
+
         while not self.micrometerQueue.empty():
             x, y = self.micrometerQueue.get_nowait()
             print("ADDED")
@@ -121,8 +130,8 @@ class GraphingProcess(QtWidgets.QMainWindow):
 
 
 
-def run_pyqt_app(micrometerQueue, powermeter1Queue, powermeter2Queue, phaseQueue, strainQueue):
+def run_pyqt_app(signalGraph, micrometerQueue, powermeter1Queue, powermeter2Queue, phaseQueue, strainQueue):
     app = QtWidgets.QApplication(sys.argv)
-    window = GraphingProcess(micrometerQueue, powermeter1Queue, powermeter2Queue, phaseQueue, strainQueue)
+    window = GraphingProcess(signalGraph, micrometerQueue, powermeter1Queue, powermeter2Queue, phaseQueue, strainQueue)
     window.show()
     sys.exit(app.exec_())

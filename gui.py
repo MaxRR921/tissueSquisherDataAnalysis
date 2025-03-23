@@ -35,6 +35,7 @@ class Gui:
         self.window.title("Data GUI")
         self.window.geometry("800x800")
         self.numExecutions = 1
+        self.signalGraph = multiprocessing.Queue()
 
         #Initializing device classes.
         try:
@@ -221,11 +222,11 @@ class Gui:
             print("Starting PyQt process...")
             if not self.polarimeter == None:
                 self.pyqt_process = multiprocessing.Process(target=graphingProcess.run_pyqt_app,
-                                                            args=(self.micrometerController.plotQueue, self.powermeter.device1PlotQueue, self.powermeter.device2PlotQueue, self.polarimeter.dataAnalyzer.phaseQueue, self.polarimeter.dataAnalyzer.strainQueue))
+                                                            args=(self.signalGraph, self.micrometerController.plotQueue, self.powermeter.device1PlotQueue, self.powermeter.device2PlotQueue, self.polarimeter.dataAnalyzer.phaseQueue, self.polarimeter.dataAnalyzer.strainQueue))
                 self.pyqt_process.start()
             elif self.polarimeter == None:
                 self.pyqt_process = multiprocessing.Process(target=graphingProcess.run_pyqt_app,
-                                                            args=(self.micrometerController.plotQueue, self.powermeter.device1PlotQueue, self.powermeter.device2PlotQueue, None, None))
+                                                            args=(self.signalGraph, self.micrometerController.plotQueue, self.powermeter.device1PlotQueue, self.powermeter.device2PlotQueue, None, None))
                 self.pyqt_process.start()
         else:
             print("PyQt process is already running!")        
@@ -463,6 +464,7 @@ class Gui:
     def updatePlotsFromData(self):
         self.timeStamp = time.time()
         if (self.executed.is_set()): #right here all of the things that need to be done immediately after move(s) are done executing happen
+            self.signalGraph.put(1)
             if self.polarimeter is not None:
                 self.polarimeter.run = False
             else:
