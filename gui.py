@@ -287,7 +287,7 @@ class Gui:
     thecollect method. 
     !! should make it just use self.movelist...."""
     def startExecuteThread(self, moveList):
-        self.signalGraph.put(1)
+        self.signalGraph.put("STOP")
         self.executeThread = threading.Thread(target=self.__collect, args=[moveList])
         self.executeThread.start()
 

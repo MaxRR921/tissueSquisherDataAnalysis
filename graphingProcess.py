@@ -83,7 +83,7 @@ class GraphingProcess(QtWidgets.QMainWindow):
         """Pull all items from the queue and update the plot."""
         diff = None
         while not self.signalGraph.empty():
-            if self.signalGraph.get_nowait() == 1:
+            if self.signalGraph.get_nowait() == "STOP":
                 self.plot1.clear()
                 self.plot2.clear()
                 self.plot3.clear()
