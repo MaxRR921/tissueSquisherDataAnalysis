@@ -90,6 +90,24 @@ class GraphingProcess(QtWidgets.QMainWindow):
                 self.plot4.clear()
                 self.plot5.clear()
 
+                # Recreate the curve items
+                self.curve1 = self.plot1.plot([], [], pen='r')
+                self.curve2 = self.plot2.plot([], [], pen='g')
+                self.curve3 = self.plot3.plot([], [], pen='b')
+                self.curve4 = self.plot4.plot([], [], pen='m')
+                self.curve5 = self.plot5.plot([], [], pen='y')
+
+                # Clear data buffers
+                self.x_data1.clear()
+                self.y_data1.clear()
+                self.x_data2.clear()
+                self.y_data2.clear()
+                self.x_data3.clear()
+                self.y_data3.clear()
+                self.x_data4.clear()
+                self.y_data4.clear()
+
+
         while not self.micrometerQueue.empty():
             x, y = self.micrometerQueue.get_nowait()
             print("ADDED")
