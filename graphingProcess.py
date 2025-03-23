@@ -104,7 +104,7 @@ class GraphingProcess(QtWidgets.QMainWindow):
             while not self.strainQueue.empty():
                 self.x_data4.append(self.strainQueue.get_nowait())
         
-        if self.x_data3.size == 0 or self.y_data3.size == 0 and self.y_data2.size == 0:
+        if  self.x_data3 and self.y_data3 and self.y_data2:
             interp_func = interp1d(self.x_data3, self.y_data3, kind='linear', fill_value='extrapolate')
             aligned_pow2 = interp_func(self.x_data2)
             diff = self.y_data2 - aligned_pow2
