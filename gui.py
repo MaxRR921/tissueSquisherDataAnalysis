@@ -191,6 +191,7 @@ class Gui:
     def addTopMenuButtons(self):
         self.__browseDataFileButton(self.topMenuFrame)
         self.__startGraphingButton(self.topMenuFrame)
+        self.__findAngleButton(self.topMenuFrame)
          
 
     #ALL BUTTONS IN TOP MENU
@@ -214,6 +215,10 @@ class Gui:
     def __startGraphingButton(self, frameTopMenu):
         startPyQtButton = ttk.Button(frameTopMenu, text='Start PyQt Plot', command=lambda: self.startPyqtProcess())
         startPyQtButton.pack(side="left")
+
+    def __findAngleButton(self, frameTopMenu):
+        findAngleButton = ttk.Button(frameTopMenu, text='open angle finder', command=lambda: self.findAngle)
+        findAngleButton.pack(side="left")
 
     def startPyqtProcess(self):
         """Spawn a separate process that runs the PyQt/pyqtgraph event loop."""
@@ -320,7 +325,34 @@ class Gui:
             self.noisePlotPow2.generateCsvFromPlot("power 2 vs. time.csv")
         except:
             print("plot not open")
-        
+
+
+
+    def findAngle(self):
+        new_window = tk.Toplevel()
+        new_window.title("Angle Data Collection")
+        new_window.geometry("300x200")
+
+        # Min Height
+        ttk.Label(new_window, text="Min Height:").pack(pady=(10, 0))
+        min_height_entry = ttk.Entry(new_window)
+        min_height_entry.pack()
+
+        # Max Height
+        ttk.Label(new_window, text="Max Height:").pack(pady=(10, 0))
+        max_height_entry = ttk.Entry(new_window)
+        max_height_entry.pack()
+
+        # Begin Collection Button
+        def begin_collection():
+            min_height = min_height_entry.get()
+            max_height = max_height_entry.get()
+            print(f"Begin collection with Min: {min_height}, Max: {max_height}")
+            # Your logic here
+
+        ttk.Button(new_window, text="Begin Collection", command=begin_collection).pack(pady=20)
+
+
     """collect is a lot of logic. !should make it just use self.movelist
     if the plots currently aren't updating, it calls the recursive updatePlots function to update the plots 
     every 100 ms. Should just have this instead of having all plots update all of the time.
