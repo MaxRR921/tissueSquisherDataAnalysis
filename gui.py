@@ -288,8 +288,6 @@ class Gui:
     !! should make it just use self.movelist...."""
     def startExecuteThread(self, moveList):
         self.signalGraph.put(1)
-        for plot in self.plotList:
-            plot.resetPlot()
         self.executeThread = threading.Thread(target=self.__collect, args=[moveList])
         self.executeThread.start()
 

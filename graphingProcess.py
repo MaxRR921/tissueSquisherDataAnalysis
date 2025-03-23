@@ -82,13 +82,13 @@ class GraphingProcess(QtWidgets.QMainWindow):
     def check_queue(self):
         """Pull all items from the queue and update the plot."""
         diff = None
-        while not self.signalGraph.empty():
-            if self.signalGraph.get_nowait() == 1:
-                self.plot1.clear()
-                self.plot2.clear()
-                self.plot3.clear()
-                self.plot4.clear()
-                self.plot5.clear()
+        
+        if self.signalGraph.get_nowait() == 1:
+            self.plot1.clear()
+            self.plot2.clear()
+            self.plot3.clear()
+            self.plot4.clear()
+            self.plot5.clear()
 
         while not self.micrometerQueue.empty():
             x, y = self.micrometerQueue.get_nowait()
