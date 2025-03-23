@@ -80,6 +80,7 @@ class GraphingProcess(QtWidgets.QMainWindow):
    #NOTE: POWERMETER IS ACTUALLY POLLING QUITE SLOW.... so i made it update only when powermeter updates and the graph is way slower. 
     def check_queue(self):
         """Pull all items from the queue and update the plot."""
+        diff = None
         while not self.micrometerQueue.empty():
             x, y = self.micrometerQueue.get_nowait()
             print("ADDED")
