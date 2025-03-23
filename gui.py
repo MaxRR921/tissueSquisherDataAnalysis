@@ -188,21 +188,15 @@ class Gui:
 
     """addTopMenuButtons is executed from init, calls the methods that create all of the buttons"""
     def addTopMenuButtons(self):
-        self.__dropdownButton(self.topMenuFrame)
         self.__browseDataFileButton(self.topMenuFrame)
         self.__startGraphingButton(self.topMenuFrame)
          
 
     #ALL BUTTONS IN TOP MENU
-
-
     """browseDataFile button creates the button for browsing for the data files."""
     def __browseDataFileButton(self, frameTopMenu):
         browseDataFileButton = ttk.Button(frameTopMenu, text="browse for data file", command=lambda: self.__browseFile())
         browseDataFileButton.pack(side='left')
-
-    
-
 
     """browseFile opens the file browser, is executed from the button"""
     def __browseFile(self):
@@ -210,41 +204,11 @@ class Gui:
         if self.filePath:
             self.__plot()
     
-
-
-        
-        
-
-
-
-    
-        
-
-
     """startpolarimeterthread starts the thread for data collection from the powlarimeter. This thread runs polarimeter.start"""
     def __startPolarimeterThread(self):
         print("SHOULD START")
         self.polarimeterThread = threading.Thread(target=self.polarimeter.start, args=[])
         self.polarimeterThread.start()
-
-    """dropdownButton creates the dropdown button for all of the graphs that the user has the option to add"""
-    def __dropdownButton(self, frameTopMenu):
-        dropdownButton = ttk.Menubutton(frameTopMenu, text="Add Graphs", direction="below")
-        dropdownMenu = tk.Menu(dropdownButton, tearoff=False)
-        dropdownMenu.add_command(label="Micrometer position vs. Time", command=self.__option1)
-        dropdownMenu.add_command(label="Power difference vs. Time", command=self.__option2)
-        dropdownMenu.add_command(label="Polarimter Δpol vs. Time ", command=self.__option3)
-        dropdownMenu.add_command(label="power1 vs. distance ", command=self.__option4)
-        dropdownMenu.add_command(label="power2 vs. distance ", command=self.__option5)
-
-        dropdownMenu.add_command(label="power dif vs. time", command=self.__option6)
-
-        dropdownMenu.add_command(label="power 1 vs. time", command=self.__option7)
-
-        dropdownMenu.add_command(label="power 2 vs. time", command=self.__option8)
-
-        dropdownButton["menu"] = dropdownMenu
-        dropdownButton.pack(side="left")
 
     def __startGraphingButton(self, frameTopMenu):
         startPyQtButton = ttk.Button(frameTopMenu, text='Start PyQt Plot', command=lambda: self.startPyqtProcess())
@@ -266,89 +230,6 @@ class Gui:
         else:
             print("PyQt process is already running!")        
 
-    """options are all of the options to select the plots you want to see displayed in real time (semi real time
-    in the case of the polarimeter plot). iti initializes all of the plot2D objects""" 
-    def __option1(self):
-        print("Option 1 selected")
-        def remove_plot(plot):
-            self.plotList.remove(plot)
-            self.micrometerPlot = None  # Clear the reference
-            print(f"Plot '{plot.title}' closed and removed from plotList.")
-        
-        self.micrometerPlot = Plot2D('micrometer plot', 'time', 'distance', on_close=remove_plot)
-        self.plotList.append(self.micrometerPlot)
-
-    def __option2(self):
-        print("Option 2 selected")
-        def remove_plot(plot):
-            self.plotList.remove(plot)
-            self.powerPlot = None  # Clear the reference
-            print(f"Plot '{plot.title}' closed and removed from plotList.")
-        
-        self.powerPlot = Plot2D('power plot', 'distance (mm)', 'power (um)', True, on_close=remove_plot)
-        self.plotList.append(self.powerPlot)
-
-    def __option3(self):
-        print("Option 3 selected")
-        def remove_plot(plot):
-            self.plotList.remove(plot)
-            self.polPlot = None  # Clear the reference
-            print(f"Plot '{plot.title}' closed and removed from plotList.")
-        
-        self.polPlot = Plot2D('polarimeter plot', 'strain', 'phase', on_close=remove_plot)
-        self.plotList.append(self.polPlot)
-
-    def __option4(self):
-        print("Option 4 selected")
-        def remove_plot(plot):
-            self.plotList.remove(plot)
-            self.pow1Plot = None  # Clear the reference
-            print(f"Plot '{plot.title}' closed and removed from plotList.")
-        
-        self.pow1Plot = Plot2D('power 1 plot', 'distance', 'power', on_close=remove_plot)
-        self.plotList.append(self.pow1Plot)
-
-    def __option5(self):
-        print("Option 5 selected")
-        def remove_plot(plot):
-            self.plotList.remove(plot)
-            self.pow2Plot = None  # Clear the reference
-            print(f"Plot '{plot.title}' closed and removed from plotList.")
-        
-        self.pow2Plot = Plot2D('power 2 plot', 'distance', 'power', on_close=remove_plot)
-        self.plotList.append(self.pow2Plot)
-
-    def __option6(self):
-        print("Option 6 selected")
-        def remove_plot(plot):
-            self.plotList.remove(plot)
-            self.noisePlotPowDif = None  # Clear the reference
-            print(f"Plot '{plot.title}' closed and removed from plotList.")
-        
-        self.noisePlotPowDif = Plot2D("power dif vs time", 'time', 'power dif', on_close=remove_plot)
-        self.plotList.append(self.noisePlotPowDif)
-
-    def __option7(self):
-        print("Option 7 selected")
-        def remove_plot(plot):
-            self.plotList.remove(plot)
-            self.noisePlotPow1 = None  # Clear the reference
-            print(f"Plot '{plot.title}' closed and removed from plotList.")
-        
-        self.noisePlotPow1 = Plot2D("power 1 vs time", 'time', 'power dif', on_close=remove_plot)
-        self.plotList.append(self.noisePlotPow1)
-
-    def __option8(self):
-        print("Option 8 selected")
-        def remove_plot(plot):
-            self.plotList.remove(plot)
-            self.noisePlotPow2 = None  # Clear the reference
-            print(f"Plot '{plot.title}' closed and removed from plotList.")
-        
-        self.noisePlotPow2 = Plot2D("power 2 vs time", 'time', 'power dif', on_close=remove_plot)
-        self.plotList.append(self.noisePlotPow2)
-            
-            
 
     """adds all of the buttons in the bottom frame"""
     def addBottomFrameButtons(self, listFrame):
@@ -581,45 +462,6 @@ class Gui:
     """DEAL WITH PLOTTING TRY CATCH""" 
     def updatePlotsFromData(self):
         self.timeStamp = time.time()
-        if self.updatingPlots.is_set():
-            if(self.micrometerPlot is not None):
-                try:
-                    if(self.micrometerController.downward):
-                        self.micrometerPlot.updatePlot(self.timeStamp, self.micrometerController.micrometerPosition[3:].strip())
-                except:
-                    print("micrometer not found")
-            if self.powerPlot is not None: 
-                try:
-                    self.powerPlot.updatePlot(self.micrometerController.micrometerPosition[3:].strip(), abs(self.powermeter.device1Data - self.powermeter.device2Data))
-                except:
-                    print("not enough powermeters connected.")
-            if self.pow1Plot is not None:
-                try:
-                    self.pow1Plot.updatePlot(self.micrometerController.micrometerPosition[3:].strip(), self.powermeter.device1Data)
-
-                except:
-                    print("not enough powermeters connected.")
-            if self.pow2Plot is not None:
-                try:
-                    self.pow2Plot.updatePlot(self.micrometerController.micrometerPosition[3:].strip(), self.powermeter.device2Data)
-                except:
-                    print("not enough powermeters connected.")
-            if self.noisePlotPowDif is not None:  
-                try:
-                    self.noisePlotPowDif.updatePlot(time.time(), self.powermeter.device1Data - self.powermeter.device2Data)
-                except:
-                    print("noise not going")
-            if self.noisePlotPow1 is not None:
-                try:
-                    self.noisePlotPow1.updatePlot(time.time(), self.powermeter.device1Data)
-                except:
-                    print("noise not going")
-            if self.noisePlotPow2 is not None:
-                try:
-                    self.noisePlotPow2.updatePlot(time.time(), self.powermeter.device2Data)
-                except:
-                    print("noise not going")
-
         if (self.executed.is_set()): #right here all of the things that need to be done immediately after move(s) are done executing happen
             if self.polarimeter is not None:
                 self.polarimeter.run = False
@@ -646,11 +488,6 @@ class Gui:
             
             if self.powerPlot is not None:
                 self.powerPlot.colorLines()
-            
-                        
-
-                
-                
             self.executed.clear()
             self.stopExecution = False
 
