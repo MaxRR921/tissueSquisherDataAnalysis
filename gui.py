@@ -330,6 +330,8 @@ class Gui:
 
 
 
+    #STRANGE: NOTE: when doing this sometimes the pyqt plots just don't do anything. Maybe add a little wait?
+
     def findAngle(self):
         new_window = tk.Toplevel()
         new_window.title("Angle Data Collection")
@@ -354,6 +356,7 @@ class Gui:
 
         # Begin Collection Button
         def begin_collection():
+            nonlocal angle
             min_height = str(min_height_entry.get())
             max_height = str(max_height_entry.get())
 
