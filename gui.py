@@ -291,7 +291,7 @@ class Gui:
     """startExecuteThread resets all of the constantly polling plots... starts the execute thread which calls 
     thecollect method. 
     !! should make it just use self.movelist...."""
-    def startExecuteThread(self, moveList, collectData):
+    def startExecuteThread(self, moveList):
         self.signalGraph.put("STOP")
         self.executeThread = threading.Thread(target=self.__collect, args=[moveList])
         self.executeThread.start()
