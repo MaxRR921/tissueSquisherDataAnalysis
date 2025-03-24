@@ -36,6 +36,8 @@ class Gui:
         self.window.geometry("800x800")
         self.numExecutions = 1
         self.signalGraph = multiprocessing.Queue()
+        self.signalAngleFinder = threading.Event()
+        self.signalAngleFinder.clear()
 
         #Initializing device classes.
         try:
@@ -342,15 +344,52 @@ class Gui:
         ttk.Label(new_window, text="Max Height:").pack(pady=(10, 0))
         max_height_entry = ttk.Entry(new_window)
         max_height_entry.pack()
+    
+        min_height = str(min_height_entry.get())
+        max_height = str(max_height_entry.get())
+    
+
 
         # Begin Collection Button
-        def begin_collection():
-            min_height = min_height_entry.get()
-            max_height = max_height_entry.get()
-            print(f"Begin collection with Min: {min_height}, Max: {max_height}")
-            # Your logic here
+        def begin_collection(min_height, max_height):
+            listTemp = []
+            positionMove = move.Move(self.micrometerController)
+            positionMove.velocity = "1"
+            positionMove.targetHeight = max_height
+            listTemp.append(positionMove)
+            self.startExecuteThread(listTemp, False)
+            self.signalAngleFinder.wait()
+            self.signalAngleFinder.clear()
 
-        ttk.Button(new_window, text="Begin Collection", command=begin_collection).pack(pady=20)
+            listTemp = []
+
+            lowerMove = move.Move(self.micrometerController)
+            lowerMove.velocity = ".1" 
+            lowerMove.targetHeight = min_height
+            listTemp.append(lowerMove)
+
+            raiseMove = move.Move(self.micrometerController)
+            raiseMove.velocity = ".1"
+            raiseMove.targetHeight = max_height
+            listTemp.append(raiseMove)
+            self.numExecutions = 3
+
+            self.startExecuteThread(listTemp, True)
+            self.signalAngleFinder.wait()
+            self.signalAngleFinder.clear()
+            self.__raiseMicrometer()
+            self.signalAngleFinder.wait()
+            self.signalAngleFinder.clear()
+            
+
+
+        def start_collection_thread():
+            self.angleThread = threading.Thread(target=begin_collection, args=[min_height, max_height])
+            self.angleThread.start()
+            
+
+
+        ttk.Button(new_window, text="Begin Collection", command=start_collection_thread).pack(pady=20)
 
 
     """collect is a lot of logic. !should make it just use self.movelist
@@ -521,6 +560,7 @@ class Gui:
             
             if self.powerPlot is not None:
                 self.powerPlot.colorLines()
+            self.signalAngleFinder.set()
             self.executed.clear()
             self.stopExecution = False
 
