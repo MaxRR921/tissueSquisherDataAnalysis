@@ -213,7 +213,7 @@ class Gui:
         self.polarimeterThread.start()
 
     def __startGraphingButton(self, frameTopMenu):
-        startPyQtButton = ttk.Button(frameTopMenu, text='Start PyQt Plot', command=lambda: self.startPyqtProcess())
+        startPyQtButton = ttk.Button(frameTopMenu, text='Start PyQt Plot', command=lambda: self.startPyqtProcess)
         startPyQtButton.pack(side="left")
 
     def __findAngleButton(self, frameTopMenu):
