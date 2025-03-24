@@ -336,7 +336,8 @@ class Gui:
         new_window.geometry("300x200")
         angle = -45
 
-        rotate_label = ttk.Label(new_window, text=f"Rotate to {angle} degrees.").pack(pady=(10, 0))
+        rotate_label = ttk.Label(new_window, text=f"Rotate to {angle} degrees.")
+        rotate_label.pack(pady=(10, 0))
 
         # Min Height
         ttk.Label(new_window, text="Min Height:").pack(pady=(10, 0))
