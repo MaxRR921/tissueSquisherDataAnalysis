@@ -247,7 +247,7 @@ class Gui:
         listFrame.grid_columnconfigure(2, weight=1)
         listFrame.grid_columnconfigure(3, weight=2)
         
-        executeAllMovesButton = ttk.Button(listFrame, text='execute all moves', command=lambda: (self.saveNumExecutions(numExec), self.startExecuteThread(self.moveList)))
+        executeAllMovesButton = ttk.Button(listFrame, text='execute all moves', command=lambda: (self.saveNumExecutions(numExec), self.startExecuteThread(self.moveList, True)))
         executeAllMovesButton.grid(row=2, column=0, sticky='sw', pady=5, padx=30)
 
         recordNoiseButton = ttk.Button(listFrame, text='collect noise', command=lambda: (self.startNoiseThread()))
@@ -283,7 +283,7 @@ class Gui:
         raiseMove.targetHeight = "12"
         listTemp = []
         listTemp.append(raiseMove)
-        self.startExecuteThread(listTemp)
+        self.startExecuteThread(listTemp, False)
 
 
         
