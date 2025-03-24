@@ -247,7 +247,7 @@ class Gui:
         listFrame.grid_columnconfigure(2, weight=1)
         listFrame.grid_columnconfigure(3, weight=2)
         
-        executeAllMovesButton = ttk.Button(listFrame, text='execute all moves', command=lambda: (self.saveNumExecutions(numExec), self.startExecuteThread(self.moveList)))
+        executeAllMovesButton = ttk.Button(listFrame, text='execute all moves', command=lambda: (self.saveNumExecutions(numExec), self.startExecuteThread(self.moveList, True)))
         executeAllMovesButton.grid(row=2, column=0, sticky='sw', pady=5, padx=30)
 
         recordNoiseButton = ttk.Button(listFrame, text='collect noise', command=lambda: (self.startNoiseThread()))
@@ -291,9 +291,9 @@ class Gui:
     """startExecuteThread resets all of the constantly polling plots... starts the execute thread which calls 
     thecollect method. 
     !! should make it just use self.movelist...."""
-    def startExecuteThread(self, moveList):
+    def startExecuteThread(self, moveList, collectData):
         self.signalGraph.put("STOP")
-        self.executeThread = threading.Thread(target=self.__collect, args=[moveList])
+        self.executeThread = threading.Thread(target=self.__collect, args=[moveList, collectData])
         self.executeThread.start()
 
     def startNoiseThread(self):
@@ -387,7 +387,7 @@ class Gui:
     
 
 
-    def __collect(self, moveList):
+    def __collect(self, moveList, collectData=True):
         print("collecting data")
         if not self.updatingPlots.is_set():
             self.updatingPlots.set() 
