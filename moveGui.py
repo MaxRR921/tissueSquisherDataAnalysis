@@ -96,20 +96,23 @@ class MoveGui(ttk.Frame):
         return frame
     """save entries saves all the text variable entries to the move associated with the gui element."""
     def saveEntries(self, move, targetHeight_var, velocity_var, frontDelay_var, backDelay_var):
-        move.targetHeight = str(targetHeight_var.get())
-        move.velocity = str(velocity_var.get())
-        move.frontDelay = int(frontDelay_var.get())
-        move.backDelay = int(backDelay_var.get())
-        print("MOVE:")
-        print(f"targetHeight: {move.targetHeight}, velocity: {move.velocity}, frontDelay: {move.frontDelay}, backDelay: {move.backDelay}")
+        try:
+            move.targetHeight = str(targetHeight_var.get())
+            move.velocity = str(velocity_var.get())
+            move.frontDelay = int(frontDelay_var.get())
+            move.backDelay = int(backDelay_var.get())
+            print("MOVE:")
+            print(f"targetHeight: {move.targetHeight}, velocity: {move.velocity}, frontDelay: {move.frontDelay}, backDelay: {move.backDelay}")
+        except ValueError:
+            print("Invalid input. Please enter valid numbers.")
 
 
-    """executemove makes a list only containing that move because startexecute thr, Trueead needs to take a list
+    """executemove makes a list only containing that move because startexecute thread needs to take a list
     so we are just wanting to execute this one move..."""
     def __executeMove(self, move):
         tempList = []
         tempList.append(move)
-        self.gui.startExecuteThread(tempList, True)
+        self.gui.startExecuteThread(tempList, False)
 
     """deleteMove deletes the move that the user clicks the x on"""
     def __deleteMove(self, move, frame):
