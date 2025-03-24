@@ -389,8 +389,9 @@ class Gui:
             self.__raiseMicrometer()
             self.signalAngleFinder.wait()
             self.signalAngleFinder.clear()
-            rotate_label.config(text=f"Rotate to {angle} degrees.")
             angle += 45
+            rotate_label.config(text=f"Rotate to {angle} degrees.")
+            
 
             
 
