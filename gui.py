@@ -345,13 +345,14 @@ class Gui:
         max_height_entry = ttk.Entry(new_window)
         max_height_entry.pack()
     
-        min_height = str(min_height_entry.get())
-        max_height = str(max_height_entry.get())
     
 
 
         # Begin Collection Button
-        def begin_collection(min_height, max_height):
+        def begin_collection():
+            min_height = str(min_height_entry.get())
+            max_height = str(max_height_entry.get())
+
             listTemp = []
             positionMove = move.Move(self.micrometerController)
             positionMove.velocity = "1"
@@ -384,7 +385,7 @@ class Gui:
 
 
         def start_collection_thread():
-            self.angleThread = threading.Thread(target=begin_collection, args=[min_height, max_height])
+            self.angleThread = threading.Thread(target=begin_collection, args=[])
             self.angleThread.start()
             
 
