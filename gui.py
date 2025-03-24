@@ -378,6 +378,7 @@ class Gui:
             self.startExecuteThread(listTemp, True)
             self.signalAngleFinder.wait()
             self.signalAngleFinder.clear()
+            time.sleep(.5)
             self.__raiseMicrometer()
             self.signalAngleFinder.wait()
             self.signalAngleFinder.clear()
