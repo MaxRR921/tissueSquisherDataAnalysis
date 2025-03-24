@@ -291,10 +291,9 @@ class Gui:
     """startExecuteThread resets all of the constantly polling plots... starts the execute thread which calls 
     thecollect method. 
     !! should make it just use self.movelist...."""
-    def startExecuteThread(self, moveList):
+    def startExecuteThread(self, moveList, collectData):
         self.signalGraph.put("STOP")
-        self.executeThread = threading.Thread(target=self.__collect, args=[moveList])
-        self.executeThread.start()
+        self.executeThread = threading.Thread(target=self.__collect, args=(moveList, collectData))
 
     def startNoiseThread(self):
         for plot in self.plotList:
@@ -387,31 +386,32 @@ class Gui:
     
 
 
-    def __collect(self, moveList):
+    def __collect(self, moveList, collectData):
         print("collecting data")
-        if not self.updatingPlots.is_set():
-            self.updatingPlots.set() 
+        if collectData:
+            if not self.updatingPlots.is_set():
+                self.updatingPlots.set() 
 
-        if not self.micrometerController.updatingCsvQueue.is_set():
-            self.micrometerController.updatingCsvQueue.set()
+            if not self.micrometerController.updatingCsvQueue.is_set():
+                self.micrometerController.updatingCsvQueue.set()
+                
+            if not self.powermeter.updatingDevice1CsvQueue.is_set():
+                self.powermeter.updatingDevice1CsvQueue.set()
             
-        if not self.powermeter.updatingDevice1CsvQueue.is_set():
-            self.powermeter.updatingDevice1CsvQueue.set()
-        
-        if not self.powermeter.updatingDevice2CsvQueue.is_set():
-            self.powermeter.updatingDevice2CsvQueue.set()
+            if not self.powermeter.updatingDevice2CsvQueue.is_set():
+                self.powermeter.updatingDevice2CsvQueue.set()
 
-        if self.pyqt_process is not None and self.pyqt_process.is_alive():
-            self.micrometerController.updatingPlotQueue.set()
-            self.powermeter.updatingDevice1PlotQueue.set()
-            self.powermeter.updatingDevice2PlotQueue.set()
+            if self.pyqt_process is not None and self.pyqt_process.is_alive():
+                self.micrometerController.updatingPlotQueue.set()
+                self.powermeter.updatingDevice1PlotQueue.set()
+                self.powermeter.updatingDevice2PlotQueue.set()
 
-        #POLARIMETER NEEDS TO START RUNNING BEFORE MOVES EXECUTE. IT DOESN'T CONSTANTLY RUN LIKE THE POWERMETER.
-        if(self.polarimeter is not None):
-            self.polarimeter.run = True
-            self.__startPolarimeterThread()
-        else:
-            print("No polarimeter Connected")
+            #POLARIMETER NEEDS TO START RUNNING BEFORE MOVES EXECUTE. IT DOESN'T CONSTANTLY RUN LIKE THE POWERMETER.
+            if(self.polarimeter is not None):
+                self.polarimeter.run = True
+                self.__startPolarimeterThread()
+            else:
+                print("No polarimeter Connected")
 
         #WARNING: BECAUSE of comparing move.targethiehgt to micrometer position, can only have one decimal place micrometer movement
         # ALSO: won't recognize values like 0.1 and .1 as being the same. I'll fix this later.
