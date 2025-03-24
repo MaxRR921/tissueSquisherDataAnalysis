@@ -352,7 +352,7 @@ class Gui:
 
 
         # Begin Collection Button
-        def begin_collection(angle):
+        def begin_collection():
             min_height = str(min_height_entry.get())
             max_height = str(max_height_entry.get())
 
@@ -386,6 +386,7 @@ class Gui:
             self.signalAngleFinder.wait()
             self.signalAngleFinder.clear()
             rotate_label.config(text=f"Rotate to {angle} degrees.")
+            angle += 45
 
             
 
@@ -393,9 +394,8 @@ class Gui:
 
 
         def start_collection_thread():
-            self.angleThread = threading.Thread(target=begin_collection, args=[angle])
+            self.angleThread = threading.Thread(target=begin_collection, args=[])
             self.angleThread.start()
-            angle += 45
             
 
 
