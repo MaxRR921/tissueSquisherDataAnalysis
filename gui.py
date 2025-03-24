@@ -336,7 +336,7 @@ class Gui:
         new_window.geometry("300x200")
         angle = -45
 
-        rotate_label = ttk.Label(new_window, text="Rotate to {angle} degrees.").pack(pady=(10, 0))
+        rotate_label = ttk.Label(new_window, text=f"Rotate to {angle} degrees.").pack(pady=(10, 0))
 
         # Min Height
         ttk.Label(new_window, text="Min Height:").pack(pady=(10, 0))
@@ -385,7 +385,7 @@ class Gui:
             self.__raiseMicrometer()
             self.signalAngleFinder.wait()
             self.signalAngleFinder.clear()
-            rotate_label.config(text="Rotate to {angle} degrees.")
+            rotate_label.config(text=f"Rotate to {angle} degrees.")
 
             
 
