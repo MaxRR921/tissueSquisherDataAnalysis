@@ -334,6 +334,9 @@ class Gui:
         new_window = tk.Toplevel()
         new_window.title("Angle Data Collection")
         new_window.geometry("300x200")
+        angle = -45
+
+        rotate_label = ttk.Label(new_window, text="Rotate to {angle} degrees.").pack(pady=(10, 0))
 
         # Min Height
         ttk.Label(new_window, text="Min Height:").pack(pady=(10, 0))
@@ -344,12 +347,12 @@ class Gui:
         ttk.Label(new_window, text="Max Height:").pack(pady=(10, 0))
         max_height_entry = ttk.Entry(new_window)
         max_height_entry.pack()
-    
+        
     
 
 
         # Begin Collection Button
-        def begin_collection():
+        def begin_collection(angle):
             min_height = str(min_height_entry.get())
             max_height = str(max_height_entry.get())
 
@@ -382,12 +385,17 @@ class Gui:
             self.__raiseMicrometer()
             self.signalAngleFinder.wait()
             self.signalAngleFinder.clear()
+            rotate_label.config(text="Rotate to {angle} degrees.")
+
+            
+
             
 
 
         def start_collection_thread():
-            self.angleThread = threading.Thread(target=begin_collection, args=[])
+            self.angleThread = threading.Thread(target=begin_collection, args=[angle])
             self.angleThread.start()
+            angle += 45
             
 
 
