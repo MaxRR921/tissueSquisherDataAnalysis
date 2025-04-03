@@ -359,6 +359,10 @@ class Gui:
             nonlocal angle
             min_height = str(min_height_entry.get())
             max_height = str(max_height_entry.get())
+            
+            if float(max_height) <= float(min_height):
+                print("can't enter this height")
+                return
 
             listTemp = []
             positionMove = move.Move(self.micrometerController)
@@ -390,6 +394,7 @@ class Gui:
             self.signalAngleFinder.wait()
             self.signalAngleFinder.clear()
             angle += 45
+            
             rotate_label.config(text=f"Rotate to {angle} degrees.")
             
 
