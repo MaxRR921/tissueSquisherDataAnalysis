@@ -371,6 +371,7 @@ class Gui:
             positionMove.targetHeight = max_height
             listTemp.append(positionMove)
             self.numExecutions = 1
+            print("LISTTEMP: ", listTemp)
             self.startExecuteThread(listTemp, False)
             self.signalAngleFinder.wait()
             self.signalAngleFinder.clear()
