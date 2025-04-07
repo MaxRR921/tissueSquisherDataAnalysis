@@ -373,6 +373,7 @@ class Gui:
             self.signalAngleFinder.wait()
             self.signalAngleFinder.clear()
 
+            time.sleep(0.5)
             listTemp = []
 
             lowerMove = move.Move(self.micrometerController)
