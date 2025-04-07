@@ -284,6 +284,7 @@ class Gui:
         raiseMove.velocity = "1"
         raiseMove.targetHeight = "12"
         listTemp = []
+        self.numExecutions = 1
         listTemp.append(raiseMove)
         self.startExecuteThread(listTemp, False)
 
@@ -369,6 +370,7 @@ class Gui:
             positionMove.velocity = "1"
             positionMove.targetHeight = max_height
             listTemp.append(positionMove)
+            self.numExecutions = 1
             self.startExecuteThread(listTemp, False)
             self.signalAngleFinder.wait()
             self.signalAngleFinder.clear()
