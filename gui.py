@@ -66,8 +66,6 @@ class Gui:
         self.updatingPlots = threading.Event() 
         self.updatingPlots.clear()
         self.triedMicrometer = False
-        self.executed = threading.Event()
-        self.executed.clear()
         self.startedPolarimeter = False
 
         #lists for phase and strain...bad.
@@ -485,7 +483,6 @@ class Gui:
                 else:
                     break
 
-        self.executed.set()
 
         if self.polarimeter is not None:
             self.polarimeter.run = False
@@ -514,7 +511,6 @@ class Gui:
             self.powerPlot.colorLines()
             
         self.signalAngleFinder.set()
-        self.executed.clear()
         self.stopExecution = False
         self.generateCsvs()
         self.updatingPlots.clear()
@@ -584,11 +580,6 @@ class Gui:
     """DEAL WITH PLOTTING TRY CATCH""" 
     def updatePlotsFromData(self):
         self.timeStamp = time.time()
-        if (self.executed.is_set()): #right here all of the things that need to be done immediately after move(s) are done executing happen
-            print("hello")
-
-            
-        
         if self.powermeter is not None:
             self.power1Text.set(str(self.powermeter.device1Data))
             self.power2Text.set(str(self.powermeter.device2Data))
