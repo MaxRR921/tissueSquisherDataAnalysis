@@ -377,12 +377,12 @@ class Gui:
             listTemp = []
 
             lowerMove = move.Move(self.micrometerController)
-            lowerMove.velocity = ".1" 
+            lowerMove.velocity = "1" 
             lowerMove.targetHeight = min_height
             listTemp.append(lowerMove)
 
             raiseMove = move.Move(self.micrometerController)
-            raiseMove.velocity = ".1"
+            raiseMove.velocity = "1"
             raiseMove.targetHeight = max_height
             listTemp.append(raiseMove)
             self.numExecutions = 3
