@@ -372,6 +372,7 @@ class Gui:
             listTemp.append(positionMove)
             self.numExecutions = 1
             print("LISTTEMP: ", listTemp)
+            time.sleep(10)
             self.startExecuteThread(listTemp, False)
             self.signalAngleFinder.wait()
             self.signalAngleFinder.clear()
