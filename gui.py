@@ -573,13 +573,6 @@ class Gui:
             print("STRAIN")
             print(self.strain)
             self.updatingPlots.clear() 
-            if self.polPlot is not None:
-                self.polPlot.updatePlot(self.polarimeter.positionList, self.phase.tolist())
-                self.polPlot.colorLines()
-                self.polPlot.generateCsvFromPlot("pol.csv")
-            
-            if self.powerPlot is not None:
-                self.powerPlot.colorLines()
             self.signalAngleFinder.set()
             self.executed.clear()
             self.stopExecution = False
