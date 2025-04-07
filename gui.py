@@ -486,6 +486,36 @@ class Gui:
                     break
 
         self.executed.set()
+
+        if self.polarimeter is not None:
+            self.polarimeter.run = False
+        else:
+            print("polarimeter could not be told to stop running because no polarimeter detected.")
+
+        if self.powerPlot is not None:
+            self.powerPlot.generateCsvFromPlot("pow.csv")
+        else:
+            print("no power plot open")
+        if self.pow1Plot is not None:
+            self.pow1Plot.generateCsvFromPlot("pow1.csv")
+        if self.pow2Plot is not None:
+            self.pow2Plot.generateCsvFromPlot("pow2.csv")
+        print("PHASE")
+        print(self.phase)
+        print("STRAIN")
+        print(self.strain)
+        self.updatingPlots.clear() 
+        if self.polPlot is not None:
+            self.polPlot.updatePlot(self.polarimeter.positionList, self.phase.tolist())
+            self.polPlot.colorLines()
+            self.polPlot.generateCsvFromPlot("pol.csv")
+        
+        if self.powerPlot is not None:
+            self.powerPlot.colorLines()
+            
+        self.signalAngleFinder.set()
+        self.executed.clear()
+        self.stopExecution = False
         self.generateCsvs()
         self.updatingPlots.clear()
         self.micrometerController.updatingCsvQueue.clear()
@@ -555,35 +585,7 @@ class Gui:
     def updatePlotsFromData(self):
         self.timeStamp = time.time()
         if (self.executed.is_set()): #right here all of the things that need to be done immediately after move(s) are done executing happen
-            if self.polarimeter is not None:
-                self.polarimeter.run = False
-            else:
-                print("polarimeter could not be told to stop running because no polarimeter detected.")
-
-            if self.powerPlot is not None:
-                self.powerPlot.generateCsvFromPlot("pow.csv")
-            else:
-                print("no power plot open")
-            if self.pow1Plot is not None:
-                self.pow1Plot.generateCsvFromPlot("pow1.csv")
-            if self.pow2Plot is not None:
-                self.pow2Plot.generateCsvFromPlot("pow2.csv")
-            print("PHASE")
-            print(self.phase)
-            print("STRAIN")
-            print(self.strain)
-            self.updatingPlots.clear() 
-            if self.polPlot is not None:
-                self.polPlot.updatePlot(self.polarimeter.positionList, self.phase.tolist())
-                self.polPlot.colorLines()
-                self.polPlot.generateCsvFromPlot("pol.csv")
-            
-            if self.powerPlot is not None:
-                self.powerPlot.colorLines()
-            self.signalAngleFinder.set()
-            self.executed.clear()
-            self.stopExecution = False
-
+            print("hello")
 
             
         
