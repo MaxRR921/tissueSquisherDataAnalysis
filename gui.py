@@ -491,8 +491,10 @@ class Gui:
                     break
 
         self.executed.set()
+
+
         self.generateCsvs()
-        self.updatingPlots.clear()
+        
         self.micrometerController.updatingCsvQueue.clear()
         self.micrometerController.updatingPlotQueue.clear()
         self.powermeter.updatingDevice1CsvQueue.clear()
