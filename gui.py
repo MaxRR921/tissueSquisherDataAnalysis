@@ -360,6 +360,7 @@ class Gui:
             nonlocal angle
             min_height = str(min_height_entry.get())
             max_height = str(max_height_entry.get())
+            self.signalAngleFinder.clear()
             
             if float(max_height) <= float(min_height):
                 print("can't enter this height")
