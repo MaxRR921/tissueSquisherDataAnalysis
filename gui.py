@@ -391,11 +391,13 @@ class Gui:
             listTemp.append(raiseMove)
             self.numExecutions = 3
             print("TARGET HEIGHT: ", listTemp[0].targetHeight, listTemp[1].targetHeight)
+
             time.sleep(5)
 
             self.startExecuteThread(listTemp, True)
             self.signalAngleFinder.wait()
             self.signalAngleFinder.clear()
+            print("SHOULD NOW RAISE MICROMETER!!!")
             time.sleep(3)
             self.__raiseMicrometer()
             self.signalAngleFinder.wait()
