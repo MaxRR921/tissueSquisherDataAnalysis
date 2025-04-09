@@ -485,7 +485,8 @@ class Gui:
             alphaLabel.pack(side='left')
 
         except FileNotFoundError:
-            ttk.Label(self.root, text="Ideal angle file not found.").pack()
+            alphaLabel = ttk.Label(self.topMenuFrame, text="ideal angle not saved")
+            alphaLabel.pack(side='left')
 
 
 
