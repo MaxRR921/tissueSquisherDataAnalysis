@@ -391,12 +391,12 @@ class Gui:
             listTemp = []
             
             lowerMove = move.Move(self.micrometerController)
-            lowerMove.velocity = "1" 
+            lowerMove.velocity = ".1" 
             lowerMove.targetHeight = min_height
             listTemp.append(lowerMove)
 
             raiseMove = move.Move(self.micrometerController)
-            raiseMove.velocity = "1"
+            raiseMove.velocity = ".1"
             raiseMove.targetHeight = max_height
             listTemp.append(raiseMove)
             self.numExecutions = 3
@@ -433,6 +433,7 @@ class Gui:
         ttk.Button(new_window, text="Begin Collection", command=start_collection_thread).pack(pady=20)
         def show_angle():
             angle = self.angleFind.findAngle(differenceValues)
+            self.angleFind.plot()
             ttk.Label(new_window, text=f"Ideal Angle: {angle:.2f}°").pack()
 
         ttk.Button(
