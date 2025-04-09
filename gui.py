@@ -432,7 +432,7 @@ class Gui:
 
         ttk.Button(new_window, text="Begin Collection", command=start_collection_thread).pack(pady=20)
         def show_angle():
-            angle = angleFinder.findAngle(differenceValues)
+            angle = self.angleFind.findAngle(differenceValues)
             ttk.Label(new_window, text=f"Ideal Angle: {angle:.2f}°").pack()
 
         ttk.Button(
