@@ -203,6 +203,8 @@ class Gui:
         self.__browseDataFileButton(self.topMenuFrame)
         self.__startGraphingButton(self.topMenuFrame)
         self.__findAngleButton(self.topMenuFrame)
+        self.alphaLabel = ttk.Label(self.topMenuFrame, text="Ideal Angle: N/A")
+        self.alphaLabel.pack(side='left')
          
 
     #ALL BUTTONS IN TOP MENU
@@ -479,15 +481,10 @@ class Gui:
         try:
             with open("idealAlpha.txt", "r") as f:
                 angle = f.read().strip()
-
-            # Display angle on the main window
-
-            alphaLabel = ttk.Label(self.topMenuFrame, text=f"Ideal Angle: {angle}°")
-            alphaLabel.pack(side='left')
-
+            self.alphaLabel.config(text=f"Ideal Angle: {angle}°")
         except FileNotFoundError:
-            alphaLabel = ttk.Label(self.topMenuFrame, text="ideal angle not saved")
-            alphaLabel.pack(side='left')
+            self.alphaLabel.config(text="ideal angle not saved")
+
 
 
 
