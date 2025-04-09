@@ -448,7 +448,7 @@ class Gui:
         print("power 2:", power2)
 
         interp_func = interp1d(time2, power2, kind='linear', fill_value='extrapolate')
-        aligned_pow2 = interp_func(self.time1)
+        aligned_pow2 = interp_func(time1)
         diff = power1 - aligned_pow2
         deltaDiff = np.abs(np.max(diff) - np.min(diff))
         for i in range(50000):
