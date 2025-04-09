@@ -407,13 +407,13 @@ class Gui:
             self.powermeter.updatingAngleQueues.clear()
             print("Finding angle: ", self.powermeter.updatingAngleQueues.is_set())
             print("SHOULD NOW RAISE MICROMETER!!!")
-            self.findDeltaPowerDif()
             time.sleep(10)
             self.__raiseMicrometer()
             self.signalAngleFinder.wait()
             self.signalAngleFinder.clear()
             angle += 45
           
+            self.findDeltaPowerDif()
             rotate_label.config(text=f"Rotate to {angle} degrees.")
             
 
