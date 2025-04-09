@@ -117,13 +117,14 @@ class Gui:
         self.listFrame.grid_propagate(False)
 
 
-        self.updateIdealAlpha()
 
         # Create top menu frame
         self.topMenuFrame = tk.Frame(self.window, height=30, background="light grey")  # Adjust the height here
         self.topMenuFrame.grid(row=0, column=0, columnspan=2, sticky="new")
         self.topMenuFrame.grid_propagate(False)
         self.addTopMenuButtons()
+        
+        self.updateIdealAlpha()
         
         #create bottomFrame 
         self.bottomFrame = tk.Frame(self.window, height=80, background="light grey")
