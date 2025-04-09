@@ -435,7 +435,7 @@ class Gui:
         power2 = []
         while not self.powermeter.angle1Queue.empty():
             power1.append(self.powermeter.angle1Queue.get_nowait())
-        while not self.powermeter.angle1Queue.empty():
+        while not self.powermeter.angle2Queue.empty():
             power2.append(self.powermeter.angle2Queue.get_nowait())
         print("power 1: ", power1)
         print("power 2:", power2)
