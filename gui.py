@@ -116,6 +116,9 @@ class Gui:
         self.listFrame.grid(row=0, column=0, columnspan= 2, rowspan=2, sticky="nsew")
         self.listFrame.grid_propagate(False)
 
+
+        self.updateIdealAlpha()
+
         # Create top menu frame
         self.topMenuFrame = tk.Frame(self.window, height=30, background="light grey")  # Adjust the height here
         self.topMenuFrame.grid(row=0, column=0, columnspan=2, sticky="new")
@@ -433,8 +436,12 @@ class Gui:
         ttk.Button(new_window, text="Begin Collection", command=start_collection_thread).pack(pady=20)
         def show_angle():
             angle = self.angleFind.findAngle(differenceValues)
+
             self.angleFind.plot()
             ttk.Label(new_window, text=f"Ideal Angle: {angle:.2f}°").pack()
+            with open("idealAlpha.txt", "w") as f:
+                f.write(f"{angle:.2f}")
+            self.updateIdealAlpha()
 
         ttk.Button(
             new_window,
@@ -465,6 +472,23 @@ class Gui:
         for i in range(50):
             print(deltaDiff)
         return deltaDiff
+    
+
+    def updateIdealAlpha(self):
+        try:
+            with open("idealAlpha.txt", "r") as f:
+                angle = f.read().strip()
+
+            # Display angle on the main window
+
+            alphaLabel = ttk.Label(self.topMenuFrame, text=f"Ideal Angle: {angle}°")
+            alphaLabel.pack(side='left')
+
+        except FileNotFoundError:
+            ttk.Label(self.root, text="Ideal angle file not found.").pack()
+
+
+
     
         
 
