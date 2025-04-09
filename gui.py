@@ -38,7 +38,6 @@ class Gui:
         self.signalGraph = multiprocessing.Queue()
         self.signalAngleFinder = threading.Event()
         self.signalAngleFinder.clear()
-        self.findingAngle = threading.Event()
         
 
         #Initializing device classes.
@@ -104,6 +103,8 @@ class Gui:
         self.noisePlotPow2 = None 
         #list of times recorded
         self.timeList = []
+
+        self.deltaPowerDifferences = []
         
 
         self.pyqt_process = None
@@ -364,7 +365,6 @@ class Gui:
 
         # Begin Collection Button
         def begin_collection():
-             
             nonlocal angle
             min_height = str(min_height_entry.get())
             max_height = str(max_height_entry.get())
@@ -397,24 +397,27 @@ class Gui:
             raiseMove.targetHeight = max_height
             listTemp.append(raiseMove)
             self.numExecutions = 3
-            self.findingAngle.set()
-            print("Finding angle: ", self.findingAngle.is_set())
+            self.powermeter.updatingAngleQueues.set()
+            print("Finding angle: ", self.powermeter.updatingAngleQueues.is_set())
             self.startExecuteThread(listTemp, True)
             self.signalAngleFinder.wait()
             self.signalAngleFinder.clear()
-            self.findingAngle.clear()
-            print("Finding angle: ", self.findingAngle.is_set())
+            self.powermeter.updatingAngleQueues.clear()
+            print("Finding angle: ", self.powermeter.updatingAngleQueues.is_set())
             print("SHOULD NOW RAISE MICROMETER!!!")
             time.sleep(3)
             self.__raiseMicrometer()
             self.signalAngleFinder.wait()
             self.signalAngleFinder.clear()
             angle += 45
-            
+
+            self.findDeltaPowerDif()
+          
             rotate_label.config(text=f"Rotate to {angle} degrees.")
             
 
-            
+
+
 
             
 
@@ -426,6 +429,18 @@ class Gui:
 
 
         ttk.Button(new_window, text="Begin Collection", command=start_collection_thread).pack(pady=20)
+
+    def findDeltaPowerDif(self):
+        power1 = []
+        power2 = []
+        while not self.powermeter.angle1Queue.empty():
+            power1.append(self.powermeter.angle1Queue.get_nowait())
+        while not self.powermeter.angle1Queue.empty():
+            power2.append(self.powermeter.angle2Queue.get_nowait())
+        print("power 1: ", power1)
+        print("power 2:", power2)
+
+
 
 
     """collect is a lot of logic. !should make it just use self.movelist

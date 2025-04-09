@@ -57,6 +57,9 @@ class Powermeter:
             self.updatingDevice1CsvQueue.clear()
             self.updatingDevice2CsvQueue = threading.Event()
             self.updatingDevice2CsvQueue.clear()
+            self.angle1Queue = queue.Queue() 
+            self.angle2Queue = queue.Queue()
+            self.updatingAngleQueues = threading.Event()
 
             self.run = threading.Event()
             self.run.set()  # to start running
@@ -114,6 +117,8 @@ class Powermeter:
                         self.device1CsvQueue.put((float(data[0][0]), time.time()))
                     if(self.updatingDevice1PlotQueue.is_set()):
                         self.device1PlotQueue.put((time.time(), float(data[0][0])))
+                    if(self.updatingAngleQueues.is_set()):
+                        self.angle1Queue.put((time.time(), float(data[0][0])))
                     # print("DATA:", self.device1Data)
                 i=i+1
 
@@ -148,6 +153,8 @@ class Powermeter:
                         self.device2CsvQueue.put((float(data[0][0]), time.time()))
                     if(self.updatingDevice2PlotQueue.is_set()):
                         self.device2PlotQueue.put((time.time(), float(data[0][0])))
+                    if(self.updatingAngleQueues.is_set()):
+                        self.angle2Queue.put((time.time(), float(data[0][0])))
                     # print("DATA:", self.device2Data)
                 i=i+1
         else:
