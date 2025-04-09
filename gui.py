@@ -442,8 +442,8 @@ class Gui:
             power1.append(y)
         while not self.powermeter.angle2Queue.empty():
             x,y = self.powermeter.angle2Queue.get_nowait()
-            time1.append(x)
-            power1.append(y)
+            time2.append(x)
+            power2.append(y)
         print("power 1: ", power1)
         print("power 2:", power2)
 
