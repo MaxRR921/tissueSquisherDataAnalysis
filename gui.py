@@ -451,7 +451,7 @@ class Gui:
         aligned_pow2 = interp_func(time1)
         diff = power1 - aligned_pow2
         deltaDiff = np.abs(np.max(diff) - np.min(diff))
-        for i in range(50000):
+        for i in range(50):
             print(deltaDiff)
     
         
