@@ -38,6 +38,8 @@ class Gui:
         self.signalGraph = multiprocessing.Queue()
         self.signalAngleFinder = threading.Event()
         self.signalAngleFinder.clear()
+        self.findingAngle = threading.Event()
+        
 
         #Initializing device classes.
         try:
@@ -333,6 +335,11 @@ class Gui:
 
     #STRANGE: NOTE: when doing this sometimes the pyqt plots just don't do anything. Maybe add a little wait?
 
+    # Need to figure out how to get the data into the angleFinder script. We need to get the minumum and maximum from the power difference!
+            
+            #plan: 
+            # two new queues in the powermeters, pop them off in here and interpolate just like I did for the plot. I feel like this is good because the thing 
+
     def findAngle(self):
         new_window = tk.Toplevel()
         new_window.title("Angle Data Collection")
@@ -357,6 +364,7 @@ class Gui:
 
         # Begin Collection Button
         def begin_collection():
+             
             nonlocal angle
             min_height = str(min_height_entry.get())
             max_height = str(max_height_entry.get())
@@ -378,7 +386,7 @@ class Gui:
 
             time.sleep(3) #need time to reinitialize everything
             listTemp = []
-
+            
             lowerMove = move.Move(self.micrometerController)
             lowerMove.velocity = "1" 
             lowerMove.targetHeight = min_height
@@ -389,10 +397,13 @@ class Gui:
             raiseMove.targetHeight = max_height
             listTemp.append(raiseMove)
             self.numExecutions = 3
-
+            self.findingAngle.set()
+            print("Finding angle: ", self.findingAngle.is_set())
             self.startExecuteThread(listTemp, True)
             self.signalAngleFinder.wait()
             self.signalAngleFinder.clear()
+            self.findingAngle.clear()
+            print("Finding angle: ", self.findingAngle.is_set())
             print("SHOULD NOW RAISE MICROMETER!!!")
             time.sleep(3)
             self.__raiseMicrometer()
@@ -494,7 +505,7 @@ class Gui:
 
 
         self.generateCsvs()
-        
+
         self.micrometerController.updatingCsvQueue.clear()
         self.micrometerController.updatingPlotQueue.clear()
         self.powermeter.updatingDevice1CsvQueue.clear()
