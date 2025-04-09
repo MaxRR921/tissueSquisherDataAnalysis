@@ -15,6 +15,8 @@ import csv
 import multiprocessing
 import graphingProcess
 
+from scipy.interpolate import interp1d
+
 """!THINKING MAYBE I SHOULD JUSt iNitiAlize all of the threads in init, then call them later"""
 
 
@@ -431,15 +433,29 @@ class Gui:
         ttk.Button(new_window, text="Begin Collection", command=start_collection_thread).pack(pady=20)
 
     def findDeltaPowerDif(self):
+        time1 = []
         power1 = []
+        time2 = []
         power2 = []
         while not self.powermeter.angle1Queue.empty():
-            power1.append(self.powermeter.angle1Queue.get_nowait())
+            x,y = self.powermeter.angle1Queue.get_nowait()
+            time1.append(x)
+            power1.append(y)
         while not self.powermeter.angle2Queue.empty():
-            power2.append(self.powermeter.angle2Queue.get_nowait())
+            x,y = self.powermeter.angle1Queue.get_nowait()
+            time1.append(x)
+            power1.append(y)
         print("power 1: ", power1)
         print("power 2:", power2)
 
+        interp_func = interp1d(time2, power2, kind='linear', fill_value='extrapolate')
+        aligned_pow2 = interp_func(self.time1)
+        diff = power1 - aligned_pow2
+        deltaDiff = np.abs(np.max(diff) - np.min(diff))
+        for i in range(50000):
+            print(deltaDiff)
+    
+        
 
 
 
