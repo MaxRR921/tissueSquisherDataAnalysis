@@ -452,8 +452,6 @@ class Gui:
 
             self.angleFind.plot()
             ttk.Label(new_window, text=f"Ideal Angle: {angle:.2f}°").pack()
-            with open("idealAlpha.txt", "w") as f:
-                f.write(f"{angle:.2f}")
             if save_target == "alpha":
                 self.updateIdealAlpha()
             elif save_target == "beta":
