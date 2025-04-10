@@ -454,8 +454,10 @@ class Gui:
             ttk.Label(new_window, text=f"Ideal Angle: {angle:.2f}°").pack()
             with open("idealAlpha.txt", "w") as f:
                 f.write(f"{angle:.2f}")
-            self.updateIdealAlpha()
-            self.updateIdealBeta()
+            if save_target == "alpha":
+                self.updateIdealAlpha()
+            elif save_target == "beta":
+                self.updateIdealBeta()
 
         ttk.Button(
             new_window,
