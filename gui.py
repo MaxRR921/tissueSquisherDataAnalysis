@@ -125,6 +125,7 @@ class Gui:
         self.addTopMenuButtons()
         
         self.updateIdealAlpha()
+        self.updateIdealBeta()
         
         #create bottomFrame 
         self.bottomFrame = tk.Frame(self.window, height=80, background="light grey")
@@ -203,8 +204,10 @@ class Gui:
         self.__browseDataFileButton(self.topMenuFrame)
         self.__startGraphingButton(self.topMenuFrame)
         self.__findAngleButton(self.topMenuFrame)
-        self.alphaLabel = ttk.Label(self.topMenuFrame, text="Ideal Angle: N/A")
+        self.alphaLabel = ttk.Label(self.topMenuFrame, text="Ideal Alpha: N/A")
         self.alphaLabel.pack(side='left')
+        self.betaLabel = ttk.Label(self.topMenuFrame, text="Ideal Ideal Beta: N/A")
+        self.betaLabel.pack(side='left')
          
 
     #ALL BUTTONS IN TOP MENU
@@ -369,6 +372,13 @@ class Gui:
         max_height_entry = ttk.Entry(new_window)
         max_height_entry.pack()
         
+
+        # Dropdown for saving target: alpha or beta
+        ttk.Label(new_window, text="Save to:").pack(pady=(10, 0))
+        save_target = tk.StringVar(value="alpha")  # default value
+        save_dropdown = ttk.Combobox(new_window, textvariable=save_target, state="readonly")
+        save_dropdown['values'] = ("alpha", "beta")
+        save_dropdown.pack()
     
 
 
@@ -445,6 +455,7 @@ class Gui:
             with open("idealAlpha.txt", "w") as f:
                 f.write(f"{angle:.2f}")
             self.updateIdealAlpha()
+            self.updateIdealBeta()
 
         ttk.Button(
             new_window,
@@ -481,10 +492,18 @@ class Gui:
         try:
             with open("idealAlpha.txt", "r") as f:
                 angle = f.read().strip()
-            self.alphaLabel.config(text=f"Ideal Angle: {angle}°")
+            self.alphaLabel.config(text=f"Ideal Alpha: {angle}°")
         except FileNotFoundError:
-            self.alphaLabel.config(text="ideal angle not saved")
+            self.alphaLabel.config(text="ideal alpha not saved")
+    
 
+    def updateIdealBeta(self):
+        try:
+            with open("idealBeta.txt", "r") as f:
+                angle = f.read().strip()
+            self.betaLabel.config(text=f"Ideal Beta: {angle}°")
+        except FileNotFoundError:
+            self.betaLabel.config(text="ideal beta not saved")
 
 
 
