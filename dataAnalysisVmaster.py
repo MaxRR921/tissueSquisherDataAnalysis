@@ -23,12 +23,15 @@ class DataAnalyzer:
         timeList = []
         while not s1Queue.empty():
             s1List.append(s1Queue.get()) 
+            print("APPENDED S1")
 
         while not s2Queue.empty():
             s2List.append(s2Queue.get()) 
+            print("APPENDED S2")
 
         while not s3Queue.empty():
             s3List.append(s3Queue.get()) 
+            print("APPENDED S3")
 
         while not timeQueue.empty():
             timeList.append(timeQueue.get())
