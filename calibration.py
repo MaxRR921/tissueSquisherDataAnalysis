@@ -44,7 +44,7 @@ def calculate_beta(E_x, E_y):
      print("F", force_vals)
      
      beta_vals = np.zeros(npoints, dtype=complex)
-    
+     # 
 
      for li in range(npoints):
           A = (np.cos(phiVals[li]) * (np.exp(-1j*k*N_s*l[li])*((np.cos(gamma)*np.cos(phiVals[li])) + (np.exp(1j*delta)*np.sin(gamma)*np.sin(phiVals[li]))))) - (np.sin(phiVals[li])*(np.exp(-1j*k*N_f*l[li])*((-np.cos(gamma)*np.sin(phiVals[li]))+(np.exp(1j*delta)*np.sin(gamma)*np.cos(phiVals[li])))))
@@ -161,6 +161,7 @@ def varyingAlpha(alphaVal):
                Ex2= np.abs(Ex)**2  # Equivalent to |Ex|^2
                Ey2= np.abs(Ey)**2 #Equivalent to |Ey|^2
 
+               #NOTE: dont have n not free space
                eta = 376.73  # Characteristic impedance of free space (ohms)
 
                S1[li] = Ex2/(2*eta)

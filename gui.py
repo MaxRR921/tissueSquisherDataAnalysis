@@ -453,9 +453,9 @@ class Gui:
             self.angleFind.plot()
             ttk.Label(new_window, text=f"Ideal Angle: {angle:.2f}°").pack()
             if save_target == "alpha":
-                self.updateIdealAlpha()
+                self.updateIdealAlpha(angle)
             elif save_target == "beta":
-                self.updateIdealBeta()
+                self.updateIdealBeta(angle)
 
         ttk.Button(
             new_window,
@@ -488,20 +488,20 @@ class Gui:
         return deltaDiff
     
 
-    def updateIdealAlpha(self):
+    def updateIdealAlpha(self, alpha):
         try:
             with open("idealAlpha.txt", "r") as f:
                 angle = f.read().strip()
-            self.alphaLabel.config(text=f"Ideal Alpha: {angle}°")
+            self.alphaLabel.config(text=f"Ideal Alpha: {alpha}°")
         except FileNotFoundError:
             self.alphaLabel.config(text="ideal alpha not saved")
     
 
-    def updateIdealBeta(self):
+    def updateIdealBeta(self, beta):
         try:
             with open("idealBeta.txt", "r") as f:
                 angle = f.read().strip()
-            self.betaLabel.config(text=f"Ideal Beta: {angle}°")
+            self.betaLabel.config(text=f"Ideal Beta: {beta}°")
         except FileNotFoundError:
             self.betaLabel.config(text="ideal beta not saved")
 
@@ -634,6 +634,13 @@ class Gui:
             # Each element of the tuple goes into its own CSV column
             for row_tuple in powermeter2Array:
                 writer.writerow(row_tuple)
+
+        with open("polarimetertime.csv", mode="w", newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow(["phase", "strain"])
+            for phase_val, strain_val in zip(self.polarimeter.dataAnalyzer.phase, self.polarimeter.dataAnalyzer.strain):
+                writer.writerow([phase_val, strain_val])
+
                 
 
     """addmove adds the move to the movelist and then udpates the move gui adding the move"""
