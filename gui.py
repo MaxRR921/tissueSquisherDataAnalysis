@@ -124,8 +124,8 @@ class Gui:
         self.topMenuFrame.grid_propagate(False)
         self.addTopMenuButtons()
         
-        self.updateIdealAlpha()
-        self.updateIdealBeta()
+        # self.updateIdealAlpha()
+        # self.updateIdealBeta()
         
         #create bottomFrame 
         self.bottomFrame = tk.Frame(self.window, height=80, background="light grey")
