@@ -141,7 +141,7 @@ class GraphingProcess(QtWidgets.QMainWindow):
         self.curve1.setData(self.x_data1, self.y_data1)
         self.curve2.setData(self.x_data2, self.y_data2)
         self.curve3.setData(self.x_data3, self.y_data3)
-        self.curve4.setData(self.x_data4, self.y_data4)
+        # self.curve4.setData(self.x_data4, self.y_data4)
         if diff is not None:
             self.curve5.setData(self.x_data2, diff)
 
