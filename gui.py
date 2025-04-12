@@ -598,8 +598,9 @@ class Gui:
         self.powermeter.updatingDevice2CsvQueue.clear()
         self.powermeter.updatingDevice1PlotQueue.clear()
         self.powermeter.updatingDevice2PlotQueue.clear()
-        self.polarimeter.dataAnalyzer.finishAnalyzeDataSignal.wait()
-        self.polarimeter.dataAnalyzer.finishAnalyzeDataSignal.clear()
+        if self.polarimeter is not None:
+            self.polarimeter.dataAnalyzer.finishAnalyzeDataSignal.wait()
+            self.polarimeter.dataAnalyzer.finishAnalyzeDataSignal.clear()
         self.polarimeter.updatingCsvQueue.clear()
         self.generateCsvs()
         print("DONE")
