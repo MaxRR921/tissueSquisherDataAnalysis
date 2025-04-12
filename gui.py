@@ -587,7 +587,8 @@ class Gui:
 
         self.executed.set()
         # time.sleep(2)
-
+        self.polarimeter.dataAnalyzer.finishAnalyzeDataSignal.wait()
+        self.polarimeter.dataAnalyzer.finishAnalyzeDataSignal.clear()
         self.generateCsvs()
 
         self.micrometerController.updatingCsvQueue.clear()

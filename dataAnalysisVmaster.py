@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import multiprocessing 
+import threading
 
 #TODO TAke out unnecessary imports 
 
@@ -11,12 +12,12 @@ class DataAnalyzer:
         self.phaseQueue = multiprocessing.Queue()
         self.strain = None 
         self.phase = None
+        self.finishAnalyzeDataSignal = threading.Event()
     
 
 
     def analyzeData(self, s1Queue, s2Queue, s3Queue, timeQueue):
         # Convert lists to numpy arrays
-        
         s1List = []
         s2List = []
         s3List = []
@@ -143,6 +144,7 @@ class DataAnalyzer:
             self.strainQueue.put(s)
         for p in self.phase:
             self.phaseQueue.put(p)
+        self.finishAnalyzeDataSignal.set()
 
 
    
