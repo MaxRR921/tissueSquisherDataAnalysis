@@ -637,8 +637,8 @@ class Gui:
 
         with open("polarimetertime.csv", mode="w", newline="") as f:
             writer = csv.writer(f)
-            print(f"Phase: {self.phase}")
-            print(f"Strain: {self.strain}")
+            print(f"Phase: {self.polarimeter.dataAnalyzer.phase}")
+            print(f"Strain: {self.polarimeter.dataAnalyzer.strain}")
             # writer.writerow(["phase", "strain"])
             # for phase_val, strain_val in zip(self.polarimeter.dataAnalyzer.phase, self.polarimeter.dataAnalyzer.strain):
             #     writer.writerow([phase_val, strain_val])
@@ -679,10 +679,6 @@ class Gui:
                 self.pow1Plot.generateCsvFromPlot("pow1.csv")
             if self.pow2Plot is not None:
                 self.pow2Plot.generateCsvFromPlot("pow2.csv")
-            print("PHASE")
-            print(self.phase)
-            print("STRAIN")
-            print(self.strain)
             self.updatingPlots.clear() 
             self.signalAngleFinder.set()
             self.executed.clear()
