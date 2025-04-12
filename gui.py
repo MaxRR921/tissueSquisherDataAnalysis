@@ -647,16 +647,17 @@ class Gui:
                 for row_tuple in powermeter2Array:
                     writer.writerow(row_tuple)
 
-        if self.polarimeter.dataAnalyzer.phase is not None and self.polarimeter.dataAnalyzer.strain is not None:
-            with open("polarimetertime.csv", mode="w", newline="") as f:
-                writer = csv.writer(f)
-                print(f"Phase: {self.polarimeter.dataAnalyzer.phase}")
-                print(f"Strain: {self.polarimeter.dataAnalyzer.strain}")
-                writer.writerow(["phase", "strain"])
-                for phase_val, strain_val in zip(self.polarimeter.dataAnalyzer.phase, self.polarimeter.dataAnalyzer.strain):
-                    writer.writerow([phase_val, strain_val])
-                self.polarimeter.dataAnalyzer.strain = None
-                self.polarimeter.dataAnalyzer.phase = None
+        if self.polarimeter is not None:
+            if self.polarimeter.dataAnalyzer.phase is not None and self.polarimeter.dataAnalyzer.strain is not None:
+                with open("polarimetertime.csv", mode="w", newline="") as f:
+                    writer = csv.writer(f)
+                    print(f"Phase: {self.polarimeter.dataAnalyzer.phase}")
+                    print(f"Strain: {self.polarimeter.dataAnalyzer.strain}")
+                    writer.writerow(["phase", "strain"])
+                    for phase_val, strain_val in zip(self.polarimeter.dataAnalyzer.phase, self.polarimeter.dataAnalyzer.strain):
+                        writer.writerow([phase_val, strain_val])
+                    self.polarimeter.dataAnalyzer.strain = None
+                    self.polarimeter.dataAnalyzer.phase = None
                 
 
     """addmove adds the move to the movelist and then udpates the move gui adding the move"""
