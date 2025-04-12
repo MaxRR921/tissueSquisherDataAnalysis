@@ -23,15 +23,12 @@ class DataAnalyzer:
         timeList = []
         while not s1Queue.empty():
             s1List.append(s1Queue.get()) 
-            print("APPENDED S1")
 
         while not s2Queue.empty():
             s2List.append(s2Queue.get()) 
-            print("APPENDED S2")
 
         while not s3Queue.empty():
             s3List.append(s3Queue.get()) 
-            print("APPENDED S3")
 
         while not timeQueue.empty():
             timeList.append(timeQueue.get())
@@ -132,13 +129,13 @@ class DataAnalyzer:
         rate = 0.1  # rate of the micrometer (compression rate in mm/s)
         self.strain = (timeListNp * rate) / thick
         
-        print("Time List:", timeListNp)
-        print("Strain:", self.strain)
+        # print("Time List:", timeListNp)
+        # print("Strain:", self.strain)
         try:
             print("Phase:", self.phase)
-            print("S1 List:", s1ListNp)
-            print("S2 List:", s2ListNp)
-            print("S3 List: ", s3ListNp)
+            # print("S1 List:", s1ListNp)
+            # print("S2 List:", s2ListNp)
+            # print("S3 List: ", s3ListNp)
         except:
             print("UH OH")
         for s in self.strain:
