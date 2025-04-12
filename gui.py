@@ -602,7 +602,7 @@ class Gui:
         if self.polarimeter is not None:
             self.polarimeter.dataAnalyzer.finishAnalyzeDataSignal.wait()
             self.polarimeter.dataAnalyzer.finishAnalyzeDataSignal.clear()
-        self.polarimeter.updatingCsvQueue.clear()
+            self.polarimeter.updatingCsvQueue.clear()
         self.generateCsvs()
         print("DONE")
 
