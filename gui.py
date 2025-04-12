@@ -586,7 +586,7 @@ class Gui:
                     break
 
         self.executed.set()
-
+        time.sleep(2)
 
         self.generateCsvs()
 
