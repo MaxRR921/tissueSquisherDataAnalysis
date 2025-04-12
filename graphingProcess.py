@@ -130,8 +130,9 @@ class GraphingProcess(QtWidgets.QMainWindow):
                 self.x_data4.append(self.strainQueue.get_nowait())
             while not self.strainQueue.empty():
                 x=self.strainQueue.get_nowait()
-                y=self.phaseQueue.get_nowait()
         
+            while not self.phaseQueue.empty():
+                y=self.phaseQueue.get_nowait()
 
 
         if  self.x_data3 and self.y_data3 and self.y_data2:
