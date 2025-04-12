@@ -447,11 +447,13 @@ class Gui:
 
 
         ttk.Button(new_window, text="Begin Collection", command=start_collection_thread).pack(pady=20)
+
         def show_angle():
             angle = self.angleFind.findAngle(differenceValues)
 
             self.angleFind.plot()
             ttk.Label(new_window, text=f"Ideal Angle: {angle:.2f}°").pack()
+
             if save_target == "alpha":
                 self.updateIdealAlpha(angle)
             elif save_target == "beta":
@@ -488,22 +490,46 @@ class Gui:
         return deltaDiff
     
 
-    def updateIdealAlpha(self, alpha):
+
+    # 2 things: 
+    # 1. read for ideal alpha from file on startup, update label
+    # 2. take in angle, write to file, update label
+
+    def readSavedIdealAlpha(self):
         try:
             with open("idealAlpha.txt", "r") as f:
-                angle = f.read().strip()
+                alpha = f.read().strip()
             self.alphaLabel.config(text=f"Ideal Alpha: {alpha}°")
         except FileNotFoundError:
             self.alphaLabel.config(text="ideal alpha not saved")
-    
 
-    def updateIdealBeta(self, beta):
+    def readSavedIdealBeta(self):
         try:
             with open("idealBeta.txt", "r") as f:
-                angle = f.read().strip()
+                beta = f.read().strip()
             self.betaLabel.config(text=f"Ideal Beta: {beta}°")
         except FileNotFoundError:
             self.betaLabel.config(text="ideal beta not saved")
+
+    def updateIdealAlpha(self, alpha):
+        try:
+            with open("idealAlpha.txt", "w") as f:
+                f.write(str(alpha))
+            self.alphaLabel.config(text=f"Ideal Alpha: {alpha}°")
+        except Exception as e:
+            self.alphaLabel.config(text="Failed to save ideal alpha")
+            print(f"Error saving alpha: {e}")
+
+    
+
+    def updateIdealAlpha(self, beta):
+        try:
+            with open("idealBeta.txt", "w") as f:
+                f.write(str(beta))
+            self.betaLabel.config(text=f"Ideal Beta: {beta}°")
+        except Exception as e:
+            self.betaLabel.config(text="Failed to save ideal alpha")
+            print(f"Error saving beta: {e}")
 
 
 
