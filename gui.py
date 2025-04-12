@@ -639,9 +639,9 @@ class Gui:
             writer = csv.writer(f)
             print(f"Phase: {self.polarimeter.dataAnalyzer.phase}")
             print(f"Strain: {self.polarimeter.dataAnalyzer.strain}")
-            # writer.writerow(["phase", "strain"])
-            # for phase_val, strain_val in zip(self.polarimeter.dataAnalyzer.phase, self.polarimeter.dataAnalyzer.strain):
-            #     writer.writerow([phase_val, strain_val])
+            writer.writerow(["phase", "strain"])
+            for phase_val, strain_val in zip(self.polarimeter.dataAnalyzer.phase, self.polarimeter.dataAnalyzer.strain):
+                writer.writerow([phase_val, strain_val])
 
                 
 
