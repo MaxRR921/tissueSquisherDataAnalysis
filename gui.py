@@ -591,9 +591,6 @@ class Gui:
 
         self.executed.set()
         # time.sleep(2)
-        self.polarimeter.dataAnalyzer.finishAnalyzeDataSignal.wait()
-        self.polarimeter.dataAnalyzer.finishAnalyzeDataSignal.clear()
-        self.generateCsvs()
 
         self.micrometerController.updatingCsvQueue.clear()
         self.micrometerController.updatingPlotQueue.clear()
@@ -601,6 +598,9 @@ class Gui:
         self.powermeter.updatingDevice2CsvQueue.clear()
         self.powermeter.updatingDevice1PlotQueue.clear()
         self.powermeter.updatingDevice2PlotQueue.clear()
+        self.polarimeter.dataAnalyzer.finishAnalyzeDataSignal.wait()
+        self.polarimeter.dataAnalyzer.finishAnalyzeDataSignal.clear()
+        self.generateCsvs()
         self.polarimeter.updatingCsvQueue.clear()
         print("DONE")
 
@@ -637,7 +637,6 @@ class Gui:
                     writer.writerow(row_tuple)
 
         if powermeter2Array:
-
             with open("power2time.csv", mode="w", newline="") as f:
                 writer = csv.writer(f)
                 # Optionally, write a header row first:
