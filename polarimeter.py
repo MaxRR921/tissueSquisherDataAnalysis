@@ -115,7 +115,7 @@ class Polarimeter():
             self.lib.TLPAX_releaseScan(self.instrumentHandle, scanID)
             time.sleep(0.07)
         
-        if(self.polaimreter.updatingCsvQueue.is_set()):
+        if(self.updatingCsvQueue.is_set()):
             print("ANALYZING DATA !!! !!! !! ")
             self.dataAnalyzer.analyzeData(self.s1Queue, self.s2Queue, self.s3Queue, self.timeQueue)
 
