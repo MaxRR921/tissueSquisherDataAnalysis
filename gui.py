@@ -600,8 +600,8 @@ class Gui:
         self.powermeter.updatingDevice2PlotQueue.clear()
         self.polarimeter.dataAnalyzer.finishAnalyzeDataSignal.wait()
         self.polarimeter.dataAnalyzer.finishAnalyzeDataSignal.clear()
-        self.generateCsvs()
         self.polarimeter.updatingCsvQueue.clear()
+        self.generateCsvs()
         print("DONE")
 
     def generateCsvs(self):
