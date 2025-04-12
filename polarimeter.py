@@ -113,7 +113,7 @@ class Polarimeter():
             self.s3Queue.put(float(s3.value))
             self.timeQueue.put(float(time.time()) - initTime.value)
             self.lib.TLPAX_releaseScan(self.instrumentHandle, scanID)
-            time.sleep(0.06)
+            time.sleep(0.07)
         
         print("ANALYZING DATA !!! !!! !! ")
         self.dataAnalyzer.analyzeData(self.s1Queue, self.s2Queue, self.s3Queue, self.timeQueue)
