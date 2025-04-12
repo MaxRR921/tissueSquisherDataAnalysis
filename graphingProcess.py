@@ -124,14 +124,16 @@ class GraphingProcess(QtWidgets.QMainWindow):
             self.x_data3.append(x)
             self.y_data3.append(y)
 
-        if not self.phaseQueue == None:
-            while not self.phaseQueue.empty():
+        if not self.phaseQueue == None and not self.strainQueue == None:
+            while not self.phaseQueue.empty() and not self.strainQueue.empty():
                 self.y_data4.append(self.phaseQueue.get_nowait())
-
-        if not self.strainQueue == None:
-            while not self.strainQueue.empty():
                 self.x_data4.append(self.strainQueue.get_nowait())
+            while not self.strainQueue.empty():
+                x=self.strainQueue.get_nowait()
+                y=self.phaseQueue.get_nowait()
         
+
+
         if  self.x_data3 and self.y_data3 and self.y_data2:
             interp_func = interp1d(self.x_data3, self.y_data3, kind='linear', fill_value='extrapolate')
             aligned_pow2 = interp_func(self.x_data2)
