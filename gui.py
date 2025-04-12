@@ -645,7 +645,7 @@ class Gui:
                 for row_tuple in powermeter2Array:
                     writer.writerow(row_tuple)
 
-        if self.polarimeter.dataAnalyzer.phase is not None and self.polarimeter.dataAnalyzer.strain is not none:
+        if self.polarimeter.dataAnalyzer.phase is not None and self.polarimeter.dataAnalyzer.strain is not None:
             with open("polarimetertime.csv", mode="w", newline="") as f:
                 writer = csv.writer(f)
                 print(f"Phase: {self.polarimeter.dataAnalyzer.phase}")
