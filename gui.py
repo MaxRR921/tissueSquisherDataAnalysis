@@ -561,10 +561,14 @@ class Gui:
             if not self.powermeter.updatingDevice2CsvQueue.is_set():
                 self.powermeter.updatingDevice2CsvQueue.set()
 
+            if not self.polarimeter.updatingCsvQueue.is_set():
+                self.polarimeter.updatingCsvQueue.set()
+
             if self.pyqt_process is not None and self.pyqt_process.is_alive():
                 self.micrometerController.updatingPlotQueue.set()
                 self.powermeter.updatingDevice1PlotQueue.set()
                 self.powermeter.updatingDevice2PlotQueue.set()
+
 
             #POLARIMETER NEEDS TO START RUNNING BEFORE MOVES EXECUTE. IT DOESN'T CONSTANTLY RUN LIKE THE POWERMETER.
             if(self.polarimeter is not None):
@@ -597,6 +601,7 @@ class Gui:
         self.powermeter.updatingDevice2CsvQueue.clear()
         self.powermeter.updatingDevice1PlotQueue.clear()
         self.powermeter.updatingDevice2PlotQueue.clear()
+        self.polarimeter.updatingCsvQueue.clear()
         print("DONE")
 
     def generateCsvs(self):
@@ -612,38 +617,45 @@ class Gui:
         while not self.powermeter.device2CsvQueue.empty():
             powermeter2Array.append(self.powermeter.device2CsvQueue.get())
 
-        with open("micrometertime.csv", mode="w", newline="") as f:
-            writer = csv.writer(f)
-            # Optionally, write a header row first:
-            writer.writerow(["position (mm)", "time (seconds since jan 1 1975)"])
-            # Each element of the tuple goes into its own CSV column
-            for row_tuple in micrometerArray:
-                writer.writerow(row_tuple)
+        if micrometerArray:
+            with open("micrometertime.csv", mode="w", newline="") as f:
+                writer = csv.writer(f)
+                # Optionally, write a header row first:
+                writer.writerow(["position (mm)", "time (seconds since jan 1 1975)"])
+                # Each element of the tuple goes into its own CSV column
+                for row_tuple in micrometerArray:
+                    writer.writerow(row_tuple)
+        
 
-        with open("power1time.csv", mode="w", newline="") as f:
-            writer = csv.writer(f)
-            # Optionally, write a header row first:
-            writer.writerow(["power 1 (W)", "time (seconds since jan 1 1975)"])
-            # Each element of the tuple goes into its own CSV column
-            for row_tuple in powermeter1Array:
-                writer.writerow(row_tuple)
+        if powermeter1Array:
+            with open("power1time.csv", mode="w", newline="") as f:
+                writer = csv.writer(f)
+                # Optionally, write a header row first:
+                writer.writerow(["power 1 (W)", "time (seconds since jan 1 1975)"])
+                # Each element of the tuple goes into its own CSV column
+                for row_tuple in powermeter1Array:
+                    writer.writerow(row_tuple)
 
-        with open("power2time.csv", mode="w", newline="") as f:
-            writer = csv.writer(f)
-            # Optionally, write a header row first:
-            writer.writerow(["power 2 (W)", "time (seconds since jan 1 1975)"])
-            # Each element of the tuple goes into its own CSV column
-            for row_tuple in powermeter2Array:
-                writer.writerow(row_tuple)
+        if powermeter2Array:
 
-        with open("polarimetertime.csv", mode="w", newline="") as f:
-            writer = csv.writer(f)
-            print(f"Phase: {self.polarimeter.dataAnalyzer.phase}")
-            print(f"Strain: {self.polarimeter.dataAnalyzer.strain}")
-            writer.writerow(["phase", "strain"])
-            for phase_val, strain_val in zip(self.polarimeter.dataAnalyzer.phase, self.polarimeter.dataAnalyzer.strain):
-                writer.writerow([phase_val, strain_val])
+            with open("power2time.csv", mode="w", newline="") as f:
+                writer = csv.writer(f)
+                # Optionally, write a header row first:
+                writer.writerow(["power 2 (W)", "time (seconds since jan 1 1975)"])
+                # Each element of the tuple goes into its own CSV column
+                for row_tuple in powermeter2Array:
+                    writer.writerow(row_tuple)
 
+        if self.polarimeter.dataAnalyzer.phase is not None and self.polarimeter.dataAnalyzer.strain is not none:
+            with open("polarimetertime.csv", mode="w", newline="") as f:
+                writer = csv.writer(f)
+                print(f"Phase: {self.polarimeter.dataAnalyzer.phase}")
+                print(f"Strain: {self.polarimeter.dataAnalyzer.strain}")
+                writer.writerow(["phase", "strain"])
+                for phase_val, strain_val in zip(self.polarimeter.dataAnalyzer.phase, self.polarimeter.dataAnalyzer.strain):
+                    writer.writerow([phase_val, strain_val])
+                self.polarimeter.dataAnalyzer.strain = None
+                self.polarimeter.dataAnalyzer.phase = None
                 
 
     """addmove adds the move to the movelist and then udpates the move gui adding the move"""

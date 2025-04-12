@@ -17,6 +17,8 @@ class DataAnalyzer:
 
 
     def analyzeData(self, s1Queue, s2Queue, s3Queue, timeQueue):
+        self.strain = None 
+        self.phase = None
         # Convert lists to numpy arrays
         s1List = []
         s2List = []
