@@ -561,8 +561,9 @@ class Gui:
             if not self.powermeter.updatingDevice2CsvQueue.is_set():
                 self.powermeter.updatingDevice2CsvQueue.set()
 
-            if not self.polarimeter.updatingCsvQueue.is_set():
-                self.polarimeter.updatingCsvQueue.set()
+            if self.polarimeter is not None:
+                if not self.polarimeter.updatingCsvQueue.is_set():
+                    self.polarimeter.updatingCsvQueue.set()
 
             if self.pyqt_process is not None and self.pyqt_process.is_alive():
                 self.micrometerController.updatingPlotQueue.set()
