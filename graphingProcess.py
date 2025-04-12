@@ -128,6 +128,7 @@ class GraphingProcess(QtWidgets.QMainWindow):
             while not self.phaseQueue.empty() and not self.strainQueue.empty():
                 self.y_data4.append(self.phaseQueue.get_nowait())
                 self.x_data4.append(self.strainQueue.get_nowait())
+                
             while not self.strainQueue.empty():
                 x=self.strainQueue.get_nowait()
         
