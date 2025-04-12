@@ -132,7 +132,8 @@ class DataAnalyzer:
         # print("Time List:", timeListNp)
         # print("Strain:", self.strain)
         try:
-            print("Phase:", self.phase)
+            print("Phase: ", self.phase)
+            print("Strain: ", self.strain)
             # print("S1 List:", s1ListNp)
             # print("S2 List:", s2ListNp)
             # print("S3 List: ", s3ListNp)
