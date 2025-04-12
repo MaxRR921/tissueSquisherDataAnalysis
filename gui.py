@@ -124,8 +124,8 @@ class Gui:
         self.topMenuFrame.grid_propagate(False)
         self.addTopMenuButtons()
         
-        # self.updateIdealAlpha()
-        # self.updateIdealBeta()
+        self.readSavedIdealAlpha()
+        self.readSavedIdealBeta() 
         
         #create bottomFrame 
         self.bottomFrame = tk.Frame(self.window, height=80, background="light grey")
@@ -522,7 +522,7 @@ class Gui:
 
     
 
-    def updateIdealAlpha(self, beta):
+    def updateIdealBeta(self, beta):
         try:
             with open("idealBeta.txt", "w") as f:
                 f.write(str(beta))
