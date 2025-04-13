@@ -512,6 +512,7 @@ class Gui:
             self.betaLabel.config(text="ideal beta not saved")
 
     def updateIdealAlpha(self, alpha):
+        print("UPDATING IDEAL ALPHA!!!!!!!")
         try:
             with open("idealAlpha.txt", "w") as f:
                 f.write(str(alpha))
