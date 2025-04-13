@@ -453,7 +453,7 @@ class Gui:
 
             self.angleFind.plot()
             ttk.Label(new_window, text=f"Ideal Angle: {angle:.2f}°").pack()
-            print("SHOULD SAVE ANGLE")
+            print("SHOULD SAVE ANGLE", save_target)
 
             if save_target == "alpha":
                 self.updateIdealAlpha(angle)
