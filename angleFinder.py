@@ -3,11 +3,11 @@ import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 
 class AngleFinder:
-    def __init__(self, separation=np.pi / 9):
+    def __init__(self, separation=np.pi / 18):
         self.sin_func = None
         self.optimalAlpha = 0
         self.y_values = None
-        self.x_values = [-separation, 0, separation]  # Initialize x-values
+        self.x_values = [-separation, -separation+np.pi/18, 0, separation - np.pi/18, separation]  # Initialize x-values
 
     def findAngle(self, y_values):
         for i in range(100):
