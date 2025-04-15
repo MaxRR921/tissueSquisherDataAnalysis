@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 
 class AngleFinder:
-    def __init__(self, separation=np.pi / 18):
+    def __init__(self, separation=np.pi / 9):
         self.sin_func = None
         self.optimalAlpha = 0
         self.y_values = None
