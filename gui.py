@@ -357,7 +357,7 @@ class Gui:
         new_window = tk.Toplevel()
         new_window.title("Angle Data Collection")
         new_window.geometry("300x200")
-        angle = -45
+        angle = -20
 
         rotate_label = ttk.Label(new_window, text=f"Rotate to {angle} degrees.")
         rotate_label.pack(pady=(10, 0))
@@ -424,15 +424,16 @@ class Gui:
             self.powermeter.updatingAngleQueues.clear()
             print("Finding angle: ", self.powermeter.updatingAngleQueues.is_set())
             print("SHOULD NOW RAISE MICROMETER!!!")
-            time.sleep(10)
+            time.sleep(3)
             self.__raiseMicrometer()
             self.signalAngleFinder.wait()
             self.signalAngleFinder.clear()
-            angle += 45
-          
+            angle += 10 
             differenceValues.append(self.findDeltaPowerDif())
-            rotate_label.config(text=f"Rotate to {angle} degrees.")
-            
+            if(angle >= 20):
+                rotate_label.config(text="compute the ideal angle")
+            else:
+                rotate_label.config(text=f"Rotate to {angle} degrees.")
 
 
 
