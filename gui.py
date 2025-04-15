@@ -430,7 +430,7 @@ class Gui:
             self.signalAngleFinder.clear()
             angle += 10 
             differenceValues.append(self.findDeltaPowerDif())
-            if(angle >= 20):
+            if(angle > 20):
                 rotate_label.config(text="compute the ideal angle")
             else:
                 rotate_label.config(text=f"Rotate to {angle} degrees.")
