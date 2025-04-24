@@ -61,6 +61,11 @@ class GraphingProcess(QtWidgets.QMainWindow):
         self.curve6 = self.plot6.plot([], [], pen='y')
         layout.addWidget(self.plot6, 1, 2)  # Row 1, Col 1
 
+        self.plot7 = pg.PlotWidget()
+        self.plot7.setLabel('left', "Power Difference (W)")
+        self.plot7.setLabel('bottom', "Time")
+        self.curve7 = self.plot7.plot([], [], pen='orange')
+        layout.addWidget(self.plot7, 2, 2)  # Row 1, Col 1
         # Put the container into the MainWindow
         self.setCentralWidget(container)
 
@@ -96,6 +101,7 @@ class GraphingProcess(QtWidgets.QMainWindow):
                 self.curve3 = self.plot3.plot([], [], pen='b')
                 self.curve4 = self.plot4.plot([], [], pen='m')
                 self.curve5 = self.plot5.plot([], [], pen='y')
+                self.curve6 = self.plot7.plot([],[], pen='w')
 
                 # Clear data buffers
                 self.x_data1.clear()
@@ -142,13 +148,20 @@ class GraphingProcess(QtWidgets.QMainWindow):
             aligned_pow2 = interp_func(self.x_data2)
             diff = self.y_data2 / aligned_pow2
 
+        if diff is not None:
+            self.curve5.setData(self.x_data2, diff)
         
+        if  self.x_data3 and self.y_data3 and self.y_data2:
+            interp_func = interp1d(self.x_data3, self.y_data3, kind='linear', fill_value='extrapolate')
+            aligned_pow2 = interp_func(self.x_data2)
+            diff = self.y_data2 - aligned_pow2
+
+        if diff is not None:
+            self.curve6.setData(self.x_data2, diff)
         self.curve1.setData(self.x_data1, self.y_data1)
         self.curve2.setData(self.x_data2, self.y_data2)
         self.curve3.setData(self.x_data3, self.y_data3)
         self.curve4.setData(self.x_data4, self.y_data4)
-        if diff is not None:
-            self.curve5.setData(self.x_data2, diff)
 
 
 
