@@ -353,7 +353,7 @@ class Gui:
             # two new queues in the powermeters, pop them off in here and interpolate just like I did for the plot. I feel like this is good because the thing 
 
     def findAngle(self):
-        differenceValues = []
+        powerRatios = []
         new_window = tk.Toplevel()
         new_window.title("Angle Data Collection")
         new_window.geometry("300x200")
@@ -429,7 +429,7 @@ class Gui:
             self.signalAngleFinder.wait()
             self.signalAngleFinder.clear()
             angle += 10 
-            differenceValues.append(self.findDeltaPowerDif())
+            powerRatios.append(self.findDeltaPowerDif())
             if(angle > 20):
                 rotate_label.config(text="compute the ideal angle")
             else:
@@ -450,7 +450,7 @@ class Gui:
         ttk.Button(new_window, text="Begin Collection", command=start_collection_thread).pack(pady=20)
 
         def show_angle():
-            angle = self.angleFind.findAngle(differenceValues)
+            angle = self.angleFind.findAngle(powerRatios)
 
             self.angleFind.plot()
             ttk.Label(new_window, text=f"Ideal Angle: {angle:.2f}°").pack()

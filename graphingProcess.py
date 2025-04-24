@@ -140,7 +140,7 @@ class GraphingProcess(QtWidgets.QMainWindow):
         if  self.x_data3 and self.y_data3 and self.y_data2:
             interp_func = interp1d(self.x_data3, self.y_data3, kind='linear', fill_value='extrapolate')
             aligned_pow2 = interp_func(self.x_data2)
-            diff = self.y_data2 - aligned_pow2
+            diff = self.y_data2 / aligned_pow2
 
         
         self.curve1.setData(self.x_data1, self.y_data1)
