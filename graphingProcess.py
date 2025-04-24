@@ -65,7 +65,7 @@ class GraphingProcess(QtWidgets.QMainWindow):
         self.plot7.setLabel('left', "Power Difference (W)")
         self.plot7.setLabel('bottom', "Time")
         self.curve7 = self.plot7.plot([], [], pen='orange')
-        layout.addWidget(self.plot7, 2, 2)  # Row 1, Col 1
+        layout.addWidget(self.plot7, 1, 2)  # Row 1, Col 1
         # Put the container into the MainWindow
         self.setCentralWidget(container)
 
