@@ -434,8 +434,12 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
                self.S2Normalized[li] = self.S2[li]/self.P_in
                self.stresses[li] = self.f[li]/self.l #might have to change this
                self.strains = np.linspace(initialHeight, finalHeight, npoints)
-               for s in self.strains:
-                    s = (s - initialHeight) / initialHeight
+               for i, val in enumerate(self.strains):
+                    print("val = ", val)
+                    print("initialHeight - val ", np.abs((initialHeight - val)))
+                    self.strains[i] = (initialHeight - val) / initialHeight
+                    print("STRAIN ACTUAL: ", self.strains[i])
+               print("SELF.STRAINS: ", self.strains)
                
                self.Sdifferences[li] = self.S2[li] - self.S1[li]
                self.SdifferencesNormalized[li] = self.S2Normalized[li] - self.S1Normalized[li]
@@ -546,8 +550,8 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
      def plotStressStrain(self):
           plt.figure()
           plt.plot(self.strains, self.stresses, label='stress strain')
-          plt.xlabel('Stress N/M')
-          plt.ylabel('Strain (%)')       
+          plt.ylabel('Stress N/M')
+          plt.xlabel('Strain (%)')       
           plt.legend()
           plt.grid(True)
           plt.gca().get_yaxis().get_major_formatter().set_useOffset(False)  # no offset
@@ -567,7 +571,7 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
 
      def plotPowerDifferences(self):
           plt.figure()
-          plt.plot(self.f, self.Sdifferences, label='Sdifference (W)')
+          plt.plot(self.f, self.SdifferencesNormalized, label='Sdifference (W)')
           plt.xlabel('Force (N)')
           plt.ylabel('Power Difference')
           plt.title('Power Difference vs. Force')
@@ -626,10 +630,19 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
           E_x0 = np.sqrt((2 * P_in) / (n * epsilon0 * c * A_eff))
           return E_x0
 
-     def generate_function(self):
+     def generate_function_force_to_powerdiff(self):
           m, b = np.polyfit(self.f, self.Sdifferences, 1)
           fmodel = lambda F_in: m*F_in + b  
           return fmodel
+     
+     def generate_function_powerdiff_to_force(self):
+          # fit Sdifference = m*force + b
+          m, b = np.polyfit(self.f, self.SdifferencesNormalized, 1)
+          # return a function that inverts that relation:
+          print("m: ", m)
+          print("b: ", b)
+          print("TEST: ", (1.5e-12-b)/m)
+          return lambda Sdiff: (Sdiff - b) / m
 
 
 
@@ -805,17 +818,13 @@ def generate_function(f, pDiff):
      force_from_pDiff = lambda p: (p - b) / m
      return force_from_pDiff
 
-def generateStressStrainCurve(strain, stress):
-     m, b = np.polyfit(strain, stress, 1)
-     stressStrainFunc = lambda p: (p-b)/m
-     return stressStrainFunc
 
 # force_from pdiff gives us force, force divided by l is stress, strain is finalPos - initialPos
 # need to have queue for power difference -> 
 
 # def returnStressFromPowerDiff(powerDiff):
      
-
+# NEED: power diff, micrometer position. Feed power diff into function, get force, 
 
 
 # needs to tell you:
@@ -880,31 +889,23 @@ npoints = 500
 c = Calibration(npoints, np.linspace(0, 100, npoints), .018, 3.42e-7)
 # c.varyLength(np.linspace(0, .18, 100))
 initialHeight = 7
-finalHeight = 5.2 
-c.calculatePowers(finalHeight, initialHeight)
+finalHeight = 5.2
+c.calculatePowers(initialHeight, finalHeight)
 # test_ex1()
-# c.plotPowerDifferences()
+c.plotPowerDifferences()
 # c.plotPowers()
 # c.plotPowersSeperately()
 c.plotPowerDifferencesNormalized()
 c.plotNormalizedPowers()
 c.plotStressStrain()
 
-func = c.generate_function()
 
+func = c.generate_function_powerdiff_to_force()
 
-print("FUNC(90): ", func(90))
+print("FUNC(1.5e-12): ", func(1.5e-12))
 print("FUNC(10): ", func(10))
 
 print("Initial Power 1 Normalized: ", c.initialPower1)
 print("Initial Power 2 Normalized: ", c.initialPower2)
 print("Final Power 1 Normalized: ", c.finalPower1)
 print("Final Power 2 Normalized: ", c.finalPower2)
-
-
-
-
-
-
-
-
