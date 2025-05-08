@@ -118,7 +118,7 @@ class GraphingProcess(QtWidgets.QMainWindow):
             x, y = self.micrometerQueue.get_nowait()
             print("ADDED")
             if len(self.y_data1) <= 5:
-                self.initialMicrometerPosition = self.y_data1
+                self.initialMicrometerPosition = self.y_data1[0]
             print("INITIAL HEIGHT IN GRAPHING PROCESS: ", self.initialMicrometerPosition)
             self.x_data1.append(x)
             self.y_data1.append(y)
@@ -164,7 +164,7 @@ class GraphingProcess(QtWidgets.QMainWindow):
             l = .018 #interaction length in meters 
             stress = f/l
             print("STRESS: ", stress) 
-            strain = (self.y_data1 - self.initialMicrometerPosition) / self.initialMicrometerPosition
+            strain = [(y - self.initialMicrometerPosition) / self.initialMicrometerPosition for y in self.y_data1]
             print("STRAIN: ", strain)
             strain_interp = interp1d(self.x_data1, strain,
                                     kind='linear',
