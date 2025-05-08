@@ -157,7 +157,7 @@ class GraphingProcess(QtWidgets.QMainWindow):
             diff = self.y_data2 - aligned_pow2 
             print("DIFFERENCE: ", diff)
             normalizeVal = 4.0e-7
-            NormalizedDiff = diff
+            NormalizedDiff = diff #NOT NORMALIZING HERE idk.
             m = 2.4971384178039526e-14 #these results were generated in my calibration code in the inverted_movement branch
             b =  -1.965098810127962e-18
             f = (NormalizedDiff - b) / m
