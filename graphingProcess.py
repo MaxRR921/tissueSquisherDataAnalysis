@@ -117,6 +117,9 @@ class GraphingProcess(QtWidgets.QMainWindow):
         while not self.micrometerQueue.empty():
             x, y = self.micrometerQueue.get_nowait()
             print("ADDED")
+            if len(self.y_data1):
+                self.initialMicrometerPosition = self.y_data1
+            print("INITIAL HEIGHT IN GRAPHING PROCESS: ", self.initialMicrometerPosition)
             self.x_data1.append(x)
             self.y_data1.append(y)
         
@@ -153,17 +156,24 @@ class GraphingProcess(QtWidgets.QMainWindow):
             interp_func = interp1d(self.x_data3, self.y_data3, kind='linear', fill_value='extrapolate')
             aligned_pow2 = interp_func(self.x_data2)
             diff = self.y_data2 - aligned_pow2 
-            normalizeVal = 3.42e-7
+            normalizeVal = 4.0e-7
             NormalizedDiff = diff / normalizeVal
             m = 2.4971384178039526e-14 #these results were generated in my calibration code in the inverted_movement branch
             b =  -1.965098810127962e-18
-            f = (diff - b) / m
+            f = (NormalizedDiff - b) / m
             l = .018 #interaction length in meters 
-            stress = 12
+            stress = f/l 
+            strain = (self.y_data1 - self.initialMicrometerPosition) / self.initialMicrometerPosition
+            strain_interp = interp1d(self.x_data1, strain,
+                                    kind='linear',
+                                    fill_value='extrapolate')
+
+            # 2. sample that interpolator at the same time‐points used for stress:
+            aligned_strain = strain_interp(self.x_data2)
             
             
         if diff is not None:
-            self.curve5.setData(self.x_data2, diff)
+            self.curve5.setData(aligned_strain, stress)
         
         if  self.x_data3 and self.y_data3 and self.y_data2:
             interp_func = interp1d(self.x_data3, self.y_data3, kind='linear', fill_value='extrapolate')
