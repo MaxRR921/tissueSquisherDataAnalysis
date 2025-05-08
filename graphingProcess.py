@@ -117,7 +117,7 @@ class GraphingProcess(QtWidgets.QMainWindow):
         while not self.micrometerQueue.empty():
             x, y = self.micrometerQueue.get_nowait()
             print("ADDED")
-            if len(self.y_data1) == 1:
+            if len(self.y_data1) <= 5:
                 self.initialMicrometerPosition = self.y_data1
             print("INITIAL HEIGHT IN GRAPHING PROCESS: ", self.initialMicrometerPosition)
             self.x_data1.append(x)
