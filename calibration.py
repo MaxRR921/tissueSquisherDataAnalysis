@@ -442,8 +442,7 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
                print("SELF.STRAINS: ", self.strains)
                
                self.Sdifferences[li] = self.S2[li] - self.S1[li]
-               self.SdifferencesNormalized[li] = self.S2Normalized[li] - self.S1Normalized[li]
-               
+               self.SdifferencesNormalized[li] = (self.S2[li] - self.S1[li])/4.0e-7 
                if (li == 0):
                     self.initialPowerDifference = self.Sdifferences[li]
                     self.initialPower1 = self.S1Normalized[li]
