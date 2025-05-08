@@ -163,7 +163,7 @@ class GraphingProcess(QtWidgets.QMainWindow):
             l = .018 #interaction length in meters 
             stress = f/l
             print("STRESS: ", stress) 
-            strain = [(y - self.initialMicrometerPosition) / self.initialMicrometerPosition for y in self.y_data1]
+            strain = [(self.initialMicrometerPosition - y) / self.initialMicrometerPosition for y in self.y_data1]
             print("STRAIN: ", strain)
             strain_interp = interp1d(self.x_data1, strain,
                                     kind='linear',
