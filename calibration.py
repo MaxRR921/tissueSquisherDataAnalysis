@@ -419,7 +419,7 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
                K = (np.cos(self.phiValues[li] * E)) - (np.sin(self.phiValues[li]) * F)
                L = (np.sin(self.phiValues[li]) * G) - (np.cos(self.phiValues[li]) * H)
 
-               print("THIS TERM IS: ", np.exp(-2j*self.k*self.l*((2*np.pi)/(self.k*self.Lb[li]))) * np.exp(-2j*self.k*self.N*self.l))
+               print(" / 4e-7THIS TERM IS: ", np.exp(-2j*self.k*self.l*((2*np.pi)/(self.k*self.Lb[li]))) * np.exp(-2j*self.k*self.N*self.l))
                Ex = (self.Ex_0) * np.exp(-2j*self.k*self.N*self.l)*np.exp(-2j*self.k*self.l*((2*np.pi)/(self.k*self.Lb[li]))) * (I*np.cos(self.beta) - J*np.sin(self.beta))
                Ey = (self.Ex_0) * np.exp(-2j*self.k*self.N*self.l     )*np.exp(-2j*self.k*self.l*((2*np.pi)/(self.k*self.Lb[li]))) * (K*np.cos(self.beta) - L*np.sin(self.beta))               
 
@@ -435,11 +435,11 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
                self.stresses[li] = self.f[li]/self.l #might have to change this
                self.strains = np.linspace(initialHeight, finalHeight, npoints)
                for i, val in enumerate(self.strains):
-                    print("val = ", val)
-                    print("initialHeight - val ", np.abs((initialHeight - val)))
+                    # print("val = ", val)
+                    # print("initialHeight - val ", np.abs((initialHeight - val)))
                     self.strains[i] = (initialHeight - val) / initialHeight
-                    print("STRAIN ACTUAL: ", self.strains[i])
-               print("SELF.STRAINS: ", self.strains)
+                    # print("STRAIN ACTUAL: ", self.strains[i])
+               # print("SELF.STRAINS: ", self.strains)
                
                self.Sdifferences[li] = self.S2[li] - self.S1[li]
                self.SdifferencesNormalized[li] = (self.S2[li] - self.S1[li])/4.0e-7 
@@ -545,6 +545,8 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
           plt.legend()
           plt.grid(True)
           plt.show()
+          print("POWER 2 - POWER 1: ", self.S2 - self.S1)
+          print("POWER DIFF NORMALIZED: ", (self.S2 - self.S1) / 4e-7)
 
      def plotStressStrain(self):
           plt.figure()
@@ -892,7 +894,7 @@ finalHeight = 5.2
 c.calculatePowers(initialHeight, finalHeight)
 # test_ex1()
 c.plotPowerDifferences()
-# c.plotPowers()
+c.plotPowers()
 # c.plotPowersSeperately()
 c.plotPowerDifferencesNormalized()
 c.plotNormalizedPowers()
@@ -901,7 +903,7 @@ c.plotStressStrain()
 
 func = c.generate_function_powerdiff_to_force()
 
-print("FUNC(1.5e-12): ", func(1.5e-12))
+print("FUNC(1.5e-12): ", (func(440e-9)/20e6))
 print("FUNC(10): ", func(10))
 
 print("Initial Power 1 Normalized: ", c.initialPower1)
