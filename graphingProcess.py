@@ -148,6 +148,12 @@ class GraphingProcess(QtWidgets.QMainWindow):
             aligned_pow2 = interp_func(self.x_data2)
             diff = self.y_data2 / aligned_pow2
 
+        # stress strain prototype 
+        if self.y_data1 and self.x_data3 and self.y_data3 and self.y_data2:
+            interp_func = interp1d(self.x_data3, self.y_data3, kind='linear', fill_value='extrapolate')
+            aligned_pow2 = interp_func(self.x_data2)
+            diff = self.y_data2 - aligned_pow2 
+            
         if diff is not None:
             self.curve5.setData(self.x_data2, diff)
         
