@@ -153,6 +153,14 @@ class GraphingProcess(QtWidgets.QMainWindow):
             interp_func = interp1d(self.x_data3, self.y_data3, kind='linear', fill_value='extrapolate')
             aligned_pow2 = interp_func(self.x_data2)
             diff = self.y_data2 - aligned_pow2 
+            normalizeVal = 3.42e-7
+            NormalizedDiff = diff / normalizeVal
+            m = 2.4971384178039526e-14 #these results were generated in my calibration code in the inverted_movement branch
+            b =  -1.965098810127962e-18
+            f = (diff - b) / m
+            l = .018 #interaction length in meters 
+            stress = 12
+            
             
         if diff is not None:
             self.curve5.setData(self.x_data2, diff)
