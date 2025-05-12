@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.ticker import ScalarFormatter
 
 """
 Potential issues:
@@ -354,7 +355,7 @@ def ex():
 #         plt.show() 
 
 
-
+#NORMALIZE USING THE CALCULATED VALUES NOT MEASURED FROM SETUP...
 class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match 
      def __init__(self, npoints, force_values, interaction_length, P_in):
           # Material properties of the fiber
@@ -370,7 +371,7 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
           
           
           
-          self.fiberArea = 8.5e-11 # powermeter sensor area in meters 
+          self.fiberArea = 8.5e-11 # fiber area cross sectional in meters 
           self.P_in = P_in
           self.npoints = npoints
 
@@ -419,7 +420,7 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
                K = (np.cos(self.phiValues[li] * E)) - (np.sin(self.phiValues[li]) * F)
                L = (np.sin(self.phiValues[li]) * G) - (np.cos(self.phiValues[li]) * H)
 
-               print(" / 4e-7THIS TERM IS: ", np.exp(-2j*self.k*self.l*((2*np.pi)/(self.k*self.Lb[li]))) * np.exp(-2j*self.k*self.N*self.l))
+               # print(" / 4e-7THIS TERM IS: ", np.exp(-2j*self.k*self.l*((2*np.pi)/(self.k*self.Lb[li]))) * np.exp(-2j*self.k*self.N*self.l))
                Ex = (self.Ex_0) * np.exp(-2j*self.k*self.N*self.l)*np.exp(-2j*self.k*self.l*((2*np.pi)/(self.k*self.Lb[li]))) * (I*np.cos(self.beta) - J*np.sin(self.beta))
                Ey = (self.Ex_0) * np.exp(-2j*self.k*self.N*self.l     )*np.exp(-2j*self.k*self.l*((2*np.pi)/(self.k*self.Lb[li]))) * (K*np.cos(self.beta) - L*np.sin(self.beta))               
 
@@ -430,8 +431,9 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
 
                self.S1[li] = Ex2/(2*eta) * self.fiberArea 
                self.S2[li] = Ey2/(2*eta) * self.fiberArea 
-               self.S1Normalized[li] = self.S1[li]/self.P_in
-               self.S2Normalized[li] = self.S2[li]/self.P_in
+               # print("S1: ", self.S1[li])
+               # print("S2: ", self.S2[li])
+               # print("S1 + S2: ", self.S1 + self.S2)
                self.stresses[li] = self.f[li]/self.l #might have to change this
                self.strains = np.linspace(initialHeight, finalHeight, npoints)
                for i, val in enumerate(self.strains):
@@ -442,20 +444,41 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
                # print("SELF.STRAINS: ", self.strains)
                
                self.Sdifferences[li] = self.S2[li] - self.S1[li]
-               self.SdifferencesNormalized[li] = (self.S2[li] - self.S1[li])/4.0e-7 
+               self.SdifferencesNormalized[li] = (np.abs(self.S2[li] - self.S1[li]) / (self.S1[li] + self.S2[li]))
+               # print("SDIFFERENCENORMALIZED: ", self.SdifferencesNormalized[li])
+               
                if (li == 0):
                     self.initialPowerDifference = self.Sdifferences[li]
-                    self.initialPower1 = self.S1Normalized[li]
-                    self.initialPower2 = self.S2Normalized[li]
+                    self.initalPowerDifferenceNormalized = self.SdifferencesNormalized[li]
+                    print("INITIAL POWER 1: ", self.S1[li])
+                    print("INITIAL POWER 2: ", self.S2[li])
+                    print("INITIAL POWER DIFFERENCE: ", self.initialPowerDifference)
+                    print("INITIAL POWER DIFFERENCE NORMALIZED: ", self.SdifferencesNormalized[li])
+                    self.initialPower1 = self.S1[li]
+                    self.initialPower2 = self.S2[li]
+                    print("INITIAL POWER SUM: ", self.initialPower1 + self.initialPower2)
+                    
 
 
                if(li == self.npoints - 1):
                     self.finalPowerDifference = self.Sdifferences[li]
+                    self.finalPowerDifferenceNormalized = self.SdifferencesNormalized[li]
+                    print("FINAL POWER 1: ", self.S1[li])
+                    print("FINAL POWER 2: ", self.S2[li])
+                    print("FINAL POWER DIFFERENCE: ", self.finalPowerDifference)
+                    print("FINAL POWER SUM: ", self.S1[li]+self.S2[li])
+                    print("FINAL - initial POWER DIFFERENCE: ", self.finalPowerDifference - self.initialPowerDifference)
+                    print("FINAL - initial POWER DIFFERENCE NORMALIZED: ", self.finalPowerDifferenceNormalized - self.initalPowerDifferenceNormalized)
+                    print("AVERAGE POWER 1: ", np.average(self.S1))
+                    print("AVERAGE POWER 2: ", np.average(self.S2))
+                    print("AVERAGE POWER 1 + POWER 2: ", np.average(self.S1 + self.S2))
+                    print("Change in Total Power: ", (self.S1[li]+self.S2[li]) - (self.initialPower1 + self.initialPower2))
                     self.finalPower1 = self.S1Normalized[li]
                     self.finalPower2 = self.S2Normalized[li]
 
                self.ExList[li] = Ex
                self.EyList[li] = Ey
+
                
                
 
@@ -482,7 +505,7 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
                K = (np.cos(self.phiValues[li] * E)) - (np.sin(self.phiValues[li]) * F)
                L = (np.sin(self.phiValues[li]) * G) - (np.cos(self.phiValues[li]) * H)
 
-               print("THIS TERM IS: ", np.exp(-2j*self.k*l*((2*np.pi)/(self.k*self.Lb[li]))) * np.exp(-2j*self.k*self.N*l))
+               # print("THIS TERM IS: ", np.exp(-2j*self.k*l*((2*np.pi)/(self.k*self.Lb[li]))) * np.exp(-2j*self.k*self.N*l))
                Ex = (self.Ex_0) * np.exp(-2j*self.k*self.N*l)*np.exp(-2j*self.k*l*((2*np.pi)/(self.k*self.Lb[li]))) * (I*np.cos(self.beta) - J*np.sin(self.beta))
                Ey = (self.Ex_0) * np.exp(-2j*self.k*self.N*l)*np.exp(-2j*self.k*l*((2*np.pi)/(self.k*self.Lb[li]))) * (K*np.cos(self.beta) - L*np.sin(self.beta))               
 
@@ -535,18 +558,6 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
           plt.show()
 
      
-     def plotPowers(self):
-          plt.figure()
-          plt.plot(self.f, self.S1, label='S1')
-          plt.plot(self.f, self.S2, label='S2')
-          plt.xlabel('Force (N)')
-          plt.ylabel('S1, S2 (Real part) (W)')
-          plt.title('S1 and S2 vs. Force')
-          plt.legend()
-          plt.grid(True)
-          plt.show()
-          print("POWER 2 - POWER 1: ", self.S2 - self.S1)
-          print("POWER DIFF NORMALIZED: ", (self.S2 - self.S1) / 4e-7)
 
      def plotStressStrain(self):
           plt.figure()
@@ -558,27 +569,17 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
           plt.gca().get_yaxis().get_major_formatter().set_useOffset(False)  # no offset
           plt.show()
           
-     def plotNormalizedPowers(self):
-          plt.figure()
-          plt.plot(self.stresses, self.S1Normalized, label='S1')
-          plt.plot(self.stresses, self.S2Normalized, label='S2')
-          plt.xlabel('Stress (N/M)')
-          plt.ylabel('S1, S2 Normalized')
-          plt.title('S1 and S2 vs. Stress')
-          plt.legend()
-          plt.grid(True)
-          plt.gca().get_yaxis().get_major_formatter().set_useOffset(False)  # no offset
-          plt.show()
 
-     def plotPowerDifferences(self):
-          plt.figure()
-          plt.plot(self.f, self.SdifferencesNormalized, label='Sdifference (W)')
-          plt.xlabel('Force (N)')
-          plt.ylabel('Power Difference')
-          plt.title('Power Difference vs. Force')
-          plt.legend()
-          plt.grid(True)
-          plt.show()
+     # def plotPowerDifferences(self):
+     #      plt.figure()
+     #      plt.plot(self.f, self.SdifferencesNormalized, label='Sdifference (W)')
+     #      plt.xlabel('Force (N)')
+     #      plt.ylabel('Power Difference')
+     #      plt.title('Power Difference vs. Force')
+     #      plt.legend()
+     #      plt.grid(True)
+     #      plt.show()
+
 
      def plotPowerDifferencesNormalized(self):
           plt.figure()
@@ -588,25 +589,40 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
           plt.title('Power Difference vs. Stress')
           plt.legend()
           plt.grid(True)
+
+          # plt.ylim(-1, 1)  # Set Y-axis to fixed scale
+          # plt.tight_layout()
           plt.show()
 
-     def plotPowersSeperately(self):
-          plt.figure()
-          plt.plot(self.f, self.S1, label='S1 (W)')
-          plt.xlabel('Force (N)')
-          plt.ylabel('Power Difference')
-          plt.title('Power Difference vs. Force')
-          plt.legend()
-          plt.grid(True)
+
+
+
+     def plotPowersSeparately(self):
+          # ---------- S1 ----------
+          fig, ax = plt.subplots()
+          ax.plot(self.f, self.S1, label='S1 (W)')
+          ax.set_xlabel('Force (N)')
+          ax.set_ylabel('Power 1 (W)')
+          ax.set_title('Power 1 vs. Force')
+          ax.legend()
+          ax.grid(True)
+
+          # *** kill the 1eXX offset ***
+          plt.gca().get_yaxis().get_major_formatter().set_useOffset(False)
+
           plt.show()
 
-          plt.figure()
-          plt.plot(self.f, self.S2, label='S2 (W)')
-          plt.xlabel('Force (N)')
-          plt.ylabel('Power Difference')
-          plt.title('Power Difference vs. Force')
-          plt.legend()
-          plt.grid(True)
+          # ---------- S2 ----------
+          fig, ax = plt.subplots()
+          ax.plot(self.f, self.S2, label='S2 (W)')
+          ax.set_xlabel('Force (N)')
+          ax.set_ylabel('Power 2 (W)')
+          ax.set_title('Power 2 vs. Force')
+          ax.legend()
+          ax.grid(True)
+
+          plt.gca().get_yaxis().get_major_formatter().set_useOffset(False)
+
           plt.show()
 
      def calculateEx0(self, P_in, MFD=10.5e-6, n=1.46, epsilon0=8.85e-12, c=3e8):
@@ -640,9 +656,9 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
           # fit Sdifference = m*force + b
           m, b = np.polyfit(self.f, self.SdifferencesNormalized, 1)
           # return a function that inverts that relation:
-          print("m: ", m)
-          print("b: ", b)
-          print("TEST: ", (1.5e-12-b)/m)
+          # print("m: ", m)
+          # print("b: ", b)
+          # print("TEST: ", (1.5e-12-b)/m)
           return lambda Sdiff: (Sdiff - b) / m
 
 
@@ -710,7 +726,7 @@ def ex1(alphaVal):
           K = (np.cos(phiVals[li] * E)) - (np.sin(phiVals[li]) * F)
           L = (np.sin(phiVals[li]) * G) - (np.cos(phiVals[li]) * H)
 
-          print("THIS TERM IS: ", np.exp(-2j*k*l*((2*np.pi)/(k*Lb[li]))) * np.exp(-2j*k*N*l))
+          # print("THIS TERM IS: ", np.exp(-2j*k*l*((2*np.pi)/(k*Lb[li]))) * np.exp(-2j*k*N*l))
           Ex = (Ex_0**2) * np.exp(-2j*k*N*l)*np.exp(-2j*k*l*((2*np.pi)/(k*Lb[li]))) * (I*np.cos(beta) - J*np.sin(beta))
           Ey = (Ex_0**2) * np.exp(-2j*k*N*l)*np.exp(-2j*k*l*((2*np.pi)/(k*Lb[li]))) * (K*np.cos(beta) - L*np.sin(beta))
 
@@ -893,20 +909,13 @@ initialHeight = 7
 finalHeight = 5.2
 c.calculatePowers(initialHeight, finalHeight)
 # test_ex1()
-c.plotPowerDifferences()
-c.plotPowers()
-# c.plotPowersSeperately()
-c.plotPowerDifferencesNormalized()
-c.plotNormalizedPowers()
-c.plotStressStrain()
+# c.plotPowerDifferences()
+c.plotPowersSeparately()
+# c.plotPowerDifferencesNormalized()
+# c.plotStressStrain()
 
 
 func = c.generate_function_powerdiff_to_force()
 
 print("FUNC(1.5e-12): ", (func(440e-9)/20e6))
 print("FUNC(10): ", func(10))
-
-print("Initial Power 1 Normalized: ", c.initialPower1)
-print("Initial Power 2 Normalized: ", c.initialPower2)
-print("Final Power 1 Normalized: ", c.finalPower1)
-print("Final Power 2 Normalized: ", c.finalPower2)
