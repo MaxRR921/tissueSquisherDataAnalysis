@@ -49,11 +49,11 @@ class GraphingProcess(QtWidgets.QMainWindow):
         self.curve4 = self.plot4.plot([], [], pen='y')
         layout.addWidget(self.plot4, 1, 1)  # Row 1, Col 1
 
-        self.plot5 = pg.PlotWidget()
-        self.plot5.setLabel('left', "Power Ratio (p1/p2)")
-        self.plot5.setLabel('bottom', "Time")
-        self.curve5 = self.plot5.plot([], [], pen='orange')
-        layout.addWidget(self.plot5, 0, 2)  # Row 1, Col 1
+        # self.plot5 = pg.PlotWidget()
+        # self.plot5.setLabel('left', "Power Ratio (p1/p2)")
+        # self.plot5.setLabel('bottom', "Time")
+        # # self.curve5 = self.plot5.plot([], [], pen='orange')
+        # layout.addWidget(self.plot5, 0, 2)  # Row 1, Col 1
 
         self.plot6 = pg.PlotWidget()
         self.plot6.setLabel('left', "Phase")
@@ -100,7 +100,7 @@ class GraphingProcess(QtWidgets.QMainWindow):
                 self.curve2 = self.plot2.plot([], [], pen='g')
                 self.curve3 = self.plot3.plot([], [], pen='b')
                 self.curve4 = self.plot4.plot([], [], pen='m')
-                self.curve5 = self.plot5.plot([], [], pen='y')
+                # self.curve5 = self.plot5.plot([], [], pen='y')
                 self.curve6 = self.plot7.plot([],[], pen='w')
 
                 # Clear data buffers
@@ -132,17 +132,17 @@ class GraphingProcess(QtWidgets.QMainWindow):
             self.x_data3.append(x)
             self.y_data3.append(y)
 
-        if not self.phaseQueue == None and not self.strainQueue == None:
-            while not self.phaseQueue.empty() and not self.strainQueue.empty():
-                self.y_data4.append(self.phaseQueue.get_nowait())
-                print("PLOT")
-                self.x_data4.append(self.strainQueue.get_nowait())
+        # if not self.phaseQueue == None and not self.strainQueue == None:
+        #     while not self.phaseQueue.empty() and not self.strainQueue.empty():
+        #         self.y_data4.append(self.phaseQueue.get_nowait())
+        #         print("PLOT")
+        #         self.x_data4.append(self.strainQueue.get_nowait())
 
-            while not self.strainQueue.empty():
-                x=self.strainQueue.get_nowait()
+        #     while not self.strainQueue.empty():
+        #         x=self.strainQueue.get_nowait()
         
-            while not self.phaseQueue.empty():
-                y=self.phaseQueue.get_nowait()
+        #     while not self.phaseQueue.empty():
+        #         y=self.phaseQueue.get_nowait()
 
 
         if  self.x_data3 and self.y_data3 and self.y_data2:
@@ -151,31 +151,31 @@ class GraphingProcess(QtWidgets.QMainWindow):
             diff = self.y_data2 / aligned_pow2
 
         # stress strain prototype 
-        if self.y_data1 and self.x_data3 and self.y_data3 and self.y_data2:
-            interp_func = interp1d(self.x_data3, self.y_data3, kind='linear', fill_value='extrapolate')
-            aligned_pow2 = interp_func(self.x_data2)
-            diff = self.y_data2 - aligned_pow2 
-            print("DIFFERENCE: ", diff)
-            normalizeVal = 4.0e-7
-            NormalizedDiff = diff #NOT NORMALIZING HERE idk.
-            m = 2.4971384178039526e-14 #these results were generated in my calibration code in the inverted_movement branch
-            b =  -1.965098810127962e-18
-            f = (NormalizedDiff - b) / m
-            l = .018 #interaction length in meters 
-            stress = f/l
-            print("STRESS: ", stress) 
-            strain = [(self.initialMicrometerPosition - y) / self.initialMicrometerPosition for y in self.y_data1]
-            print("STRAIN: ", strain)
-            strain_interp = interp1d(self.x_data1, strain,
-                                    kind='linear',
-                                    fill_value='extrapolate')
+        # if self.y_data1 and self.x_data3 and self.y_data3 and self.y_data2:
+        #     interp_func = interp1d(self.x_data3, self.y_data3, kind='linear', fill_value='extrapolate')
+        #     aligned_pow2 = interp_func(self.x_data2)
+        #     diff = self.y_data2 - aligned_pow2 
+        #     print("DIFFERENCE: ", diff)
+        #     normalizeVal = 4.0e-7
+        #     NormalizedDiff = diff #NOT NORMALIZING HERE idk.
+        #     m = 2.4971384178039526e-14 #these results were generated in my calibration code in the inverted_movement branch
+        #     b =  -1.965098810127962e-18
+        #     f = (NormalizedDiff - b) / m
+        #     l = .018 #interaction length in meters 
+        #     stress = f/l
+        #     print("STRESS: ", stress) 
+        #     strain = [(self.initialMicrometerPosition - y) / self.initialMicrometerPosition for y in self.y_data1]
+        #     print("STRAIN: ", strain)
+        #     strain_interp = interp1d(self.x_data1, strain,
+        #                             kind='linear',
+        #                             fill_value='extrapolate')
 
-            # 2. sample that interpolator at the same time‐points used for stress:
-            aligned_strain = strain_interp(self.x_data2)
+        #     # 2. sample that interpolator at the same time‐points used for stress:
+        #     aligned_strain = strain_interp(self.x_data2)
             
             
-        if diff is not None:
-            self.curve5.setData(aligned_strain, stress)
+        # if diff is not None:
+        #     self.curve5.setData(aligned_strain, stress)
         
         if  self.x_data3 and self.y_data3 and self.y_data2:
             interp_func = interp1d(self.x_data3, self.y_data3, kind='linear', fill_value='extrapolate')
