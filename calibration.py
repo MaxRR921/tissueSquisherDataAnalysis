@@ -370,7 +370,7 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
           self.k=1/self.fiberWavelength
           
           
-          
+          #FIND OUT MFD?? 
           self.fiberArea = 8.5e-11 # fiber area cross sectional in meters 
           self.P_in = P_in
           self.npoints = npoints
