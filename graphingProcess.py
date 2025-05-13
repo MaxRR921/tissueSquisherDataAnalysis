@@ -40,7 +40,7 @@ class GraphingProcess(QtWidgets.QMainWindow):
         self.plot3.setLabel('left', "Power 2 (W)")
         self.plot3.setLabel('bottom', "Time")
         self.curve3 = self.plot3.plot([], [], pen='b')
-        layout.addWidget(self.plot3, 1, 0)  # Row 1, Col 0
+        layout.addWidget(self.plot3, 0, 2)  # Row 1, Col 0
 
         # Subplot 4
         self.plot4 = pg.PlotWidget()
@@ -49,23 +49,18 @@ class GraphingProcess(QtWidgets.QMainWindow):
         self.curve4 = self.plot4.plot([], [], pen='y')
         layout.addWidget(self.plot4, 1, 1)  # Row 1, Col 1
 
-        # self.plot5 = pg.PlotWidget()
-        # self.plot5.setLabel('left', "Power Ratio (p1/p2)")
-        # self.plot5.setLabel('bottom', "Time")
-        # # self.curve5 = self.plot5.plot([], [], pen='orange')
-        # layout.addWidget(self.plot5, 0, 2)  # Row 1, Col 1
+        self.plot5 = pg.PlotWidget()
+        self.plot5.setLabel('left', "Power Ratio (p1/p2)")
+        self.plot5.setLabel('bottom', "Time")
+        # self.curve5 = self.plot5.plot([], [], pen='orange')
+        layout.addWidget(self.plot5, 1, 2)  # Row 1, Col 1
+
 
         self.plot6 = pg.PlotWidget()
-        self.plot6.setLabel('left', "Phase")
-        self.plot6.setLabel('bottom', "Strain")
-        self.curve6 = self.plot6.plot([], [], pen='y')
-        layout.addWidget(self.plot6, 1, 2)  # Row 1, Col 1
-
-        self.plot7 = pg.PlotWidget()
-        self.plot7.setLabel('left', "Power Difference (W)")
-        self.plot7.setLabel('bottom', "Time")
-        self.curve7 = self.plot7.plot([], [], pen='orange')
-        layout.addWidget(self.plot7, 1, 2)  # Row 1, Col 1
+        self.plot6.setLabel('left', "Power Difference (W)")
+        self.plot6.setLabel('bottom', "Time")
+        self.curve6 = self.plot6.plot([], [], pen='orange')
+        layout.addWidget(self.plot6, 1, 0)  # Row 1, Col 1
         # Put the container into the MainWindow
         self.setCentralWidget(container)
 
@@ -94,6 +89,8 @@ class GraphingProcess(QtWidgets.QMainWindow):
                 self.plot3.clear()
                 self.plot4.clear()
                 self.plot5.clear()
+                self.plot6.clear()
+
 
                 # Recreate the curve items
                 self.curve1 = self.plot1.plot([], [], pen='r')
@@ -101,7 +98,7 @@ class GraphingProcess(QtWidgets.QMainWindow):
                 self.curve3 = self.plot3.plot([], [], pen='b')
                 self.curve4 = self.plot4.plot([], [], pen='m')
                 # self.curve5 = self.plot5.plot([], [], pen='y')
-                self.curve6 = self.plot7.plot([],[], pen='w')
+                self.curve6 = self.plot6.plot([],[], pen='w')
 
                 # Clear data buffers
                 self.x_data1.clear()
@@ -132,23 +129,23 @@ class GraphingProcess(QtWidgets.QMainWindow):
             self.x_data3.append(x)
             self.y_data3.append(y)
 
-        # if not self.phaseQueue == None and not self.strainQueue == None:
-        #     while not self.phaseQueue.empty() and not self.strainQueue.empty():
-        #         self.y_data4.append(self.phaseQueue.get_nowait())
-        #         print("PLOT")
-        #         self.x_data4.append(self.strainQueue.get_nowait())
+        if not self.phaseQueue == None and not self.strainQueue == None:
+            while not self.phaseQueue.empty() and not self.strainQueue.empty():
+                self.y_data4.append(self.phaseQueue.get_nowait())
+                print("PLOT")
+                self.x_data4.append(self.strainQueue.get_nowait())
 
-        #     while not self.strainQueue.empty():
-        #         x=self.strainQueue.get_nowait()
+            while not self.strainQueue.empty():
+                x=self.strainQueue.get_nowait()
         
-        #     while not self.phaseQueue.empty():
-        #         y=self.phaseQueue.get_nowait()
+            while not self.phaseQueue.empty():
+                y=self.phaseQueue.get_nowait()
 
 
-        if  self.x_data3 and self.y_data3 and self.y_data2:
-            interp_func = interp1d(self.x_data3, self.y_data3, kind='linear', fill_value='extrapolate')
-            aligned_pow2 = interp_func(self.x_data2)
-            diff = self.y_data2 / aligned_pow2
+        # if  self.x_data3 and self.y_data3 and self.y_data2:
+        #     interp_func = interp1d(self.x_data3, self.y_data3, kind='linear', fill_value='extrapolate')
+        #     aligned_pow2 = interp_func(self.x_data2)
+        #     diff = self.y_data2 / aligned_pow2
 
         # stress strain prototype 
         # if self.y_data1 and self.x_data3 and self.y_data3 and self.y_data2:
@@ -181,7 +178,6 @@ class GraphingProcess(QtWidgets.QMainWindow):
             interp_func = interp1d(self.x_data3, self.y_data3, kind='linear', fill_value='extrapolate')
             aligned_pow2 = interp_func(self.x_data2)
             diff = self.y_data2 - aligned_pow2
-            print("diff:", diff)
 
         if diff is not None:
             self.curve6.setData(self.x_data2, diff)
