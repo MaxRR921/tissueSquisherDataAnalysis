@@ -357,54 +357,138 @@ def ex():
 
 #NORMALIZE USING THE CALCULATED VALUES NOT MEASURED FROM SETUP...
 class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match 
-     def __init__(self, npoints, force_values, interaction_length, P_in):
-          # Material properties of the fiber
-          self.Y = 7.3e10 # young's modulus of the fiber in N/m^2
-          self.sigma = 0.17 # Poisson's ratio at 633nm wavelength
-          self.N = 1.46 # Refractive index of the fiber 
-          self.p_11 = 0.121 #photelastic constants 
-          self.p_12 = 0.27
-          self.b = 62.5e-6 # Radius of fiber cladding in meters 
-          self.Lb_0 = 2e-3 # unstressed beat length in meters
-          self.fiberWavelength = 2e-3
-          self.k=1/self.fiberWavelength
+       def __init__(self, npoints, force_values, interaction_length, P_in):
+              # Material properties of the fiber
+              self.Y = 7.3e10 # young's modulus of the fiber in N/m^2
+              self.sigma = 0.17 # Poisson's ratio at 633nm wavelength
+              self.N = 1.46 # Refractive index of the fiber 
+              self.p_11 = 0.121 #photelastic constants 
+              self.p_12 = 0.27
+              self.b = 62.5e-6 # Radius of fiber cladding in meters 
+              self.Lb_0 = 2e-3 # unstressed beat length in meters
+              self.fiberWavelength = 1.550e-6
+              self.k=1/self.fiberWavelength
+              
+              
+              #FIND OUT MFD?? 
+              self.fiberArea = np.pi*(self.b**2) # fiber area cross sectional in meters 
+              self.P_in = P_in
+              self.npoints = npoints
+
+              #calculated values
+              self.S1 = np.zeros(npoints) # powermeter 1 power
+              self.S2 = np.zeros(npoints) # powermeter 2 power 
+              self.S1Normalized = np.zeros(npoints)
+              self.S2Normalized = np.zeros(npoints)
+              self.Sdifferences = np.zeros(npoints) # difference between the two powers 
+              self.SdifferencesNormalized = np.zeros(npoints)
+              self.stresses = np.zeros(npoints)
+
+              self.ExList = np.zeros(npoints, dtype=complex)
+              self.EyList = np.zeros(npoints, dtype=complex)
+
+
+              self.f = force_values
+              self.l = interaction_length
+              self.Ex_0 = 1
+
+              self.alpha = np.pi/2
+              self.beta = np.pi/4
+              self.delta = np.pi/2
+              self.gamma = np.pi/4
+              self.eta = 376.730313
+
+              self.normalizedForces = 2 * self.N**3 * (1 + self.sigma) * (self.p_12 - self.p_11) * self.Lb_0 * self.f / (self.fiberWavelength * np.pi * self.b * self.Y)  # Normalized force66
+              self.phiValues = 0.5 * np.arctan((self.normalizedForces * np.sin(2 * self.alpha)) / (1 + self.normalizedForces * np.cos(2 * self.alpha)))  # Angle of rotated birefringence 
+              self.Lb = self.Lb_0 * (1 + self.normalizedForces**2 + 2 * self.normalizedForces * np.cos(2 * self.alpha))**(-1/2)  # Modified beat length
+              self.deltaN = (2*np.pi)/(self.k*self.Lb)
+              self.Ns = self.N + (self.deltaN/2) 
+              self.Nf = self.N - (self.deltaN/2)
+              self.initialPowerDifference = 0
+              self.finalPowerDifference = 0
+
+
+       def redidCalculatePowers(self, initialHeight, finalHeight): 
+              #EX:
+              #Ex0 * (cos(gamma)*(A+B) + e^jdelta * sin(gamma)*(C+D))
+              
+              A = np.cos(self.phiValues)*(np.exp(-1*1j*self.k*self.Ns*self.l)*np.cos(self.phiValues + self.beta)) 
+              B = -np.sin(self.phiValues)*(np.exp(-1*1j*self.k*self.Nf*self.l)*(-np.sin(self.phiValues + self.beta)))
+              C = np.sin(self.phiValues)*(np.exp(-1*1j*self.k*self.Ns*self.l)*np.cos(self.phiValues + self.beta))
+              D = np.cos(self.phiValues)*(np.exp(-1*1j*self.k*self.Nf*self.l)*(-np.sin(self.phiValues + self.beta)))
+
+              self.Ex = self.Ex_0 * ( (np.cos(self.gamma)*(A+B)) + (np.sin(self.gamma) * ((np.exp(1j*self.delta) * (C+D)))) )
+
+ 
+              self.Ey = self.Ex_0 * ( (-np.sin(self.gamma)*(A+B)) + (np.cos(self.gamma) * ((np.exp(1j*self.delta) * (C+D)))) )
+
+
+              # print("Ex: ", self.Ex)
+              # print("Ey: ", self.Ey)
+
+
+              Ex2= np.abs(self.Ex)**2  # Equivalent to |Ex|^2
+              Ey2= np.abs(self.Ey)**2 #Equivalent to |Ey|^2
+              eta = 376.73  # Characteristic impedance of free space (ohms)
+
+              self.S1 = Ex2/(2*eta) * self.fiberArea 
+              self.S2 = Ey2/(2*eta) * self.fiberArea 
+
+              self.S1Normalized = self.S1/(self.S1+self.S2)
+              self.S2Normalized = self.S2/(self.S1+self.S2)
+
+
+              self.Sdifferences = self.S2 - self.S1
+              self.SdifferencesNormalized = (np.abs(self.S2 - self.S1) / (self.S1 + self.S2))
+
+              return self.S1Normalized[npoints-1]-self.S1Normalized[0], self.S2Normalized[npoints-1]-self.S2Normalized[0]
+
+
+
+       def plotOptimalBeta(self, betaVals):
+              S1, S2 = [], []
+              for i in range(len(betaVals)):
+                     self.beta = betaVals[i] 
+                     h, k = self.redidCalculatePowers(7,5.2)
+                     S1.append(h)
+                     S2.append(k)
+                     
+              plt.figure()
+              plt.plot(betaVals, S1, label="S1")
+              plt.plot(betaVals, S2, label="S2")
+              plt.xlabel(r'$\beta$')
+              plt.ylabel('Normalized Power')
+              plt.title('Optimal β sweep')
+              plt.legend()
+              plt.grid(True, linestyle='--', alpha=0.3)
+              plt.show()
+              
+              
+       def plotOptimalAlpha(self, alphaVals):
+              S1, S2 = [], []
+              for i in range(len(alphaVals)):
+                     self.alpha = alphaVals[i] 
+                     print(self.alpha)
+                     h, k = self.redidCalculatePowers(7,5.2)
+                     S1.append(h)
+                     S2.append(k)
+                     
+              plt.figure()
+              plt.plot(alphaVals, S1, label="S1")
+              plt.plot(alphaVals, S2, label="S2")
+              plt.xlabel("alpha")
+              plt.ylabel('Normalized Power')
+              plt.title('Optimal alpha sweep')
+              plt.legend()
+              plt.grid(True, linestyle='--', alpha=0.3)
+              plt.show()
+       
+
+
+            
           
-          
-          #FIND OUT MFD?? 
-          self.fiberArea = 8.5e-11 # fiber area cross sectional in meters 
-          self.P_in = P_in
-          self.npoints = npoints
 
-          #calculated values
-          self.S1 = np.zeros(npoints) # powermeter 1 power
-          self.S2 = np.zeros(npoints) # powermeter 2 power 
-          self.S1Normalized = np.zeros(npoints)
-          self.S2Normalized = np.zeros(npoints)
-          self.Sdifferences = np.zeros(npoints) # difference between the two powers 
-          self.SdifferencesNormalized = np.zeros(npoints)
-          self.stresses = np.zeros(npoints)
-
-          self.ExList = np.zeros(npoints, dtype=complex)
-          self.EyList = np.zeros(npoints, dtype=complex)
-
-
-          self.f = force_values
-          self.l = interaction_length
-          self.Ex_0 = 1
-
-          self.alpha = np.pi/4
-          self.beta = np.pi/4
-          self.delta = 0
-          self.gamma = np.pi/2
-          self.eta = 376.730313
-
-          self.normalizedForce = 2 * self.N**3 * (1 + self.sigma) * (self.p_12 - self.p_11) * self.Lb_0 * self.f / (self.fiberWavelength * np.pi * self.b * self.Y)  # Normalized force66
-          self.phiValues = 0.5 * np.arctan((self.normalizedForce * np.sin(2 * self.alpha)) / (1 + self.normalizedForce * np.cos(2 * self.alpha)))  # Angle of rotated birefringence 
-          self.Lb = self.Lb_0 * (1 + self.normalizedForce**2 + 2 * self.normalizedForce * np.cos(2 * self.alpha))**(-1/2)  # Modified beat length
-          self.initialPowerDifference = 0
-          self.finalPowerDifference = 0
-
-     def calculatePowers(self, initialHeight, finalHeight):
+       def calculatePowers(self, initialHeight, finalHeight):
           for li in range(self.npoints):          
                A = ((np.cos(self.gamma)*np.cos(self.phiValues[li])) + (np.exp(1j*self.delta) * np.sin(self.gamma) * np.sin(self.phiValues[li])))
                B = ((-np.cos(self.gamma) * np.sin(self.phiValues[li])) + (np.exp(1j*self.delta) * np.sin(self.gamma) * np.cos(self.phiValues[li])))
@@ -482,7 +566,7 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
                
                
 
-     def __calculatePowersVaryLength(self, l):
+       def __calculatePowersVaryLength(self, l):
           S1 = np.zeros(self.npoints)
           S2 = np.zeros(self.npoints)
           S1Normalized = np.zeros(self.npoints)
@@ -539,7 +623,7 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
                self.EyList[li] = Ey
           return finalS1DifferenceNormalized - initialSDifferenceNormalized
 
-     def varyLength(self, ls):
+       def varyLength(self, ls):
           powerdiffs = np.zeros(100)
           for i in range(0,100):
                powerdiffs[i]=self.__calculatePowersVaryLength(ls[i])
@@ -559,7 +643,7 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
 
      
 
-     def plotStressStrain(self):
+       def plotStressStrain(self):
           plt.figure()
           plt.plot(self.strains, self.stresses, label='stress strain')
           plt.ylabel('Stress N/M')
@@ -581,9 +665,9 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
      #      plt.show()
 
 
-     def plotPowerDifferencesNormalized(self):
+       def plotPowerDifferencesNormalized(self):
           plt.figure()
-          plt.plot(self.stresses, self.SdifferencesNormalized, label='Sdifference (W)')
+          plt.plot(self.f, self.SdifferencesNormalized, label='Sdifference (W)')
           plt.xlabel('Stress (N/M)')
           plt.ylabel('Power Difference Normalized')
           plt.title('Power Difference vs. Stress')
@@ -597,7 +681,7 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
 
 
 
-     def plotPowersSeparately(self):
+       def plotPowersSeparately(self):
           # ---------- S1 ----------
           fig, ax = plt.subplots()
           ax.plot(self.f, self.S1, label='S1 (W)')
@@ -625,7 +709,38 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
 
           plt.show()
 
-     def calculateEx0(self, P_in, MFD=10.5e-6, n=1.46, epsilon0=8.85e-12, c=3e8):
+
+       def plotPowersNormalized(self):
+          # ---------- S1 ----------
+          fig, ax = plt.subplots()
+          ax.plot(self.f, self.S1Normalized, label='S1 (W)')
+          ax.set_xlabel('Force (N)')
+          ax.set_ylabel('Power 1 (W)')
+          ax.set_title('Power 1 vs. Force')
+          ax.legend()
+          ax.grid(True)
+
+          # *** kill the 1eXX offset ***
+          plt.gca().get_yaxis().get_major_formatter().set_useOffset(False)
+
+          plt.show()
+
+          # ---------- S2 ----------
+          fig, ax = plt.subplots()
+          ax.plot(self.f, self.S2Normalized, label='S2 (W)')
+          ax.set_xlabel('Force (N)')
+          ax.set_ylabel('Power 2 (W)')
+          ax.set_title('Power 2 vs. Force')
+          ax.legend()
+          ax.grid(True)
+
+          plt.gca().get_yaxis().get_major_formatter().set_useOffset(False)
+
+          plt.show()
+
+       
+
+       def calculateEx0(self, P_in, MFD=10.5e-6, n=1.46, epsilon0=8.85e-12, c=3e8):
           """
           Calculate the peak electric field amplitude E_x0 (in V/m) for a given input power.
 
@@ -647,12 +762,12 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
           E_x0 = np.sqrt((2 * P_in) / (n * epsilon0 * c * A_eff))
           return E_x0
 
-     def generate_function_force_to_powerdiff(self):
+       def generate_function_force_to_powerdiff(self):
           m, b = np.polyfit(self.f, self.Sdifferences, 1)
           fmodel = lambda F_in: m*F_in + b  
           return fmodel
      
-     def generate_function_powerdiff_to_force(self):
+       def generate_function_powerdiff_to_force(self):
           # fit Sdifference = m*force + b
           m, b = np.polyfit(self.f, self.SdifferencesNormalized, 1)
           # return a function that inverts that relation:
@@ -903,19 +1018,22 @@ def test_ex1():
 
             
 npoints = 500
-c = Calibration(npoints, np.linspace(0, 100, npoints), .018, 3.42e-7)
+c = Calibration(npoints, np.linspace(0, 100, npoints), .018, 1)
 # c.varyLength(np.linspace(0, .18, 100))
 initialHeight = 7
 finalHeight = 5.2
-c.calculatePowers(initialHeight, finalHeight)
+c.redidCalculatePowers(initialHeight, finalHeight)
 # test_ex1()
 # c.plotPowerDifferences()
-c.plotPowersSeparately()
+# c.plotPowersSeparately()
+# c.plotOptimalBeta(np.linspace(0,(6*np.pi), 500))
+# c.plotOptimalAlpha(np.linspace(0,(6*np.pi), 500))
+c.plotPowersNormalized()
 # c.plotPowerDifferencesNormalized()
 # c.plotStressStrain()
 
 
-func = c.generate_function_powerdiff_to_force()
+# func = c.generate_function_powerdiff_to_force()
 
-print("FUNC(1.5e-12): ", (func(440e-9)/20e6))
-print("FUNC(10): ", func(10))
+# print("FUNC(1.5e-12): ", (func(440e-9)/20e6))
+# print("FUNC(10): ", func(10))
