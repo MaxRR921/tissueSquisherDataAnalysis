@@ -49,11 +49,13 @@ class GraphingProcess(QtWidgets.QMainWindow):
         self.curve4 = self.plot4.plot([], [], pen='y')
         layout.addWidget(self.plot4, 1, 1)  # Row 1, Col 1
 
+        # Subplot 5  (row 1, col 2)  ⟶  live Stress vs Strain
         self.plot5 = pg.PlotWidget()
-        self.plot5.setLabel('left', "Power Ratio (p1/p2)")
-        self.plot5.setLabel('bottom', "Time")
-        # self.curve5 = self.plot5.plot([], [], pen='orange')
-        layout.addWidget(self.plot5, 1, 2)  # Row 1, Col 1
+        self.plot5.setLabel('left',  "Stress (Pa)")
+        self.plot5.setLabel('bottom', "Strain")     # unitless or “ε” if you prefer
+        self.curve5 = self.plot5.plot([], [], pen='orange')
+        layout.addWidget(self.plot5, 1, 2)
+
 
 
         self.plot6 = pg.PlotWidget()
@@ -97,7 +99,7 @@ class GraphingProcess(QtWidgets.QMainWindow):
                 self.curve2 = self.plot2.plot([], [], pen='g')
                 self.curve3 = self.plot3.plot([], [], pen='b')
                 self.curve4 = self.plot4.plot([], [], pen='m')
-                # self.curve5 = self.plot5.plot([], [], pen='y')
+                self.curve5 = self.plot5.plot([], [], pen='y')
                 self.curve6 = self.plot6.plot([],[], pen='w')
 
                 # Clear data buffers
@@ -148,28 +150,32 @@ class GraphingProcess(QtWidgets.QMainWindow):
         #     diff = self.y_data2 / aligned_pow2
 
         # stress strain prototype 
-        # if self.y_data1 and self.x_data3 and self.y_data3 and self.y_data2:
-        #     interp_func = interp1d(self.x_data3, self.y_data3, kind='linear', fill_value='extrapolate')
-        #     aligned_pow2 = interp_func(self.x_data2)
-        #     diff = self.y_data2 - aligned_pow2 
-        #     print("DIFFERENCE: ", diff)
-        #     normalizeVal = 4.0e-7
-        #     NormalizedDiff = diff #NOT NORMALIZING HERE idk.
-        #     m = 2.4971384178039526e-14 #these results were generated in my calibration code in the inverted_movement branch
-        #     b =  -1.965098810127962e-18
-        #     f = (NormalizedDiff - b) / m
-        #     l = .018 #interaction length in meters 
-        #     stress = f/l
-        #     print("STRESS: ", stress) 
-        #     strain = [(self.initialMicrometerPosition - y) / self.initialMicrometerPosition for y in self.y_data1]
-        #     print("STRAIN: ", strain)
-        #     strain_interp = interp1d(self.x_data1, strain,
-        #                             kind='linear',
-        #                             fill_value='extrapolate')
+        if self.y_data1 and self.x_data3 and self.y_data3 and self.y_data2:
+            interp_func = interp1d(self.x_data3, self.y_data3, kind='linear', fill_value='extrapolate')
+            aligned_pow2 = interp_func(self.x_data2)
+            diff = self.y_data2 - aligned_pow2 
+            print("DIFFERENCE: ", diff)
+            normalizeVal = 4.0e-7
+            NormalizedDiff = diff #NOT NORMALIZING HERE idk.
+            m = 2.4971384178039526e-14 #these results were generated in my calibration code in the inverted_movement branch
+            b =  -1.965098810127962e-18
+            f = (NormalizedDiff - b) / m
+            l = .018 #interaction length in meters 
+            stress = f/l
+            print("STRESS: ", stress) 
+            strain = [(self.initialMicrometerPosition - y) / self.initialMicrometerPosition for y in self.y_data1]
+            print("STRAIN: ", strain)
+            strain_interp = interp1d(self.x_data1, strain,
+                                    kind='linear',
+                                    fill_value='extrapolate')
 
         #     # 2. sample that interpolator at the same time‐points used for stress:
-        #     aligned_strain = strain_interp(self.x_data2)
-            
+            if self.y_data1 and self.x_data3 and self.y_data3 and self.y_data2:
+                # … your existing code up to aligned_strain = …
+                aligned_strain = strain_interp(self.x_data2)
+
+                # ✱  LIVE STRESS-STRAIN UPDATE  ✱
+                self.curve5.setData(aligned_strain, stress) 
             
         # if diff is not None:
         #     self.curve5.setData(aligned_strain, stress)
@@ -185,6 +191,7 @@ class GraphingProcess(QtWidgets.QMainWindow):
         self.curve2.setData(self.x_data2, self.y_data2)
         self.curve3.setData(self.x_data3, self.y_data3)
         self.curve4.setData(self.x_data4, self.y_data4)
+        self.curve5.setData()
 
 
 
