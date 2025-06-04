@@ -5,6 +5,7 @@ import multiprocessing
 from PyQt5 import QtWidgets, QtCore
 import pyqtgraph as pg
 from scipy.interpolate import interp1d
+import numpy as np
 
 class GraphingProcess(QtWidgets.QMainWindow):
     def __init__(self, signalGraph, micrometerQueue, powermeter1Queue, powermeter2Queue, phaseQueue, strainQueue):
@@ -161,7 +162,7 @@ class GraphingProcess(QtWidgets.QMainWindow):
             b =  0.005531
             f = (NormalizedDiff - b) / m
             l = .018 #interaction length in meters 
-            stress = f/l
+            stress = f/(l*(np.pi*(122.5**2)))
             print("STRESS: ", stress) 
             strain = [(self.initialMicrometerPosition - y) / self.initialMicrometerPosition for y in self.y_data1]
             print("STRAIN: ", strain)
