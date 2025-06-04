@@ -392,14 +392,15 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
               self.l = interaction_length
               self.Ex_0 = 1
 
-              self.alpha = np.pi/2
+              self.alpha = np.pi/4
               self.beta = np.pi/4
               self.delta = np.pi/2
-              self.gamma = np.pi/4
+              self.gamma = np.pi/2
               self.eta = 376.730313
 
               self.normalizedForces = 2 * self.N**3 * (1 + self.sigma) * (self.p_12 - self.p_11) * self.Lb_0 * self.f / (self.fiberWavelength * np.pi * self.b * self.Y)  # Normalized force66
               self.phiValues = 0.5 * np.arctan((self.normalizedForces * np.sin(2 * self.alpha)) / (1 + self.normalizedForces * np.cos(2 * self.alpha)))  # Angle of rotated birefringence 
+              print("phivalues: ", self.phiValues)
               self.Lb = self.Lb_0 * (1 + self.normalizedForces**2 + 2 * self.normalizedForces * np.cos(2 * self.alpha))**(-1/2)  # Modified beat length
               self.deltaN = (2*np.pi)/(self.k*self.Lb)
               self.Ns = self.N + (self.deltaN/2) 
@@ -433,6 +434,8 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
 
               self.S1 = Ex2/(2*eta) * self.fiberArea 
               self.S2 = Ey2/(2*eta) * self.fiberArea 
+
+              print("S1+S2", self.S1+self.S2)
 
               self.S1Normalized = self.S1/(self.S1+self.S2)
               self.S2Normalized = self.S2/(self.S1+self.S2)
