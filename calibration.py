@@ -654,29 +654,31 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
           plt.show()
           
 
-     # def plotPowerDifferences(self):
-     #      plt.figure()
-     #      plt.plot(self.f, self.SdifferencesNormalized, label='Sdifference (W)')
-     #      plt.xlabel('Force (N)')
-     #      plt.ylabel('Power Difference')
-     #      plt.title('Power Difference vs. Force')
-     #      plt.legend()
-     #      plt.grid(True)
-     #      plt.show()
+       def plotPowerDifferences(self):
+          plt.figure()
+          plt.plot(self.f, self.Sdifferences, label='Sdifference  (W)')
+          plt.xlabel('Force (N)')
+          plt.ylabel('Power Difference')
+          plt.title('Power Difference vs. Force')
+          plt.legend()
+          plt.grid(True)
+          plt.show()
 
 
        def plotPowerDifferencesNormalized(self):
-          plt.figure()
-          plt.plot(self.f, self.SdifferencesNormalized, label='Sdifference (W)')
-          plt.xlabel('Stress (N/M)')
-          plt.ylabel('Power Difference Normalized')
-          plt.title('Power Difference vs. Stress')
-          plt.legend()
-          plt.grid(True)
+              plt.figure()
+              m, b = np.polyfit(self.f, self.SdifferencesNormalized, 1)
+              print(f"Best-fit line:  y = {m:.5g} x + {b:.5g}")
+              plt.plot(self.f, self.SdifferencesNormalized, label='Sdifference (W)')
+              plt.xlabel('Stress (N/M)')
+              plt.ylabel('Power Difference Normalized')
+              plt.title('Power Difference vs. Stress')
+              plt.legend()
+              plt.grid(True)
 
-          # plt.ylim(-1, 1)  # Set Y-axis to fixed scale
-          # plt.tight_layout()
-          plt.show()
+              # plt.ylim(-1, 1)  # Set Y-axis to fixed scale
+              # plt.tight_layout()
+              plt.show()
 
 
 
@@ -1029,7 +1031,7 @@ c.redidCalculatePowers(initialHeight, finalHeight)
 # c.plotOptimalBeta(np.linspace(0,(6*np.pi), 500))
 # c.plotOptimalAlpha(np.linspace(0,(6*np.pi), 500))
 c.plotPowersNormalized()
-# c.plotPowerDifferencesNormalized()
+c.plotPowerDifferencesNormalized()
 # c.plotStressStrain()
 
 
