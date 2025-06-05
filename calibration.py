@@ -39,7 +39,7 @@ def ex():
         lambda_light = 1550e-9  # Wavelength of light in fiber
         k = 1/lambda_light
 
-        alpha = np.pi / 4  # angle between applied force and fast and slow axis of the fiber.
+        alpha = np.pi / 4 # angle between applied force and fast and slow axis of the fiber.
         beta = np.pi / 6  # Angle between polarized light and fast and slow axis of the fiber.
         delta = 570  # Extra phase from traveling through unstressed fiber
         gamma = np.pi/2# Angle of PM fiber wrt polarimeter. Should be 0 or pi/2
@@ -366,8 +366,8 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
               self.p_12 = 0.27
               self.b = 62.5e-6 # Radius of fiber cladding in meters 
               self.Lb_0 = 2e-3 # unstressed beat length in meters
-              self.fiberWavelength = 1.550e-6
-              self.k=1/self.fiberWavelength
+              self.fiberWavelength = 1550e-9
+              self.k=(2*np.pi)/self.fiberWavelength
               
               
               #FIND OUT MFD?? 
@@ -392,12 +392,25 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
               self.l = interaction_length
               self.Ex_0 = 1
 
-              self.alpha = np.pi/4
-              self.beta = np.pi/4
+              self.alpha = np.pi/2   # what you want to sweep when alpha = pi/2, A and D have much higher magnitudes
+              self.beta  = np.pi/4
+              self.gamma = np.pi/4
               self.delta = np.pi/2
-              self.gamma = np.pi/2
               self.eta = 376.730313
 
+              self.normalizedForces = 2 * self.N**3 * (1 + self.sigma) * (self.p_12 - self.p_11) * self.Lb_0 * self.f / (self.fiberWavelength * np.pi * self.b * self.Y)  # Normalized force66
+              self.phiValues = 0.5 * np.arctan((self.normalizedForces * np.sin(2 * self.alpha)) / (1 + self.normalizedForces * np.cos(2 * self.alpha)))  # Angle of rotated birefringence 
+              print("phivalues: ", self.phiValues)
+              self.Lb = self.Lb_0 * (1 + self.normalizedForces**2 + 2 * self.normalizedForces * np.cos(2 * self.alpha))**(-1/2)  # Modified beat length
+              print("BEAT length", self.Lb)
+              self.deltaN = (2*np.pi)/(self.k*self.Lb)
+              self.Ns = self.N + (self.deltaN/2) 
+              self.Nf = self.N - (self.deltaN/2)
+              self.initialPowerDifference = 0
+              self.finalPowerDifference = 0
+
+
+       def redidCalculatePowers(self, initialHeight, finalHeight): 
               self.normalizedForces = 2 * self.N**3 * (1 + self.sigma) * (self.p_12 - self.p_11) * self.Lb_0 * self.f / (self.fiberWavelength * np.pi * self.b * self.Y)  # Normalized force66
               self.phiValues = 0.5 * np.arctan((self.normalizedForces * np.sin(2 * self.alpha)) / (1 + self.normalizedForces * np.cos(2 * self.alpha)))  # Angle of rotated birefringence 
               print("phivalues: ", self.phiValues)
@@ -407,21 +420,24 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
               self.Nf = self.N - (self.deltaN/2)
               self.initialPowerDifference = 0
               self.finalPowerDifference = 0
-
-
-       def redidCalculatePowers(self, initialHeight, finalHeight): 
               #EX:
               #Ex0 * (cos(gamma)*(A+B) + e^jdelta * sin(gamma)*(C+D))
+
               
               A = np.cos(self.phiValues)*(np.exp(-1*1j*self.k*self.Ns*self.l)*np.cos(self.phiValues + self.beta)) 
-              B = -np.sin(self.phiValues)*(np.exp(-1*1j*self.k*self.Nf*self.l)*(-np.sin(self.phiValues + self.beta)))
+              B = np.sin(self.phiValues)*(np.exp(-1*1j*self.k*self.Nf*self.l)*(np.sin(self.phiValues + self.beta)))
               C = np.sin(self.phiValues)*(np.exp(-1*1j*self.k*self.Ns*self.l)*np.cos(self.phiValues + self.beta))
-              D = np.cos(self.phiValues)*(np.exp(-1*1j*self.k*self.Nf*self.l)*(-np.sin(self.phiValues + self.beta)))
+              D = -np.cos(self.phiValues)*(np.exp(-1*1j*self.k*self.Nf*self.l)*(np.sin(self.phiValues + self.beta)))
 
-              self.Ex = self.Ex_0 * ( (np.cos(self.gamma)*(A+B)) + (np.sin(self.gamma) * ((np.exp(1j*self.delta) * (C+D)))) )
+              
+              print("(A+B): ", (A+B))
+              print("(C+D): ", (C+D))
+              # PHI SEEMS TO HAVE AN INVERSE RELATIONSHIP ON HOW much (A+B) and (C+D) change (less phi change is more (A+B) and (C+D) change), and by extension how much Ex and Ey change 
+              # PHI is much more when alpha is 
+              self.Ex = self.Ex_0 * ( (np.cos(self.gamma)*(A+B)) + (np.sin(self.gamma) * (np.exp(1j*self.delta) * (C+D)))) 
 
  
-              self.Ey = self.Ex_0 * ( (-np.sin(self.gamma)*(A+B)) + (np.cos(self.gamma) * ((np.exp(1j*self.delta) * (C+D)))) )
+              self.Ey = self.Ex_0 * ( (-np.sin(self.gamma)*(A+B)) + (np.cos(self.gamma) * (np.exp(1j*self.delta) * (C+D))))
 
 
               # print("Ex: ", self.Ex)
@@ -444,7 +460,7 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
               self.Sdifferences = self.S2 - self.S1
               self.SdifferencesNormalized = (np.abs(self.S2 - self.S1) / (self.S1 + self.S2))
 
-              return self.S1Normalized[npoints-1]-self.S1Normalized[0], self.S2Normalized[npoints-1]-self.S2Normalized[0]
+              return self.S1Normalized[self.npoints-1]-self.S1Normalized[0], self.S2Normalized[npoints-1]-self.S2Normalized[0]
 
 
 
@@ -456,6 +472,8 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
                      S1.append(h)
                      S2.append(k)
                      
+              
+              self.beta=np.pi/4 # set back to normal
               plt.figure()
               plt.plot(betaVals, S1, label="S1")
               plt.plot(betaVals, S2, label="S2")
@@ -471,10 +489,10 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
               S1, S2 = [], []
               for i in range(len(alphaVals)):
                      self.alpha = alphaVals[i] 
-                     print(self.alpha)
                      h, k = self.redidCalculatePowers(7,5.2)
                      S1.append(h)
                      S2.append(k)
+              self.alpha = np.pi/4
                      
               plt.figure()
               plt.plot(alphaVals, S1, label="S1")
@@ -487,9 +505,43 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
               plt.show()
        
 
-
-            
+       def plotOptimalGamma(self, gammaVals):
+              S1, S2 = [], []
+              for i in range(len(gammaVals)):
+                     self.gamma = gammaVals[i] 
+                     h, k = self.redidCalculatePowers(7,5.2)
+                     S1.append(h)
+                     S2.append(k)
+              self.gamma = np.pi/4
+                     
+              plt.figure()
+              plt.plot(gammaVals, S1, label="S1")
+              plt.plot(gammaVals, S2, label="S2")
+              plt.xlabel("alpha")
+              plt.ylabel('Normalized Power')
+              plt.title('Optimal gamma sweep')
+              plt.legend()
+              plt.grid(True, linestyle='--', alpha=0.3)
+              plt.show()
           
+       def plotOptimalDelta(self, deltaVals):
+              S1, S2 = [], []
+              for i in range(len(deltaVals)):
+                     self.delta = deltaVals[i] 
+                     h, k = self.redidCalculatePowers(7,5.2)
+                     S1.append(h)
+                     S2.append(k)
+              self.delta = np.pi/2
+                     
+              plt.figure()
+              plt.plot(deltaVals, S1, label="S1")
+              plt.plot(deltaVals, S2, label="S2")
+              plt.xlabel("alpha")
+              plt.ylabel('Normalized Power')
+              plt.title('Optimal delta sweep')
+              plt.legend()
+              plt.grid(True, linestyle='--', alpha=0.3)
+              plt.show()
 
        def calculatePowers(self, initialHeight, finalHeight):
           for li in range(self.npoints):          
@@ -1031,10 +1083,12 @@ c.redidCalculatePowers(initialHeight, finalHeight)
 # test_ex1()
 # c.plotPowerDifferences()
 # c.plotPowersSeparately()
-# c.plotOptimalBeta(np.linspace(0,(6*np.pi), 500))
-# c.plotOptimalAlpha(np.linspace(0,(6*np.pi), 500))
+# c.plotOptimalAlpha(np.linspace(0,(2*np.pi), 500))
+# c.plotOptimalBeta(np.linspace(0,(2*np.pi), 500))
+# c.plotOptimalGamma(np.linspace(0,(2*np.pi), 500))
+# c.plotOptimalDelta(np.linspace(0,(2*np.pi), 500))
 c.plotPowersNormalized()
-c.plotPowerDifferencesNormalized()
+# c.plotPowerDifferencesNormalized()
 # c.plotStressStrain()
 
 
