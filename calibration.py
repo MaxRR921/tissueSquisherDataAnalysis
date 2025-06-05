@@ -388,32 +388,40 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
               self.EyList = np.zeros(npoints, dtype=complex)
 
 
-              self.f = force_values
               self.l = interaction_length
+              self.f = force_values/interaction_length
+              self.f_real = force_values
               self.Ex_0 = 1
 
-              self.alpha = np.pi/2   # what you want to sweep when alpha = pi/2, A and D have much higher magnitudes
+              self.alpha = np.pi/4
               self.beta  = np.pi/4
-              self.gamma = np.pi/4
-              self.delta = np.pi/2
+              self.gamma = 0
+              self.delta = 0
               self.eta = 376.730313
 
               self.normalizedForces = 2 * self.N**3 * (1 + self.sigma) * (self.p_12 - self.p_11) * self.Lb_0 * self.f / (self.fiberWavelength * np.pi * self.b * self.Y)  # Normalized force66
-              self.phiValues = 0.5 * np.arctan((self.normalizedForces * np.sin(2 * self.alpha)) / (1 + self.normalizedForces * np.cos(2 * self.alpha)))  # Angle of rotated birefringence 
+              self.phiValues= 0.5 * np.arctan2(self.normalizedForces * np.sin(2*self.alpha),
+                     1 + self.normalizedForces * np.cos(2*self.alpha) )
+
+
               print("phivalues: ", self.phiValues)
               self.Lb = self.Lb_0 * (1 + self.normalizedForces**2 + 2 * self.normalizedForces * np.cos(2 * self.alpha))**(-1/2)  # Modified beat length
               print("BEAT length", self.Lb)
-              self.deltaN = (2*np.pi)/(self.k*self.Lb)
+              self.deltaN = (2*np.pi)/(self.k*self.Lb)   
               self.Ns = self.N + (self.deltaN/2) 
+              print("Ns: ", self.Ns)
               self.Nf = self.N - (self.deltaN/2)
+              print("Nf ", self.Nf)
               self.initialPowerDifference = 0
               self.finalPowerDifference = 0
 
 
        def redidCalculatePowers(self, initialHeight, finalHeight): 
               self.normalizedForces = 2 * self.N**3 * (1 + self.sigma) * (self.p_12 - self.p_11) * self.Lb_0 * self.f / (self.fiberWavelength * np.pi * self.b * self.Y)  # Normalized force66
-              self.phiValues = 0.5 * np.arctan((self.normalizedForces * np.sin(2 * self.alpha)) / (1 + self.normalizedForces * np.cos(2 * self.alpha)))  # Angle of rotated birefringence 
-              print("phivalues: ", self.phiValues)
+              self.phiValues= 0.5 * np.arctan2(self.normalizedForces * np.sin(2*self.alpha),
+                        1 + self.normalizedForces * np.cos(2*self.alpha) )
+
+              # print("phivalues: ", self.phiValues)
               self.Lb = self.Lb_0 * (1 + self.normalizedForces**2 + 2 * self.normalizedForces * np.cos(2 * self.alpha))**(-1/2)  # Modified beat length
               self.deltaN = (2*np.pi)/(self.k*self.Lb)
               self.Ns = self.N + (self.deltaN/2) 
@@ -430,8 +438,8 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
               D = -np.cos(self.phiValues)*(np.exp(-1*1j*self.k*self.Nf*self.l)*(np.sin(self.phiValues + self.beta)))
 
               
-              print("(A+B): ", (A+B))
-              print("(C+D): ", (C+D))
+              # print("(A+B): ", (A+B))
+              # print("(C+D): ", (C+D))
               # PHI SEEMS TO HAVE AN INVERSE RELATIONSHIP ON HOW much (A+B) and (C+D) change (less phi change is more (A+B) and (C+D) change), and by extension how much Ex and Ey change 
               # PHI is much more when alpha is 
               self.Ex = self.Ex_0 * ( (np.cos(self.gamma)*(A+B)) + (np.sin(self.gamma) * (np.exp(1j*self.delta) * (C+D)))) 
@@ -451,7 +459,8 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
               self.S1 = Ex2/(2*eta) * self.fiberArea 
               self.S2 = Ey2/(2*eta) * self.fiberArea 
 
-              print("S1+S2", self.S1+self.S2)
+              # print("S1+S2", self.S1+self.S2)
+              # print("MAX NORMALIZED FORCE", np.max(self.normalizedForces))
 
               self.S1Normalized = self.S1/(self.S1+self.S2)
               self.S2Normalized = self.S2/(self.S1+self.S2)
@@ -461,6 +470,50 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
               self.SdifferencesNormalized = (np.abs(self.S2 - self.S1) / (self.S1 + self.S2))
 
               return self.S1Normalized[self.npoints-1]-self.S1Normalized[0], self.S2Normalized[npoints-1]-self.S2Normalized[0]
+       
+
+       def plotNormalizedForceVsCrossIntensity(self, alphaVals):
+              crossIntensities = []
+              for i in range(len(alphaVals)):
+                     self.alpha = alphaVals[i] 
+                     h, k = self.redidCalculatePowers(7,5.2)
+                     crossIntensity = self.S1[self.npoints-1]/.002
+                     crossIntensities.append(crossIntensity)
+              plt.figure()
+              plt.plot(alphaVals, crossIntensities, label="")
+
+              plt.xlabel('Normalized force')
+              plt.ylabel('Phi')
+              plt.title('cross intensity vs. Normalized force')
+              plt.legend()
+              plt.grid(True, linestyle='--', alpha=0.3)
+              plt.show()
+
+
+
+
+       def plotPhiVsNormalizedForce(self, alphaVals):
+              phiLines = []
+              for i in range(len(alphaVals)):
+                     
+                     self.alpha = alphaVals[i] 
+                     h, k = self.redidCalculatePowers(7,5.2)
+                     phiLines.append(self.phiValues)
+                     
+              plt.figure()
+              plt.plot(self.normalizedForces, phiLines[0], label="phi = 30deg")
+              plt.plot(self.normalizedForces, phiLines[1], label="phi = 45deg")
+              plt.plot(self.normalizedForces, phiLines[2], label="phi = 60deg")
+              plt.plot(self.normalizedForces, phiLines[3], label="phi = 75deg")
+
+              plt.xlabel('Normalized force')
+              plt.ylabel('Phi')
+              plt.title('Phi with respect to normalized force')
+              plt.legend()
+              plt.grid(True, linestyle='--', alpha=0.3)
+              plt.show()
+
+            
 
 
 
@@ -490,8 +543,8 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
               for i in range(len(alphaVals)):
                      self.alpha = alphaVals[i] 
                      h, k = self.redidCalculatePowers(7,5.2)
-                     S1.append(h)
-                     S2.append(k)
+                     S1.append(np.max(self.S1Normalized) - np.min(self.S1Normalized))
+                     S2.append(np.max(self.S2Normalized) - np.min(self.S2Normalized))
               self.alpha = np.pi/4
                      
               plt.figure()
@@ -512,8 +565,7 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
                      h, k = self.redidCalculatePowers(7,5.2)
                      S1.append(h)
                      S2.append(k)
-              self.gamma = np.pi/4
-                     
+              self.gamma = 0                     
               plt.figure()
               plt.plot(gammaVals, S1, label="S1")
               plt.plot(gammaVals, S2, label="S2")
@@ -531,7 +583,7 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
                      h, k = self.redidCalculatePowers(7,5.2)
                      S1.append(h)
                      S2.append(k)
-              self.delta = np.pi/2
+              self.delta = 0  
                      
               plt.figure()
               plt.plot(deltaVals, S1, label="S1")
@@ -724,7 +776,7 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
               plt.figure()
               m, b = np.polyfit(self.f, self.SdifferencesNormalized, 1)
               print(f"Best-fit line:  y = {m:.5g} x + {b:.5g}")
-              plt.plot(self.f, self.SdifferencesNormalized, label='Sdifference (W)')
+              plt.plot(self.f_real, self.SdifferencesNormalized, label='Sdifference (W)')
               plt.xlabel('Stress (N/M)')
               plt.ylabel('Power Difference Normalized')
               plt.title('Power Difference vs. Stress')
@@ -770,7 +822,7 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
        def plotPowersNormalized(self):
           # ---------- S1 ----------
           fig, ax = plt.subplots()
-          ax.plot(self.f, self.S1Normalized, label='S1 (W)')
+          ax.plot(self.f_real, self.S1Normalized, label='S1 (W)')
           ax.set_xlabel('Force (N)')
           ax.set_ylabel('Power 1 (W)')
           ax.set_title('Power 1 vs. Force')
@@ -784,7 +836,7 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
 
           # ---------- S2 ----------
           fig, ax = plt.subplots()
-          ax.plot(self.f, self.S2Normalized, label='S2 (W)')
+          ax.plot(self.f_real, self.S2Normalized, label='S2 (W)')
           ax.set_xlabel('Force (N)')
           ax.set_ylabel('Power 2 (W)')
           ax.set_title('Power 2 vs. Force')
@@ -1075,7 +1127,7 @@ def test_ex1():
 
             
 npoints = 500
-c = Calibration(npoints, np.linspace(0, 100, npoints), .018, 1)
+c = Calibration(npoints, np.linspace(0, 90, npoints), .018, 1)
 # c.varyLength(np.linspace(0, .18, 100))
 initialHeight = 7
 finalHeight = 5.2
@@ -1083,12 +1135,14 @@ c.redidCalculatePowers(initialHeight, finalHeight)
 # test_ex1()
 # c.plotPowerDifferences()
 # c.plotPowersSeparately()
-# c.plotOptimalAlpha(np.linspace(0,(2*np.pi), 500))
+# c.plotOptimalAlpha(np.linspace(0,(2*np.pi), 2000))
 # c.plotOptimalBeta(np.linspace(0,(2*np.pi), 500))
 # c.plotOptimalGamma(np.linspace(0,(2*np.pi), 500))
 # c.plotOptimalDelta(np.linspace(0,(2*np.pi), 500))
 c.plotPowersNormalized()
-# c.plotPowerDifferencesNormalized()
+c.plotPowerDifferencesNormalized()
+# c.plotPhiVsNormalizedForce([np.pi/6, np.pi/4, np.pi/3, (5*np.pi)/12])
+# c.plotNormalizedForceVsCrossIntensity(np.linspace(0, np.pi/2, 500)) THIS SUCKS
 # c.plotStressStrain()
 
 
