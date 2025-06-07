@@ -282,6 +282,35 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
               plt.grid(True, linestyle='--', alpha=0.3)
               plt.show()            
 
+
+       def plotGammaVsSingleForce(self, gammaVals, f):
+          s1Arr = np.zeros(len(gammaVals))
+          s2Arr = np.zeros(len(gammaVals))
+          for i in range(len(gammaVals)):
+               self.gamma = gammaVals[i]
+               Ex, Ey = c.__calcFields(f)
+               S1, S2 = c.__calcPower(Ex, Ey)
+               s1Arr[i], s2Arr[i] = self.calcNormalizedPower(S1, S2)
+
+
+               
+
+          plt.figure()
+          plt.plot(gammaVals, (s1Arr - s2Arr), label="power difference Normalized")
+
+          plt.xlabel('Gamma')
+          plt.ylabel('Normalized power difference')
+          plt.title('Normalized power difference vs gamma for a single force ')
+          plt.legend()
+          plt.grid(True, linestyle='--', alpha=0.3)
+          plt.show()            
+
+
+
+
+               
+
+
        def plotNormalizedPowersSeperately(self, forces):
           plt.figure()
           s1Arr = np.zeros(len(forces))
@@ -300,8 +329,6 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
           plt.legend()
           plt.grid(True)
 
-          # plt.ylim(0, 1)  # Optional: Set fixed Y-axis range if needed
-          # plt.tight_layout()
           plt.show()
 
        def plotPowerDifferencesNormalized(self, forces):
@@ -312,21 +339,49 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
           for i in range(len(forces)):
                Ex, Ey = self.__calcFields(forces[i])
                S1, S2 = self.__calcPower(Ex, Ey) 
-               
-               s1Arr[i], s2Arr[i] = self.calcNormalizedPower(S1, S2) 
-          SdifferencesNormalized = s1Arr - s2Arr
+               s1Arr[i], s2Arr[i] = self.calcNormalizedPower(S1, S2)
 
+          Sdiff = s1Arr - s2Arr
 
-          plt.plot(forces, SdifferencesNormalized, label='Sdifference (W)')
+          # --- Plot 1: Sdiff vs Force ---
+          plt.figure()
+          plt.plot(forces, Sdiff, label='Sdifference (W)', color='tab:blue')
+
+          coeffs1 = np.polyfit(forces, Sdiff, deg=2)
+          poly1 = np.poly1d(coeffs1)
+          x_fit1 = np.linspace(min(forces), max(forces), 500)
+          y_fit1 = poly1(x_fit1)
+          plt.plot(x_fit1, y_fit1, '--', label='Fitted Curve', color='tab:orange')
+
           plt.xlabel('Force')
           plt.ylabel('Power Difference Normalized')
-          plt.title('Power Difference Force')
+          plt.title('Power Difference vs Force')
           plt.legend()
           plt.grid(True)
-
-          # plt.ylim(-1, 1)  # Set Y-axis to fixed scale
-          # plt.tight_layout()
           plt.show()
+
+          eq1 = f"{coeffs1[0]:.5e} * Force² + {coeffs1[1]:.5e} * Force + {coeffs1[2]:.5e}"
+          print("Sdiff = " + eq1)
+
+          # --- Plot 2: Force vs Sdiff (inverted axes) ---
+          plt.figure()
+          plt.plot(Sdiff, forces, label='Force (N)', color='tab:green')
+
+          coeffs2 = np.polyfit(Sdiff, forces, deg=2)
+          poly2 = np.poly1d(coeffs2)
+          x_fit2 = np.linspace(min(Sdiff), max(Sdiff), 500)
+          y_fit2 = poly2(x_fit2)
+          plt.plot(x_fit2, y_fit2, '--', label='Fitted Curve', color='tab:red')
+
+          plt.xlabel('Power Difference Normalized')
+          plt.ylabel('Force')
+          plt.title('Force vs Power Difference')
+          plt.legend()
+          plt.grid(True)
+          plt.show()
+
+          eq2 = f"{coeffs2[0]:.5e} * Sdiff² + {coeffs2[1]:.5e} * Sdiff + {coeffs2[2]:.5e}"
+          print("Force = " + eq2)
 
 npoints = 500
 c = Calibration(.02365)
@@ -337,6 +392,8 @@ c.plotNormalizedPowersVsGamma(np.linspace(0,np.pi,500), np.linspace(0,14.2270,3)
 c.plotNormalizedPowersVsBeta(np.linspace(0,np.pi,500), np.linspace(0,14.2270,3))
 alphas = np.deg2rad([30, 45, 60, 75])
 c.plotPhiVsNormalizedForce(np.linspace(0,50,500), alphas)
+gammas = np.deg2rad([30, 45, 60, 75])
+c.plotGammaVsSingleForce(gammas, 14.227)
 print(c.b)
 
 # func = c.generate_function_powerdiff_to_force()
