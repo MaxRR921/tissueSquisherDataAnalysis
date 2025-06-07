@@ -51,8 +51,8 @@ class GraphingProcess(QtWidgets.QMainWindow):
         layout.addWidget(self.plot4, 1, 1)  # Row 1, Col 1
 
         self.plot5 = pg.PlotWidget()
-        self.plot5.setLabel('left',  "Stress (Pa)")
-        self.plot5.setLabel('bottom', "Strain")     # unitless or “ε” if you prefer
+        self.plot5.setLabel('left',  "force")
+        self.plot5.setLabel('bottom', "Power difference Normalized")     # unitless or “ε” if you prefer
         self.curve5 = self.plot5.plot([], [], pen='orange')
         layout.addWidget(self.plot5, 1, 2)
 
@@ -149,11 +149,12 @@ class GraphingProcess(QtWidgets.QMainWindow):
             interp_func = interp1d(self.x_data3, self.y_data3, kind='linear', fill_value='extrapolate')
             aligned_pow2 = interp_func(self.x_data2)
             diff = self.y_data2 - aligned_pow2
+            sum = self.y_data2 + aligned_pow2
 
-        if diff is not None:
-            self.curve6.setData(self.x_data2, diff)
+        if diff is not None and sum is not None:
+            self.curve6.setData(self.x_data2, diff/sum)
             force = 7.56766e+03 * diff**2 + 3.36137e+02 * diff + 2.81108e-01
-            self.curve5.setData(diff, force)
+            self.curve5.setData(diff/sum, force)
 
 
         self.curve1.setData(self.x_data1, self.y_data1)
