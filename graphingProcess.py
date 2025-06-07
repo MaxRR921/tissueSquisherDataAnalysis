@@ -152,6 +152,8 @@ class GraphingProcess(QtWidgets.QMainWindow):
 
         if diff is not None:
             self.curve6.setData(self.x_data2, diff)
+            force = 7.56766e+03 * diff**2 + 3.36137e+02 * diff + 2.81108e-01
+            self.curve5.setData(diff, force)
 
 
         self.curve1.setData(self.x_data1, self.y_data1)
