@@ -147,11 +147,12 @@ class GraphingProcess(QtWidgets.QMainWindow):
         
         if  self.x_data3 and self.y_data3 and self.y_data2:
             interp_func = interp1d(self.x_data3, self.y_data3, kind='linear', fill_value='extrapolate')
-            aligned_pow2 = interp_func(self.x_data2)
+            x_new = []
+            aligned_pow2 = interp_func(x_new)
             diff = self.y_data2 - aligned_pow2
 
-        if diff is not None:
-            self.curve6.setData(self.x_data2, diff)
+        if diff is not None and x_new is not None:
+            self.curve6.setData(x_new, diff)
 
 
         self.curve1.setData(self.x_data1, self.y_data1)
