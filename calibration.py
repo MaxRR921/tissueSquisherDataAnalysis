@@ -135,6 +135,36 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
 
           return Ex2/(2*eta) * self.fiberArea, Ey2/(2*eta) * self.fiberArea 
 
+
+       def plotStressVsPowerDifference(self, forces):
+          plt.figure()
+          s1Arr = np.zeros(len(forces))
+          s2Arr = np.zeros(len(forces))
+          for i in range(len(forces)):
+               Ex, Ey = self.__calcFields(forces[i])
+               S1, S2 = self.__calcPower(Ex, Ey) 
+               s1Arr[i], s2Arr[i] = self.calcNormalizedPower(S1, S2)
+
+          stresses = forces/(self.fiberArea * self.l)
+          powerDifferences = (s1Arr.copy() - s2Arr.copy())
+
+
+          plt.plot(powerDifferences, stresses,  label=f'Stress: ')
+
+          plt.xlabel('power Difference')
+          plt.ylabel('Stress')
+          plt.title('Force vs. Stress')
+          plt.legend()
+          plt.grid(True)
+
+          plt.show()
+          
+          plt.figure()
+          
+
+
+
+
           
           
 
@@ -347,7 +377,7 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
           plt.figure()
           plt.plot(forces, Sdiff, label='Sdifference (W)', color='tab:blue')
 
-          coeffs1 = np.polyfit(forces, Sdiff, deg=2)
+          coeffs1 = np.polyfit(forces, Sdiff, deg=4)
           poly1 = np.poly1d(coeffs1)
           x_fit1 = np.linspace(min(forces), max(forces), 500)
           y_fit1 = poly1(x_fit1)
@@ -360,14 +390,14 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
           plt.grid(True)
           plt.show()
 
-          eq1 = f"{coeffs1[0]:.5e} * Force² + {coeffs1[1]:.5e} * Force + {coeffs1[2]:.5e}"
-          print("Sdiff = " + eq1)
-
+          # eq1 = f"{coeffs1[0]:.5e} * Force² + {coeffs1[1]:.5e} * Force + {coeffs1[2]:.5e}"
+          # print("Sdiff = " + eq1)
+# 
           # --- Plot 2: Force vs Sdiff (inverted axes) ---
           plt.figure()
           plt.plot(Sdiff, forces, label='Force (N)', color='tab:green')
 
-          coeffs2 = np.polyfit(Sdiff, forces, deg=2)
+          coeffs2 = np.polyfit(Sdiff, forces, deg=1)
           poly2 = np.poly1d(coeffs2)
           x_fit2 = np.linspace(min(Sdiff), max(Sdiff), 500)
           y_fit2 = poly2(x_fit2)
@@ -380,23 +410,42 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
           plt.grid(True)
           plt.show()
 
-          eq2 = f"{coeffs2[0]:.5e} * Sdiff² + {coeffs2[1]:.5e} * Sdiff + {coeffs2[2]:.5e}"
+          eq2 = f"{coeffs2[0]:.5e} * Sdiff  + {coeffs2[1]:.5e}"
           print("Force = " + eq2)
 
 npoints = 500
 c = Calibration(.02365)
-c.plotPowerDifferencesNormalized(np.linspace(0,14.2270,500))
-c.plotNormalizedPowersSeperately(np.linspace(0,14.2270,500)) 
-c.plotNormalizedPowersVsAlpha(np.linspace(0,np.pi,500), np.linspace(0,14.2270,3)) #GOOD! look at envelope maximum... 45 degrees is the maximum of the envelope
-c.plotNormalizedPowersVsGamma(np.linspace(0,np.pi,500), np.linspace(0,14.2270,3))
-c.plotNormalizedPowersVsBeta(np.linspace(0,np.pi,500), np.linspace(0,14.2270,3))
+c.plotStressVsPowerDifference(np.linspace(0, 0.090748, 500))
+c.plotPowerDifferencesNormalized(np.linspace(0, 0.090748, 500))
+c.plotNormalizedPowersSeperately(np.linspace(0,0.090748, 500)) 
+c.plotNormalizedPowersVsAlpha(np.linspace(0,np.pi,500), np.linspace(0,0.090748,3)) #GOOD! look at envelope maximum... 45 degrees is the maximum of the envelope
+c.plotNormalizedPowersVsGamma(np.linspace(0,np.pi,500), np.linspace(0,0.090748,3))
+c.plotNormalizedPowersVsBeta(np.linspace(0,np.pi,500), np.linspace(0,0.090748,3))
 alphas = np.deg2rad([30, 45, 60, 75])
 c.plotPhiVsNormalizedForce(np.linspace(0,50,500), alphas)
 gammas = np.deg2rad([30, 45, 60, 75])
-c.plotGammaVsSingleForce(gammas, 14.227)
+c.plotGammaVsSingleForce(gammas, 0.090748)
+
 print(c.b)
 
 # func = c.generate_function_powerdiff_to_force()
 
 # print("FUNC(1.5e-12): ", (func(440e-9)/20e6))
 # print("FUNC(10): ", func(10))
+
+# sample holder: 35, scale: 33.0 dif 2
+
+#move 3.7 to 0.3 applies 6.71 N
+
+# interaction length: .019 m
+
+#Equation for this physical setup : Force = 4.43433e+02 * Sdiff  + -1.56962e-07
+
+
+
+
+## ALL THE CURVES ARE DIFFERENT. CHANGING ALPHA CHANGES THE SHAPE OF THE CURVE, NOT JUST HOW MUCH THE POWER CHANGES
+#DRAFT BY 23RD
+
+
+#DO LOWER STARTING VALUES IN EITHER ARM CORRESPOND TO LOWER CHANGE IN POWER??
