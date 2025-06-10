@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import ScalarFormatter
-
+import pandas as pd
 """
 Potential issues:
 - Ex and Ey are each 1 value, not arrays. 
@@ -38,7 +38,7 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
               self.Ex_0 = 1
 
               self.alpha = np.pi/4
-              self.beta  = np.pi/4
+              self.beta  = np.pi/4.5
               self.gamma = np.pi/2
               self.delta = 0
               self.eta = 376.730313
@@ -413,18 +413,67 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
           eq2 = f"{coeffs2[0]:.5e} * Sdiff  + {coeffs2[1]:.5e}"
           print("Force = " + eq2)
 
+
+       def calculateAlphaAndBeta(self, targetForce):
+            curves = []
+            df = pd.read_csv('data.csv')
+            sdiffs = df['Sdifference'].dropna().values
+            maxPower = np.max(sdiffs)
+            minPower = np.min(sdiffs)
+            print("Max power: ", maxPower, "Min power: ", minPower)
+
+
+            #theoretical:
+            done = False
+            for alpha in np.linspace(0, np.pi/2, 90):
+               self.alpha = alpha
+               for beta in np.linspace(0, np.pi/2, 90):
+                    self.beta = beta
+                    forces = np.linspace(0, targetForce, 500)
+                    powerDifferences = np.zeros(500)
+                    for i in range (len(forces)): 
+                         Ex, Ey = self.__calcFields(forces[i])
+                         S1, S2 = self.__calcPower(Ex, Ey)
+                         normalizedS1, normalizedS2 = self.calcNormalizedPower(S1, S2)
+                         powerDifference = np.abs(normalizedS1 - normalizedS2)
+                         powerDifferences[i] = powerDifference
+                     # plot at α≈π/4, β≈π/4
+                    coeffs2 = np.polyfit(powerDifferences, forces, deg=1)
+                    poly2 = np.poly1d(coeffs2)
+                    x_fit2 = np.linspace(min(powerDifferences), max(powerDifferences), 500)
+                    y_fit2 = poly2(x_fit2)
+                    fMax = poly2(maxPower)
+                    fMin = poly2(minPower)
+                    print("fmin: ", fMin, "fMax: ", fMax, "alpha: ", np.rad2deg(alpha), "beta: ", np.rad2deg(beta))
+                    if abs(fMax - targetForce) < 0.3 or abs(fMin - targetForce) < 0.3:
+                         print(f"Found α={np.rad2deg(alpha):.1f}°, β={np.rad2deg(beta):.1f}°")
+                         done = True
+                    if done:  
+                         break
+            
+          #   for curve in curves:
+          #      fMax = curve(maxPower)
+          #      fMin = curve(minPower)
+          #      if np.abs(fMax - targetForce) < 0.01 or np.abs(fMin - targetForce) < 0.01:
+          #           print(f"Found suitable alpha: {np.rad2deg(self.alpha)}, beta: {np.rad2deg(self.beta)}")
+
+
+
+                    
+
 npoints = 500
 c = Calibration(.02365)
-c.plotStressVsPowerDifference(np.linspace(0, 0.090748, 500))
-c.plotPowerDifferencesNormalized(np.linspace(0, 0.090748, 500))
-c.plotNormalizedPowersSeperately(np.linspace(0,0.090748, 500)) 
-c.plotNormalizedPowersVsAlpha(np.linspace(0,np.pi,500), np.linspace(0,0.090748,3)) #GOOD! look at envelope maximum... 45 degrees is the maximum of the envelope
-c.plotNormalizedPowersVsGamma(np.linspace(0,np.pi,500), np.linspace(0,0.090748,3))
-c.plotNormalizedPowersVsBeta(np.linspace(0,np.pi,500), np.linspace(0,0.090748,3))
-alphas = np.deg2rad([30, 45, 60, 75])
-c.plotPhiVsNormalizedForce(np.linspace(0,50,500), alphas)
-gammas = np.deg2rad([30, 45, 60, 75])
-c.plotGammaVsSingleForce(gammas, 0.090748)
+c.calculateAlphaAndBeta(6.71) # 6.71 N is the target force
+# c.plotStressVsPowerDifference(np.linspace(0, 0.090748, 500))
+# c.plotPowerDifferencesNormalized(np.linspace(0, 0.090748, 500))
+# c.plotNormalizedPowersSeperately(np.linspace(0,0.090748, 500)) 
+# c.plotNormalizedPowersVsAlpha(np.linspace(0,np.pi,500), np.linspace(0,0.090748,3)) #GOOD! look at envelope maximum... 45 degrees is the maximum of the envelope
+# c.plotNormalizedPowersVsGamma(np.linspace(0,np.pi,500), np.linspace(0,0.090748,3))
+# c.plotNormalizedPowersVsBeta(np.linspace(0,np.pi,500), np.linspace(0,0.090748,3))
+# alphas = np.deg2rad([30, 45, 60, 75])
+# c.plotPhiVsNormalizedForce(np.linspace(0,50,500), alphas)
+# gammas = np.deg2rad([30, 45, 60, 75])
+# c.plotGammaVsSingleForce(gammas, 0.090748)
 
 print(c.b)
 
@@ -449,3 +498,19 @@ print(c.b)
 
 
 #DO LOWER STARTING VALUES IN EITHER ARM CORRESPOND TO LOWER CHANGE IN POWER??
+
+
+
+
+#GOAL:
+
+
+# Read in csv of values: index vs power 1, index vs power 2
+# take the normalized power difference.
+# once we have this, set a target force: target force = 6.71 N 
+# sweep through alpha and beta values (n^2), generating curves of power difference vs force. 
+# find the maximum and minimum of the data powerdifference, subtract to find the change in power difference
+# sweep through our curves, feeding in the power difference to each, find the curve with the corresponding force that most
+# closely matches the target force.
+
+
