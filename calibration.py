@@ -38,7 +38,7 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
               self.Ex_0 = 1
 
               self.alpha = np.pi/4
-              self.beta  = np.pi/4
+              self.beta  = 0
               self.gamma = np.pi/2
               self.delta = 0
               self.eta = 376.730313
@@ -127,6 +127,21 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
               return Ex, Ey 
        
 
+
+       def __calcPowersChua(self,force):
+          f = force/self.l
+          self.normalizedForce = 2 * self.N**3 * (1 + self.sigma) * (self.p_12 - self.p_11) * self.Lb_0 * f / (self.fiberWavelength * np.pi * self.b * self.Y)  # Normalized force66
+          self.phi = 0.5 * np.arctan2(self.normalizedForce * np.sin(2*self.alpha),
+                    1 + self.normalizedForce * np.cos(2*self.alpha) )
+          Lb = self.Lb_0 * (1 + self.normalizedForce**2 + 2 * self.normalizedForce * np.cos(2 * self.alpha))**(-1/2)  # Modified beat length 
+          
+          Px_0 = 1 
+          return Px_0*(1- ((np.sin(2*self.phi))**2)*( (np.sin((np.pi*self.l)/(Lb))) **2)), Px_0*(((np.sin(2*self.phi))**2)*( (np.sin((np.pi*self.l)/(Lb))) **2)), 
+
+     
+
+       
+
        def __calcPower(self, Ex, Ey):
 
           Ex2= np.abs(Ex)**2  # Equivalent to |Ex|^2
@@ -187,8 +202,8 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
                Sdifferences  = np.zeros(len(alphaValues))
                for i in range(len(alphaValues)):
                     self.alpha = alphaValues[i]
-                    Ex, Ey = self.__calcFields(forces[j])
-                    S1, S2 = self.__calcPower(Ex, Ey)
+                    # Ex, Ey = self.__calcFields(forces[j])
+                    S1, S2 = self.__calcPowersChua(forces[j])
                     if(i == 0):
                          S10 = S1
                     Sdifferences[i] = self.calcNormalizedCrossIntensity(S10, S2)
@@ -483,7 +498,7 @@ c = Calibration(.02365)
 # c.calculateAlphaAndBeta(0.08993091942) # 6.71 N is the target force
 # c.plotStressVsPowerDifference(np.linspace(0, 0.090748, 500))
 # c.plotPowerDifferencesNormalized(np.linspace(0, 0.08993091942, 500))
-c.plotNormalizedPowersSeperately(np.linspace(0,0.08993091942, 500)) 
+# c.plotNormalizedPowersSeperately(np.linspace(0,0.08993091942, 500)) 
 c.plotNormalizedPowersVsAlpha(np.linspace(0,np.pi,500), np.linspace(0,2.5,3)) #GOOD! look at envelope maximum... 45 degrees is the maximum of the envelope
 c.plotNormalizedPowersVsGamma(np.linspace(0,np.pi,500), np.linspace(0,0.090748,3))
 c.plotNormalizedPowersVsBeta(np.linspace(0,np.pi,500), np.linspace(0,0.090748,3))
