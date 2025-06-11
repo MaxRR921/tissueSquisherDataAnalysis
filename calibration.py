@@ -38,7 +38,7 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
               self.Ex_0 = 1
 
               self.alpha = np.pi/4
-              self.beta  = np.pi/4.5
+              self.beta  = np.pi/4
               self.gamma = np.pi/2
               self.delta = 0
               self.eta = 376.730313
@@ -172,21 +172,27 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
        def calcNormalizedPower(self, S1, S2):
           return S1/(S1+S2), S2/(S1+S2) 
 
+       def calcNormalizedPowerDifference(self, S1, S2):
+          return np.abs((S2 - S1))/np.abs(S1+S2)
+       
+       def calcNormalizedCrossIntensity(self, S1, S2):
+            return S2/S1
+
        def plotNormalizedPowersVsAlpha(self, alphaValues, forces):
           plt.figure()
-          s1Arr = np.zeros(len(alphaValues))
-          s2Arr = np.zeros(len(alphaValues))
+          Sdifferences  = np.zeros(len(alphaValues))
           curves = []
+          S10=0
           for j in range(len(forces)):
-               s1Arr = np.zeros(len(alphaValues))     # new array each force
-               s2Arr = np.zeros(len(alphaValues))
+               Sdifferences  = np.zeros(len(alphaValues))
                for i in range(len(alphaValues)):
                     self.alpha = alphaValues[i]
                     Ex, Ey = self.__calcFields(forces[j])
                     S1, S2 = self.__calcPower(Ex, Ey)
-                    s1Arr[i], s2Arr[i] = self.calcNormalizedPower(S1, S2)
-               print("S1:", s1Arr)
-               curves.append((forces[j], s1Arr.copy()-s2Arr.copy()))
+                    if(i == 0):
+                         S10 = S1
+                    Sdifferences[i] = self.calcNormalizedCrossIntensity(S10, S2)
+               curves.append((forces[j], Sdifferences.copy()))
                print("S1:")
 
           for curve in curves:
@@ -345,14 +351,18 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
           plt.figure()
           s1Arr = np.zeros(len(forces))
           s2Arr = np.zeros(len(forces))
+          crossIntensityArr = np.zeros(len(forces))
 
           for i in range(len(forces)):
                Ex, Ey = self.__calcFields(forces[i])
-               S1, S2 = self.__calcPower(Ex, Ey) 
-               s1Arr[i], s2Arr[i] = self.calcNormalizedPower(S1, S2) 
+               s1Arr[i], s2Arr[i] = self.__calcPower(Ex, Ey) 
+               crossIntensityArr[i] = self.calcNormalizedCrossIntensity(s1Arr[0], s2Arr[i])
+               print("normalized cross intensity: ", crossIntensityArr[i])
+                
 
-          plt.plot(forces, s1Arr, label='S1 Normalized')
-          plt.plot(forces, s2Arr, label='S2 Normalized')
+          plt.plot(forces, s1Arr, label='S1 ')
+          plt.plot(forces, s2Arr, label='S2 ')
+          # plt.plot(forces, crossIntensityArr, label='Normalized cross intensity')
           plt.xlabel('Force')
           plt.ylabel('Normalized Power')
           plt.title('S1 and S2 Normalized Power vs. Force')
@@ -363,15 +373,13 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
 
        def plotPowerDifferencesNormalized(self, forces):
           plt.figure()
-          s1Arr = np.zeros(len(forces))
-          s2Arr = np.zeros(len(forces))
+          Sdiff = np.zeros(len(forces))
 
           for i in range(len(forces)):
                Ex, Ey = self.__calcFields(forces[i])
                S1, S2 = self.__calcPower(Ex, Ey) 
-               s1Arr[i], s2Arr[i] = self.calcNormalizedPower(S1, S2)
+               Sdiff[i] = self.calcNormalizedPowerDifference(S1, S2)
 
-          Sdiff = s1Arr - s2Arr
 
           # --- Plot 1: Sdiff vs Force ---
           plt.figure()
@@ -416,13 +424,15 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
 
        def calculateAlphaAndBeta(self, targetForce):
             curves = []
-            df = pd.read_csv('data.csv')
+            df = pd.read_csv('trial3.csv')
             sdiffs = df['Sdifference'].dropna().values
-            maxPower = np.max(sdiffs)
-            minPower = np.min(sdiffs)
+          #   maxPower = np.max(sdiffs)
+          #   minPower = np.min(sdiffs)
+            maxPower = np.max(sdiffs[sdiffs != 0])
+            minPower = np.min(sdiffs[sdiffs != 0])
             print("Max power: ", maxPower, "Min power: ", minPower)
 
-
+            finds = []
             #theoretical:
             done = False
             for alpha in np.linspace(0, np.pi/2, 90):
@@ -434,9 +444,7 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
                     for i in range (len(forces)): 
                          Ex, Ey = self.__calcFields(forces[i])
                          S1, S2 = self.__calcPower(Ex, Ey)
-                         normalizedS1, normalizedS2 = self.calcNormalizedPower(S1, S2)
-                         powerDifference = np.abs(normalizedS1 - normalizedS2)
-                         powerDifferences[i] = powerDifference
+                         powerDifferences[i] = self.calcNormalizedPowerDifference(S1, S2)
                      # plot at α≈π/4, β≈π/4
                     coeffs2 = np.polyfit(powerDifferences, forces, deg=1)
                     poly2 = np.poly1d(coeffs2)
@@ -445,17 +453,26 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
                     fMax = poly2(maxPower)
                     fMin = poly2(minPower)
                     print("fmin: ", fMin, "fMax: ", fMax, "alpha: ", np.rad2deg(alpha), "beta: ", np.rad2deg(beta))
-                    if abs(fMax - targetForce) < 0.3 or abs(fMin - targetForce) < 0.3:
-                         print(f"Found α={np.rad2deg(alpha):.1f}°, β={np.rad2deg(beta):.1f}°")
-                         done = True
-                    if done:  
-                         break
-            
-          #   for curve in curves:
-          #      fMax = curve(maxPower)
-          #      fMin = curve(minPower)
-          #      if np.abs(fMax - targetForce) < 0.01 or np.abs(fMin - targetForce) < 0.01:
-          #           print(f"Found suitable alpha: {np.rad2deg(self.alpha)}, beta: {np.rad2deg(self.beta)}")
+                    if np.isclose(np.abs(fMax - fMin), targetForce, atol=1):
+                         finds.append(f"Slope = {y_fit2[0]}, Found Fmax = {fMax:.001f}, Fmin = {fMin:.001}, α={np.rad2deg(self.alpha):.1f}°, β={np.rad2deg(self.beta):.1f}°")
+                         curves.append((x_fit2, y_fit2, maxPower, fMax, minPower, fMin))
+
+
+            for find in finds:
+               print(find)
+
+            plt.figure(figsize=(8, 6))
+            for x_fit2, y_fit2, maxP, fMax, minP, fMin in curves:
+               plt.plot(x_fit2, y_fit2)
+               plt.plot(maxP, fMax, 'ro')  # red point for max
+               plt.plot(minP, fMin, 'bo')  # blue point for min
+
+               plt.xlabel('Power Difference')
+               plt.ylabel('Force')
+               plt.title('Fitted Curves with Fmin and Fmax Points')
+               plt.grid(True)
+               plt.tight_layout()
+               plt.show()
 
 
 
@@ -463,13 +480,13 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
 
 npoints = 500
 c = Calibration(.02365)
-c.calculateAlphaAndBeta(6.71) # 6.71 N is the target force
+# c.calculateAlphaAndBeta(0.08993091942) # 6.71 N is the target force
 # c.plotStressVsPowerDifference(np.linspace(0, 0.090748, 500))
-# c.plotPowerDifferencesNormalized(np.linspace(0, 0.090748, 500))
-# c.plotNormalizedPowersSeperately(np.linspace(0,0.090748, 500)) 
-# c.plotNormalizedPowersVsAlpha(np.linspace(0,np.pi,500), np.linspace(0,0.090748,3)) #GOOD! look at envelope maximum... 45 degrees is the maximum of the envelope
-# c.plotNormalizedPowersVsGamma(np.linspace(0,np.pi,500), np.linspace(0,0.090748,3))
-# c.plotNormalizedPowersVsBeta(np.linspace(0,np.pi,500), np.linspace(0,0.090748,3))
+# c.plotPowerDifferencesNormalized(np.linspace(0, 0.08993091942, 500))
+c.plotNormalizedPowersSeperately(np.linspace(0,0.08993091942, 500)) 
+c.plotNormalizedPowersVsAlpha(np.linspace(0,np.pi,500), np.linspace(0,2.5,3)) #GOOD! look at envelope maximum... 45 degrees is the maximum of the envelope
+c.plotNormalizedPowersVsGamma(np.linspace(0,np.pi,500), np.linspace(0,0.090748,3))
+c.plotNormalizedPowersVsBeta(np.linspace(0,np.pi,500), np.linspace(0,0.090748,3))
 # alphas = np.deg2rad([30, 45, 60, 75])
 # c.plotPhiVsNormalizedForce(np.linspace(0,50,500), alphas)
 # gammas = np.deg2rad([30, 45, 60, 75])
@@ -514,3 +531,5 @@ print(c.b)
 # closely matches the target force.
 
 
+#CONCLUSION: Scaling is messed up, can't get good curve fits. we need to reevaluate our method for normalizing power.
+# I think the best thing to do is to model how we do it after the way chua paper does it. Redo the multiplication to get S1 and S0 as functions of phi and beta!
