@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import ScalarFormatter
 import pandas as pd
+from scipy.interpolate import PchipInterpolator
 """
 Potential issues:
 - Ex and Ey are each 1 value, not arrays. 
@@ -22,8 +23,9 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
               self.p_12 = 0.27
               self.b = 62.5e-6 # Radius of fiber cladding in meters 
               self.Lb_0 = 2e-3 # unstressed beat length in meters
-              self.fiberWavelength = 1550e-9
+              self.fiberWavelength = 1550e-9 
               self.k=(2*np.pi)/self.fiberWavelength
+              self.Px_0 = 1
 
               self.phi = 0 
               self.normalizedForce = 0
@@ -38,7 +40,7 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
               self.Ex_0 = 1
 
               self.alpha = np.pi/4
-              self.beta  = 0
+              self.beta  = np.pi/2
               self.gamma = np.pi/2
               self.delta = 0
               self.eta = 376.730313
@@ -135,8 +137,44 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
                     1 + self.normalizedForce * np.cos(2*self.alpha) )
           Lb = self.Lb_0 * (1 + self.normalizedForce**2 + 2 * self.normalizedForce * np.cos(2 * self.alpha))**(-1/2)  # Modified beat length 
           
-          Px_0 = 1 
-          return Px_0*(1- ((np.sin(2*self.phi))**2)*( (np.sin((np.pi*self.l)/(Lb))) **2)), Px_0*(((np.sin(2*self.phi))**2)*( (np.sin((np.pi*self.l)/(Lb))) **2)), 
+          return self.Px_0*(1- ((np.sin(2*self.phi))**2)*( (np.sin((np.pi*self.l)/(Lb))) **2)), self.Px_0*(((np.sin(2*self.phi))**2)*( (np.sin((np.pi*self.l)/(Lb))) **2)), 
+
+
+
+       def __calcPowersNewEquations(self, force):
+          f = force/self.l
+          self.normalizedForce = 2 * self.N**3 * (1 + self.sigma) * (self.p_12 - self.p_11) * self.Lb_0 * f / (self.fiberWavelength * np.pi * self.b * self.Y)  # Normalized force66
+          self.phi = 0.5 * np.arctan2(self.normalizedForce * np.sin(2*self.alpha),
+                    1 + self.normalizedForce * np.cos(2*self.alpha) )
+          Lb = self.Lb_0 * (1 + self.normalizedForce**2 + 2 * self.normalizedForce * np.cos(2 * self.alpha))**(-1/2)  # Modified beat length 
+
+          Px = .25*np.exp(-2j*self.k*self.N*self.l)* (np.exp(-1j*self.l*((2*np.pi)/Lb))*(np.cos(self.phi)*np.cos(self.phi+self.beta))+(np.sin(self.phi)*np.sin(self.phi+self.beta)))**2
+          Py = .25*np.exp(2j*(self.delta-(self.k*self.N*self.l)))* (np.exp(-1j*self.l*((2*np.pi)/Lb))*(np.sin(self.phi)*np.cos(self.phi+self.beta))+(np.cos(self.phi)*np.sin(self.phi+self.beta)))**2
+          return Px, Py
+
+
+       def __calcPowersFromExEy(self, force):
+          f = force/self.l
+          self.normalizedForce = 2 * self.N**3 * (1 + self.sigma) * (self.p_12 - self.p_11) * self.Lb_0 * f / (self.fiberWavelength * np.pi * self.b * self.Y)  # Normalized force66
+          self.phi = 0.5 * np.arctan2(self.normalizedForce * np.sin(2*self.alpha),
+                    1 + self.normalizedForce * np.cos(2*self.alpha) )
+          Lb = self.Lb_0 * (1 + self.normalizedForce**2 + 2 * self.normalizedForce * np.cos(2 * self.alpha))**(-1/2)  # Modified beat length 
+          
+          Ex = -0.5*self.Ex_0*np.exp(-1j*self.k*self.N*self.l)*((np.exp(-1j*self.l*((2*np.pi)/Lb))*np.cos(self.phi)*np.cos(self.phi+self.beta)) + np.sin(self.phi)*np.sin(self.phi+self.beta))
+          Ey = -0.5*np.exp(-1j*self.delta)*np.exp(-1j*self.k*self.N*self.l)*self.Ex_0*((np.exp(-1j*self.l*((2*np.pi)/Lb))*np.sin(self.phi)*np.cos(self.phi+self.beta)) - np.cos(self.phi)*np.sin(self.phi+self.beta))
+          
+          Sx = np.abs(Ex)**2
+          Sy = np.abs(Ey)**2
+          return Sx, Sy
+
+
+       def __calcNormalizedCrossIntensityChua(self, force):
+          f = force/self.l
+          lOverLb_0 = self.l/self.Lb_0
+          self.normalizedForce = 2 * self.N**3 * (1 + self.sigma) * (self.p_12 - self.p_11) * self.Lb_0 * f / (self.fiberWavelength * np.pi * self.b * self.Y)  # Normalized force66
+          print("normalized force: ", self.normalizedForce)
+          Lb = self.Lb_0 * (1 + self.normalizedForce**2 + 2 * self.normalizedForce * np.cos(2 * self.alpha))**(-1/2)  # Modified beat length 
+          return ((np.pi*lOverLb_0)**2) * (self.normalizedForce**2) * ((np.sin(2*self.alpha))**2) * ((((np.sin((np.pi*lOverLb_0*(1+(self.normalizedForce**2) + (2*self.normalizedForce*np.cos(2*self.alpha)))**.5)))))/((np.pi*lOverLb_0*(1+(self.normalizedForce**2) + (2*self.normalizedForce*np.cos(2*self.alpha)))**.5)))**2
 
      
 
@@ -184,34 +222,51 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
           
 
 
-       def calcNormalizedPower(self, S1, S2):
-          return S1/(S1+S2), S2/(S1+S2) 
+     #   def calcNormalizedPowerDiff(self, S1, S2):
+     #      return np.abs( (S2/(S1+S2)) - (S1/(S1+S2)) ) 
 
        def calcNormalizedPowerDifference(self, S1, S2):
-          return np.abs((S2 - S1))/np.abs(S1+S2)
+          return (S2 - S1)/(S1+S2)
        
        def calcNormalizedCrossIntensity(self, S1, S2):
-            return S2/S1
+            print(self.Px_0)
+            print("cross intensity: ", S2/self.Px_0)
+            return S2/self.Px_0
 
        def plotNormalizedPowersVsAlpha(self, alphaValues, forces):
           plt.figure()
-          Sdifferences  = np.zeros(len(alphaValues))
+          SdifferencesCrossIntensityChua  = np.zeros(len(alphaValues))
+          SdifferencesChua = np.zeros(len(alphaValues))
+          Sdifferences = np.zeros(len(alphaValues))
           curves = []
+          curvesChuaCrossIntensity = []
+          curvesChua = []
           S10=0
           for j in range(len(forces)):
                Sdifferences  = np.zeros(len(alphaValues))
                for i in range(len(alphaValues)):
                     self.alpha = alphaValues[i]
-                    # Ex, Ey = self.__calcFields(forces[j])
-                    S1, S2 = self.__calcPowersChua(forces[j])
-                    if(i == 0):
-                         S10 = S1
-                    Sdifferences[i] = self.calcNormalizedCrossIntensity(S10, S2)
+                    Sx, Sy = self.__calcPowersNewEquations(forces[j])
+                    SxChua, SyChua = self.__calcPowersChua(forces[j])
+                    SdifferencesCrossIntensityChua[i] = self.calcNormalizedPowerDifference(SxChua, SyChua)
+                    SdifferencesChua[i] = self.__calcNormalizedCrossIntensityChua(forces[j])
+                    Sdifferences[i] = self.calcNormalizedPowerDifference(Sx, Sy)
+                    # print('sdifference: ', Sdifferences[i])
+               curvesChuaCrossIntensity.append((forces[j], SdifferencesCrossIntensityChua.copy()))
+               curvesChua.append((forces[j], SdifferencesChua.copy()))
                curves.append((forces[j], Sdifferences.copy()))
-               print("S1:")
+
+               # print("S1:",)
+
 
           for curve in curves:
                plt.plot(np.rad2deg(alphaValues), curve[1], label=f'Force: {curve[0]} ')
+
+          # for curve in curvesChuaCrossIntensity:
+          #      plt.plot(np.rad2deg(alphaValues), curve[1], label=f'Force: {curve[0]} ')
+
+          # for curve in curvesChua:
+          #      plt.plot(np.rad2deg(alphaValues), curve[1], label=f'ForceChua: {curve[0]} ')
 
           plt.xlabel('Alpha (deg)')
           plt.ylabel('Normalized Power')
@@ -366,13 +421,15 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
           plt.figure()
           s1Arr = np.zeros(len(forces))
           s2Arr = np.zeros(len(forces))
-          crossIntensityArr = np.zeros(len(forces))
+          sDifferencesNormalized = np.zeros(len(forces))
 
           for i in range(len(forces)):
-               Ex, Ey = self.__calcFields(forces[i])
-               s1Arr[i], s2Arr[i] = self.__calcPower(Ex, Ey) 
-               crossIntensityArr[i] = self.calcNormalizedCrossIntensity(s1Arr[0], s2Arr[i])
-               print("normalized cross intensity: ", crossIntensityArr[i])
+               # Ex, Ey = self.__calcFields(forces[i])
+               # s1Arr[i], s2Arr[i] = self.__calcPower(Ex, Ey) 
+               # crossIntensityArr[i] = self.calcNormalizedCrossIntensity(s1Arr[0], s2Arr[i])
+               Sx, Sy = self.__calcPowersNewEquations(forces[i])
+
+               print("normalized cross intensity: ", sDifferencesNormalized[i])
                 
 
           plt.plot(forces, s1Arr, label='S1 ')
@@ -391,22 +448,24 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
           Sdiff = np.zeros(len(forces))
 
           for i in range(len(forces)):
-               Ex, Ey = self.__calcFields(forces[i])
-               S1, S2 = self.__calcPower(Ex, Ey) 
-               Sdiff[i] = self.calcNormalizedPowerDifference(S1, S2)
+               Sx, Sy = self.__calcPowersFromExEy(forces[i])
+               Sdiff[i] = self.calcNormalizedPowerDifference(Sx, Sy)
 
 
           # --- Plot 1: Sdiff vs Force ---
+          stresses = forces/(np.pi*self.b**2)
           plt.figure()
-          plt.plot(forces, Sdiff, label='Sdifference (W)', color='tab:blue')
+          plt.plot(stresses, Sdiff, label='Sdifference (W)', color='tab:blue')
 
-          coeffs1 = np.polyfit(forces, Sdiff, deg=4)
-          poly1 = np.poly1d(coeffs1)
-          x_fit1 = np.linspace(min(forces), max(forces), 500)
-          y_fit1 = poly1(x_fit1)
-          plt.plot(x_fit1, y_fit1, '--', label='Fitted Curve', color='tab:orange')
+          interp = PchipInterpolator(stresses, Sdiff)
+          x_fit = np.linspace(min(stresses), max(stresses), 500)
 
-          plt.xlabel('Force')
+          # Interpolated (fitted) power differences
+          y_fit = interp(x_fit)
+
+          plt.plot(x_fit, y_fit, '--', label='Fitted Curve', color='tab:orange')
+
+          plt.xlabel('Stress')
           plt.ylabel('Power Difference Normalized')
           plt.title('Power Difference vs Force')
           plt.legend()
@@ -418,29 +477,33 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
 # 
           # --- Plot 2: Force vs Sdiff (inverted axes) ---
           plt.figure()
-          plt.plot(Sdiff, forces, label='Force (N)', color='tab:green')
+          plt.plot(Sdiff, stresses, label='Force (N)', color='tab:green')
 
-          coeffs2 = np.polyfit(Sdiff, forces, deg=1)
-          poly2 = np.poly1d(coeffs2)
-          x_fit2 = np.linspace(min(Sdiff), max(Sdiff), 500)
-          y_fit2 = poly2(x_fit2)
-          plt.plot(x_fit2, y_fit2, '--', label='Fitted Curve', color='tab:red')
+          sorted_idx = np.argsort(Sdiff)
+          Sdiff_sorted = Sdiff[sorted_idx]
+          stresses_sorted = stresses[sorted_idx]
+          interp = PchipInterpolator(Sdiff_sorted, stresses_sorted)
+          x_fit = np.linspace(min(Sdiff_sorted), max(Sdiff_sorted), 500)
+
+          # Interpolated (fitted) power differences
+          y_fit = interp(x_fit)
+
+          plt.plot(x_fit, y_fit, '--', label='Fitted Curve', color='tab:red')
 
           plt.xlabel('Power Difference Normalized')
-          plt.ylabel('Force')
+          plt.ylabel('Stress')
           plt.title('Force vs Power Difference')
           plt.legend()
           plt.grid(True)
           plt.show()
 
-          eq2 = f"{coeffs2[0]:.5e} * Sdiff  + {coeffs2[1]:.5e}"
-          print("Force = " + eq2)
 
 
        def calculateAlphaAndBeta(self, targetForce):
             curves = []
-            df = pd.read_csv('trial3.csv')
+            df = pd.read_csv('trial2.csv')
             sdiffs = df['Sdifference'].dropna().values
+            print("sdiffs: ", sdiffs)
           #   maxPower = np.max(sdiffs)
           #   minPower = np.min(sdiffs)
             maxPower = np.max(sdiffs[sdiffs != 0])
@@ -454,31 +517,46 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
                self.alpha = alpha
                for beta in np.linspace(0, np.pi/2, 90):
                     self.beta = beta
-                    forces = np.linspace(0, targetForce, 500)
+                    forces = np.linspace(-2*targetForce, 2*targetForce, 500)
+                    stresses = forces/(np.pi * self.b**2)
+
+                    targetStress = targetForce/(np.pi*self.b**2)
+                    print("TARGET STRESS: ", targetStress)
                     powerDifferences = np.zeros(500)
                     for i in range (len(forces)): 
-                         Ex, Ey = self.__calcFields(forces[i])
-                         S1, S2 = self.__calcPower(Ex, Ey)
-                         powerDifferences[i] = self.calcNormalizedPowerDifference(S1, S2)
+                         Sx, Sy = self.__calcPowersNewEquations(forces[i])
+                         powerDifferences[i] = self.calcNormalizedPowerDifference(Sx, Sy)
                      # plot at α≈π/4, β≈π/4
-                    coeffs2 = np.polyfit(powerDifferences, forces, deg=1)
-                    poly2 = np.poly1d(coeffs2)
-                    x_fit2 = np.linspace(min(powerDifferences), max(powerDifferences), 500)
-                    y_fit2 = poly2(x_fit2)
-                    fMax = poly2(maxPower)
-                    fMin = poly2(minPower)
-                    print("fmin: ", fMin, "fMax: ", fMax, "alpha: ", np.rad2deg(alpha), "beta: ", np.rad2deg(beta))
-                    if np.isclose(np.abs(fMax - fMin), targetForce, atol=1):
-                         finds.append(f"Slope = {y_fit2[0]}, Found Fmax = {fMax:.001f}, Fmin = {fMin:.001}, α={np.rad2deg(self.alpha):.1f}°, β={np.rad2deg(self.beta):.1f}°")
-                         curves.append((x_fit2, y_fit2, maxPower, fMax, minPower, fMin))
+                    try:
+                         sorted_idx = np.argsort(powerDifferences)
+                         Sdiff_sorted = powerDifferences[sorted_idx]
+                         stresses_sorted = stresses[sorted_idx]
+                         Sdiff_unique, unique_indices = np.unique(Sdiff_sorted, return_index=True)
+                         stresses_unique = stresses_sorted[unique_indices]
+                         interp = PchipInterpolator(Sdiff_unique, stresses_unique)
+                         x_fit = np.linspace(min(Sdiff_unique), max(Sdiff_unique), 500)
+
+                         # Interpolated (fitted) power differences
+                         y_fit = interp(x_fit)
+                         print("powerDifferences range:", np.min(powerDifferences), np.max(powerDifferences))
+                         print("sdiffs range:", minPower, maxPower)
+                         stressMax = interp(maxPower)
+                         stressMin = interp(minPower)
+                         print("STRESS DIFFERENCE: ", np.abs(stressMax - stressMin))
+                         print("fmin: ", stressMin, "fMax: ", stressMax, "alpha: ", np.rad2deg(alpha), "beta: ", np.rad2deg(beta))
+                         if np.isclose(np.abs(stressMax-stressMin) , targetStress, atol=100000):
+                              finds.append(f"Slope = {y_fit[0]}, Found stress max = {stressMax:.001f}, stress min = {stressMin:.001}, α={np.rad2deg(self.alpha):.1f}°, β={np.rad2deg(self.beta):.1f}°")
+                              curves.append((x_fit, y_fit, maxPower, stressMax, minPower, stressMin))
+                    except:
+                         print("couldn't fit a curve")
 
 
             for find in finds:
                print(find)
 
             plt.figure(figsize=(8, 6))
-            for x_fit2, y_fit2, maxP, fMax, minP, fMin in curves:
-               plt.plot(x_fit2, y_fit2)
+            for x_fit, y_fit, maxP, fMax, minP, fMin in curves:
+               plt.plot(x_fit, y_fit)
                plt.plot(maxP, fMax, 'ro')  # red point for max
                plt.plot(minP, fMin, 'bo')  # blue point for min
 
@@ -494,14 +572,14 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
                     
 
 npoints = 500
-c = Calibration(.02365)
-# c.calculateAlphaAndBeta(0.08993091942) # 6.71 N is the target force
+c = Calibration(.023)
+c.calculateAlphaAndBeta(.08993091942) # 6.71 N is the target force
 # c.plotStressVsPowerDifference(np.linspace(0, 0.090748, 500))
 # c.plotPowerDifferencesNormalized(np.linspace(0, 0.08993091942, 500))
 # c.plotNormalizedPowersSeperately(np.linspace(0,0.08993091942, 500)) 
-c.plotNormalizedPowersVsAlpha(np.linspace(0,np.pi,500), np.linspace(0,2.5,3)) #GOOD! look at envelope maximum... 45 degrees is the maximum of the envelope
-c.plotNormalizedPowersVsGamma(np.linspace(0,np.pi,500), np.linspace(0,0.090748,3))
-c.plotNormalizedPowersVsBeta(np.linspace(0,np.pi,500), np.linspace(0,0.090748,3))
+# c.plotNormalizedPowersVsAlpha(np.linspace(0,np.pi,500), np.linspace(0,.08993091942,3)) #GOOD! look at envelope maximum... 45 degrees is the maximum of the envelope
+# c.plotNormalizedPowersVsGamma(np.linspace(0,np.pi,500), np.linspace(0,0.090748,3))
+# c.plotNormalizedPowersVsBeta(np.linspace(0,np.pi,500), np.linspace(0,0.090748,3))
 # alphas = np.deg2rad([30, 45, 60, 75])
 # c.plotPhiVsNormalizedForce(np.linspace(0,50,500), alphas)
 # gammas = np.deg2rad([30, 45, 60, 75])
@@ -548,3 +626,8 @@ print(c.b)
 
 #CONCLUSION: Scaling is messed up, can't get good curve fits. we need to reevaluate our method for normalizing power.
 # I think the best thing to do is to model how we do it after the way chua paper does it. Redo the multiplication to get S1 and S0 as functions of phi and beta!
+# normalized force might be wrong?? I get the same alpha curves for everything, it's just for 3N of force, my normalized force is different I thinkg
+# make sure our core cladding offset is zero. If it's not we have to use unjacketed fiber as the sensing element
+# they were using .633 micrometer cable, that changes the sensitivity a lot. (simply uniformly scales it up and down)
+#Trial 2: Slope = 0.045364637014770046, Found Fmax = 0.0, Fmin = 0.1, α=76.9°, β=42.5°
+#Tral 3: Slope = 0.045364637014770046, Found Fmax = 0.0, Fmin = 0.1, α=76.9°, β=42.5°
