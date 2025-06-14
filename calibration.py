@@ -23,7 +23,7 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
               self.p_12 = 0.27
               self.b = 62.5e-6 # Radius of fiber cladding in meters 
               self.Lb_0 = 2e-3 # unstressed beat length in meters
-              self.fiberWavelength = 1550e-9 
+              self.fiberWavelength = 1550e-9
               self.k=(2*np.pi)/self.fiberWavelength
               self.Px_0 = 1
 
@@ -39,8 +39,8 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
               self.l = interaction_length
               self.Ex_0 = 1
 
-              self.alpha = np.pi/4
-              self.beta  = np.pi/2
+              self.alpha = 0
+              self.beta  = np.pi/4
               self.gamma = np.pi/2
               self.delta = 0
               self.eta = 376.730313
@@ -276,6 +276,38 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
 
           plt.show()
           self.alpha = np.pi/4
+       
+
+
+
+       def plotNormalizedPowersVsDelta(self, deltaValues, forces):
+
+          plt.figure()
+          s1Arr = np.zeros(len(deltaValues))
+          s2Arr = np.zeros(len(deltaValues))
+          curves = []
+          for j in range(len(forces)):
+               s1Arr = np.zeros(len(deltaValues))     # new array each force
+               s2Arr = np.zeros(len(deltaValues))
+               for i in range(len(deltaValues)):
+                    self.gamma = deltaValues[i]
+                    S1, S2 = self.__calcPowersFromExEy(forces[j])
+                    s1Arr[i] = self.calcNormalizedPowerDifference(S1, S2)
+               print("S1:", s1Arr)
+               curves.append((forces[j], s1Arr))
+               print("S1:")
+
+          for curve in curves:
+               plt.plot(np.rad2deg(deltaValues), curve[1], label=f'Force: {curve[0]} ')
+
+          plt.xlabel('Delta (deg)')
+          plt.ylabel('Normalized Power')
+          plt.title('Normalized S1 and S2 vs. Delta')
+          plt.legend()
+          plt.grid(True)
+
+          plt.show()
+          self.delta = np.pi/4
 
        def plotNormalizedPowersVsGamma(self, gammaValues, forces):
           plt.figure()
@@ -317,24 +349,23 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
                s2Arr = np.zeros(len(betaValues))
                for i in range(len(betaValues)):
                     self.beta = betaValues[i]
-                    Ex, Ey = self.__calcFields(forces[j])
-                    S1, S2 = self.__calcPower(Ex, Ey)
-                    s1Arr[i], s2Arr[i] = self.calcNormalizedPower(S1, S2)
+                    S1, S2 = self.__calcPowersFromExEy(forces[j])
+                    s1Arr[i] = self.calcNormalizedPowerDifference(S1, S2)
                print("S1:", s1Arr)
-               curves.append((forces[j], s1Arr.copy()-s2Arr.copy()))
+               curves.append((forces[j], s1Arr))
                print("S1:")
 
           for curve in curves:
                plt.plot(np.rad2deg(betaValues), curve[1], label=f'Force: {curve[0]} ')
 
-          plt.xlabel('gamma (deg)')
+          plt.xlabel('beta (deg)')
           plt.ylabel('Normalized Power')
-          plt.title('Normalized S1 and S2 vs. Gamma')
+          plt.title('Normalized S1 and S2 vs. beta')
           plt.legend()
           plt.grid(True)
 
           plt.show()
-          self.gamma = np.pi/4
+          self.beta = np.pi/4
 
        def plotPhiVsNormalizedForce(self, f, alphaVals):
           phiValues = []
@@ -513,9 +544,9 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
             finds = []
             #theoretical:
             done = False
-            for alpha in np.linspace(0, np.pi/2, 90):
+            for alpha in np.linspace(0, np.pi/2, 180):
                self.alpha = alpha
-               for beta in np.linspace(0, np.pi/2, 90):
+               for beta in np.linspace(0, np.pi/2, 180):
                     self.beta = beta
                     forces = np.linspace(-2*targetForce, 2*targetForce, 500)
                     stresses = forces/(np.pi * self.b**2)
@@ -524,9 +555,9 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
                     print("TARGET STRESS: ", targetStress)
                     powerDifferences = np.zeros(500)
                     for i in range (len(forces)): 
-                         Sx, Sy = self.__calcPowersNewEquations(forces[i])
+                         Sx, Sy = self.__calcPowersFromExEy(forces[i])
                          powerDifferences[i] = self.calcNormalizedPowerDifference(Sx, Sy)
-                     # plot at α≈π/4, β≈π/4
+                    # plot at α≈π/4, β≈π/4
                     try:
                          sorted_idx = np.argsort(powerDifferences)
                          Sdiff_sorted = powerDifferences[sorted_idx]
@@ -544,7 +575,7 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
                          stressMin = interp(minPower)
                          print("STRESS DIFFERENCE: ", np.abs(stressMax - stressMin))
                          print("fmin: ", stressMin, "fMax: ", stressMax, "alpha: ", np.rad2deg(alpha), "beta: ", np.rad2deg(beta))
-                         if np.isclose(np.abs(stressMax-stressMin) , targetStress, atol=100000):
+                         if np.isclose(stressMax-stressMin, targetStress, atol=10000000):
                               finds.append(f"Slope = {y_fit[0]}, Found stress max = {stressMax:.001f}, stress min = {stressMin:.001}, α={np.rad2deg(self.alpha):.1f}°, β={np.rad2deg(self.beta):.1f}°")
                               curves.append((x_fit, y_fit, maxPower, stressMax, minPower, stressMin))
                     except:
@@ -555,10 +586,10 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
                print(find)
 
             plt.figure(figsize=(8, 6))
-            for x_fit, y_fit, maxP, fMax, minP, fMin in curves:
+            for x_fit, y_fit, maxP, stressMax, minP, stressMin in curves:
                plt.plot(x_fit, y_fit)
-               plt.plot(maxP, fMax, 'ro')  # red point for max
-               plt.plot(minP, fMin, 'bo')  # blue point for min
+               plt.plot(maxP, stressMax, 'ro')  # red point for max
+               plt.plot(minP, stressMin, 'bo')  # blue point for min
 
                plt.xlabel('Power Difference')
                plt.ylabel('Force')
@@ -572,14 +603,15 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
                     
 
 npoints = 500
-c = Calibration(.023)
+c = Calibration(.01867)
 c.calculateAlphaAndBeta(.08993091942) # 6.71 N is the target force
+# c.plotNormalizedPowersVsDelta(np.linspace(0,np.pi,500), np.linspace(0,.08993091942,3))
 # c.plotStressVsPowerDifference(np.linspace(0, 0.090748, 500))
 # c.plotPowerDifferencesNormalized(np.linspace(0, 0.08993091942, 500))
 # c.plotNormalizedPowersSeperately(np.linspace(0,0.08993091942, 500)) 
 # c.plotNormalizedPowersVsAlpha(np.linspace(0,np.pi,500), np.linspace(0,.08993091942,3)) #GOOD! look at envelope maximum... 45 degrees is the maximum of the envelope
 # c.plotNormalizedPowersVsGamma(np.linspace(0,np.pi,500), np.linspace(0,0.090748,3))
-# c.plotNormalizedPowersVsBeta(np.linspace(0,np.pi,500), np.linspace(0,0.090748,3))
+# c.plotNormalizedPowersVsBeta(np.linspace(0,np.pi,500), np.linspace(0,.08993091942,3))
 # alphas = np.deg2rad([30, 45, 60, 75])
 # c.plotPhiVsNormalizedForce(np.linspace(0,50,500), alphas)
 # gammas = np.deg2rad([30, 45, 60, 75])
