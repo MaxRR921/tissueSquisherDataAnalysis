@@ -533,7 +533,7 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
 
        def calculateAlphaAndBeta(self, targetForce):
             curves = []
-            df = pd.read_csv('trial3.csv')
+            df = pd.read_csv('trial4.csv')
             sdiffs = df['Sdifference'].dropna().values
             print("sdiffs: ", sdiffs)
           #   maxPower = np.max(sdiffs)
@@ -691,7 +691,7 @@ print(c.b)
 
 
 #GOING FROM 3.65 to 2.0 on scale ::
-# need to add +2.53 to heights: 6.18 - 4.53
+# need to add +2.53 to heights: 6 - 4.35
 
 
 #2.34 pounds
