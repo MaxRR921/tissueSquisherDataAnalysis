@@ -142,6 +142,7 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
 
 
        def __calcPowersNewEquations(self, force):
+          #divide force by width 
           f = force/self.l
           self.normalizedForce = 2 * self.N**3 * (1 + self.sigma) * (self.p_12 - self.p_11) * self.Lb_0 * f / (self.fiberWavelength * np.pi * self.b * self.Y)  # Normalized force66
           self.phi = 0.5 * np.arctan2(self.normalizedForce * np.sin(2*self.alpha),
@@ -154,7 +155,7 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
 
 
        def __calcPowersFromExEy(self, force):
-          f = force/self.l
+          f = force/0.0002
           self.normalizedForce = 2 * self.N**3 * (1 + self.sigma) * (self.p_12 - self.p_11) * self.Lb_0 * f / (self.fiberWavelength * np.pi * self.b * self.Y)  # Normalized force66
           self.phi = 0.5 * np.arctan2(self.normalizedForce * np.sin(2*self.alpha),
                     1 + self.normalizedForce * np.cos(2*self.alpha) )
@@ -532,7 +533,7 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
 
        def calculateAlphaAndBeta(self, targetForce):
             curves = []
-            df = pd.read_csv('trial2.csv')
+            df = pd.read_csv('trial3.csv')
             sdiffs = df['Sdifference'].dropna().values
             print("sdiffs: ", sdiffs)
           #   maxPower = np.max(sdiffs)
@@ -575,7 +576,7 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
                          stressMin = interp(minPower)
                          print("STRESS DIFFERENCE: ", np.abs(stressMax - stressMin))
                          print("fmin: ", stressMin, "fMax: ", stressMax, "alpha: ", np.rad2deg(alpha), "beta: ", np.rad2deg(beta))
-                         if np.isclose(stressMax-stressMin, targetStress, atol=10000000):
+                         if np.isclose(stressMax-stressMin, targetStress, atol=10000):
                               finds.append(f"Slope = {y_fit[0]}, Found stress max = {stressMax:.001f}, stress min = {stressMin:.001}, α={np.rad2deg(self.alpha):.1f}°, β={np.rad2deg(self.beta):.1f}°")
                               curves.append((x_fit, y_fit, maxPower, stressMax, minPower, stressMin))
                     except:
@@ -663,3 +664,38 @@ print(c.b)
 # they were using .633 micrometer cable, that changes the sensitivity a lot. (simply uniformly scales it up and down)
 #Trial 2: Slope = 0.045364637014770046, Found Fmax = 0.0, Fmin = 0.1, α=76.9°, β=42.5°
 #Tral 3: Slope = 0.045364637014770046, Found Fmax = 0.0, Fmin = 0.1, α=76.9°, β=42.5°
+
+#Use fiber width instead of interaction length for force/area .22 mm
+
+
+# DO PHOTONICS WESt ABSTRACT
+#gamma sensor to patch cable angle
+
+
+
+# trial 3:
+# Slope = -14656461.171191733, Found stress max = 7927069.1, stress min = 6e+05, α=42.2°, β=45.8°
+# Slope = -14656461.171191733, Found stress max = -534743.2, stress min = -8e+06, α=47.8°, β=48.3°
+# Slope = -14656461.171191733, Found stress max = -20000693.7, stress min = -3e+07, α=48.8°, β=54.8°
+
+
+#trial 2:
+# Slope = -14656461.171191733, Found stress max = 58815499.5, stress min = 5e+07, α=41.2°, β=29.7°
+# Slope = -14656461.171191733, Found stress max = 27291218.4, stress min = 2e+07, α=42.2°, β=38.7°
+# Slope = -14656461.171191733, Found stress max = 15055663.4, stress min = 8e+06, α=42.7°, β=43.2°
+# Slope = -14656461.171191733, Found stress max = 16867407.6, stress min = 1e+07, α=43.7°, β=42.7°
+# Slope = -14656461.171191733, Found stress max = -7170635.9, stress min = -1e+07, α=47.8°, β=50.3°
+# Slope = -6197421.457157226, Found stress max = 22193708.1, stress min = 1e+07, α=76.4°, β=43.2°
+
+
+
+
+#GOING FROM 3.65 to 2.0 on scale ::
+# need to add +2.53 to heights: 6.18 - 4.53
+
+
+#2.34 pounds
+
+
+#25.6 mm - black holder + 9.5 - black platform things = 35.1 total
+# Scale: 32.57 mm
