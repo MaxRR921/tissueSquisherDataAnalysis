@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import ScalarFormatter
 import pandas as pd
 from scipy.interpolate import PchipInterpolator
+from sklearn.ensemble import RandomForestRegressor
 
 """
 Potential issues:
@@ -582,17 +583,52 @@ class Calibration:  # Px - Py/Px+Py Use Ex0, normalize power, should match
             plt.tight_layout()
             plt.show()
 
-
     def calculateForceOnFiber(self, inputForce):
         divisor = np.pi * ((self.l / 2) ** 2)
         left = inputForce / divisor
         right = self.l * self.b
         return left * right
 
+    def rankFeatures(self, n_samples=1000):
+
+        # Generate feature matrix
+        features = []
+        targets = []
+
+        for _ in range(n_samples):
+            # Sample random values
+            force = np.random.uniform(0, 0.1)
+            alpha = np.random.uniform(0, np.pi / 2)
+            beta = np.random.uniform(0, np.pi / 2)
+            l = np.random.uniform(0, 0.03) # interaction length
+
+            # Set parameters and calculate
+            self.alpha, self.beta = alpha, beta
+            self.l = l
+            Sx, Sy = self.__calcPowersFromExEy(force)
+            power_diff = self.calcNormalizedPowerDifference(Sx, Sy)
+
+            features.append([force, alpha, beta, force / (np.pi * self.b ** 2), l])
+            targets.append(power_diff)
+
+        # Train Random Forest
+        rf = RandomForestRegressor(n_estimators=100)
+        rf.fit(features, targets)
+
+        # Get importance scores
+        importance = rf.feature_importances_
+        feature_names = ['force', 'alpha', 'beta', 'stress', 'interaction length']
+
+        # Rank and display
+        ranking = sorted(zip(feature_names, importance), key=lambda x: x[1], reverse=True)
+
+        return ranking
+
 
 npoints = 500
 c = Calibration(.01867)
-c.calculateAlphaAndBeta(.08993091942)  # 6.71 N is the target force
+ranking = c.rankFeatures()
+print(ranking)
 # c.plotNormalizedPowersVsDelta(np.linspace(0,np.pi,500), np.linspace(0,.08993091942,3))
 # c.plotStressVsPowerDifference(np.linspace(0, 0.090748, 500))
 # c.plotPowerDifferencesNormalized(np.linspace(0, 0.08993091942, 500))
