@@ -231,6 +231,11 @@ class Calibration:  # Px - Py/Px+Py Use Ex0, normalize power, should match
     def calcNormalizedPowerDifference(self, S1, S2):
         return (S2 - S1) / (S1 + S2)
 
+    def calcNormalizedPowers(self, Sx, Sy):
+        S1 = Sx/(Sx + Sy)
+        S2 = Sy/(Sx + Sy)
+        return S1, S2
+
     def calcNormalizedCrossIntensity(self, S1, S2):
         print(self.Px_0)
         print("cross intensity: ", S2 / self.Px_0)
@@ -600,13 +605,14 @@ class Calibration:  # Px - Py/Px+Py Use Ex0, normalize power, should match
             force = np.random.uniform(0, 0.1)
             alpha = np.random.uniform(0, np.pi / 2)
             beta = np.random.uniform(0, np.pi / 2)
-            l = np.random.uniform(0, 0.03) # interaction length
+            l = np.random.uniform(0, 0.03)  # interaction length
 
             # Set parameters and calculate
             self.alpha, self.beta = alpha, beta
             self.l = l
             Sx, Sy = self.__calcPowersFromExEy(force)
-            power_diff = self.calcNormalizedPowerDifference(Sx, Sy)
+            # power_diff = self.calcNormalizedPowerDifference(Sx, Sy) # this does (px -py) - (px + py)
+
 
             features.append([force, alpha, beta, force / (np.pi * self.b ** 2), l])
             targets.append(power_diff)
@@ -627,6 +633,7 @@ class Calibration:  # Px - Py/Px+Py Use Ex0, normalize power, should match
 
 npoints = 500
 c = Calibration(.01867)
+# c.calculateAlphaAndBeta(500)
 ranking = c.rankFeatures()
 print(ranking)
 # c.plotNormalizedPowersVsDelta(np.linspace(0,np.pi,500), np.linspace(0,.08993091942,3))
