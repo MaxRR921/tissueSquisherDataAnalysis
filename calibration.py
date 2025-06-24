@@ -99,7 +99,7 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
 
 
        def __calcFields(self, force): 
-              f = force/.0002
+              f = force
               self.normalizedForce = 2 * self.N**3 * (1 + self.sigma) * (self.p_12 - self.p_11) * self.Lb_0 * f / (self.fiberWavelength * np.pi * self.b * self.Y)  # Normalized force66
               self.phi = 0.5 * np.arctan2(self.normalizedForce * np.sin(2*self.alpha),
                         1 + self.normalizedForce * np.cos(2*self.alpha) )
@@ -552,71 +552,74 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
 
        def calculateAlphaAndBeta(self, targetForce):
             curves = []
-            df = pd.read_csv('trial4.csv')
+            df = pd.read_csv('avg.csv')
             sdiffs = df['Sdifference'].dropna().values
             print("sdiffs: ", sdiffs)
           #   maxPower = np.max(sdiffs)
           #   minPower = np.min(sdiffs)
           #   maxPower = np.max(sdiffs[sdiffs != 0])
           #   minPower = np.min(sdiffs[sdiffs != 0])
-            minPower = -.396
-            maxPower = .291
+            minPower = .242
+            maxPower = .260
             print("Max power: ", maxPower, "Min power: ", minPower)
 
             finds = []
             #theoretical:
             done = False
           #   self.gamma = 1.3
-            for gamma in np.linspace(0, np.pi/2, 30):
-               self.gamma = gamma 
-               for alpha in np.linspace(0, np.pi/2, 30):
-                    self.alpha = alpha
-                    for beta in np.linspace(0, np.pi/2, 30):
-                         self.beta = beta
-                         forces = np.linspace(0, targetForce, 500)
-                         stresses = forces/(np.pi * self.b**2)
+            lengths = [0.0180, .01818, .01867]
+            for l in lengths: 
+               self.l = l
+               for gamma in np.linspace(0, np.pi/2, 30):
+                    self.gamma = gamma 
+                    for alpha in np.linspace(0, np.pi/2, 30):
+                         self.alpha = alpha
+                         for beta in np.linspace(0, np.pi/2, 30):
+                              self.beta = beta
+                              forces = np.linspace(0, targetForce, 500)
+                              stresses = forces/(np.pi * self.b**2)
 
-                         targetStress = targetForce/(np.pi*self.b**2)
-                         print("TARGET STRESS: ", targetStress)
-                         powerDifferences = np.zeros(500)
-                         for i in range (len(forces)): 
-                              Sx, Sy = self.__calcFields(forces[i])
-                              powerDifferences[i] = self.calcNormalizedPowerDifference(Sx, Sy)
-                         # plot at α≈π/4, β≈π/4
-                         theoreticalPmax = np.max(powerDifferences)
-                         theoreticalPmin = np.min(powerDifferences)
+                              targetStress = targetForce/(np.pi*self.b**2)
+                              print("TARGET STRESS: ", targetStress)
+                              powerDifferences = np.zeros(500)
+                              for i in range (len(forces)): 
+                                   Sx, Sy = self.__calcFields(forces[i])
+                                   powerDifferences[i] = self.calcNormalizedPowerDifference(Sx, Sy)
+                              # plot at α≈π/4, β≈π/4
+                              theoreticalPmax = np.max(powerDifferences)
+                              theoreticalPmin = np.min(powerDifferences)
 
-                         
-                         if (minPower >= theoreticalPmin and maxPower <= theoreticalPmax):
-                              sorted_idx = np.argsort(powerDifferences)
-                              Sdiff_sorted = powerDifferences[sorted_idx]
-                              forces_sorted = forces[sorted_idx]
-                              Sdiff_unique, unique_indices = np.unique(Sdiff_sorted, return_index=True)
-                              forces_unique = forces_sorted[unique_indices]
-                              if len(Sdiff_unique) < 2:
-                                   print(f"Skipping α={np.rad2deg(alpha):.1f}, β={np.rad2deg(beta):.1f}, γ={np.rad2deg(gamma):.1f} — only one unique Sdiff")
-                                   continue  # Skip this case
-                              interp = PchipInterpolator(Sdiff_unique, forces_unique)
+                              
+                              if (minPower >= theoreticalPmin and maxPower <= theoreticalPmax):
+                                   sorted_idx = np.argsort(powerDifferences)
+                                   Sdiff_sorted = powerDifferences[sorted_idx]
+                                   forces_sorted = forces[sorted_idx]
+                                   Sdiff_unique, unique_indices = np.unique(Sdiff_sorted, return_index=True)
+                                   forces_unique = forces_sorted[unique_indices]
+                                   if len(Sdiff_unique) < 2:
+                                        print(f"Skipping α={np.rad2deg(alpha):.1f}, β={np.rad2deg(beta):.1f}, γ={np.rad2deg(gamma):.1f} — only one unique Sdiff")
+                                        continue  # Skip this case
+                                   interp = PchipInterpolator(Sdiff_unique, forces_unique)
 
-                              x_fit = np.linspace(min(Sdiff_sorted), max(Sdiff_sorted), 500)
+                                   x_fit = np.linspace(min(Sdiff_sorted), max(Sdiff_sorted), 500)
 
-                              # Interpolated (fitted) power differences
-                              y_fit = interp(x_fit)
+                                   # Interpolated (fitted) power differences
+                                   y_fit = interp(x_fit)
 
 
-                              # Interpolated (fitted) power differences
-                              print("powerDifferences range:", np.min(powerDifferences), np.max(powerDifferences))
-                              print("sdiffs range:", minPower, maxPower)
-                              forceMax = interp(maxPower)
-                              forceMin = interp(minPower)
-                              print("FORCE Max (real val): ", np.abs(forceMax))
-                              print("theoretical max force:", targetForce)
-                              # print("fmin: ", stressMin, "fMax: ", stressMax, "alpha: ", np.rad2deg(alpha), "beta: ", np.rad2deg(beta), "gamma: ", np.rad2deg(gamma))
-                              if np.isclose(forceMax, targetForce, atol=.01) and np.isclose(forceMin, 0, atol=0.01):
-                                   finds.append(f"Slope = {y_fit[0]}, Found force max = {forceMax:.6f}, force min = {forceMin:.6f}, α={np.rad2deg(self.alpha):.1f}°, β={np.rad2deg(self.beta):.1f}°, gamma={np.rad2deg(self.gamma):.1f}")
-                                   curves.append((x_fit, y_fit, maxPower, forceMax, minPower, forceMin))
-                         else:
-                              print("Invalid range")
+                                   # Interpolated (fitted) power differences
+                                   print("powerDifferences range:", np.min(powerDifferences), np.max(powerDifferences))
+                                   print("sdiffs range:", minPower, maxPower)
+                                   forceMax = interp(maxPower)
+                                   forceMin = interp(minPower)
+                                   print("FORCE Max (real val): ", np.abs(forceMax))
+                                   print("theoretical max force:", targetForce)
+                                   # print("fmin: ", stressMin, "fMax: ", stressMax, "alpha: ", np.rad2deg(alpha), "beta: ", np.rad2deg(beta), "gamma: ", np.rad2deg(gamma))
+                                   if np.isclose(maxPower, theoreticalPmax, atol=.01) and np.isclose(minPower, theoreticalPmin, atol=.01):
+                                        finds.append(f"Slope = {y_fit[0]}, Found force max = {forceMax:.6f}, force min = {forceMin:.6f}, α={np.rad2deg(self.alpha):.1f}°, β={np.rad2deg(self.beta):.1f}°, gamma={np.rad2deg(self.gamma):.1f}")
+                                        curves.append((x_fit, y_fit, maxPower, forceMax, minPower, forceMin))
+                              else:
+                                   print("Invalid range")
 
 
             for find in finds:
@@ -640,8 +643,8 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
                     
 
 npoints = 500
-c = Calibration(.01818)
-c.calculateAlphaAndBeta(0.03177983425) # 6.71 N is the target force
+c = Calibration(.01800)
+c.calculateAlphaAndBeta(184) # 6.71 N is the target force
 # c.plotNormalizedPowersVsDelta(np.linspace(0,np.pi,500), np.linspace(0,.08993091942,3))
 # c.plotStressVsPowerDifference(np.linspace(0, 0.090748, 500))
 # c.plotPowerDifferencesNormalized(np.linspace(0, 0.08993091942, 500))  
@@ -734,6 +737,8 @@ print(c.b)
 # need to add +2.53 to heights: 6 - 4.35
 
 
+
+
 #2.34 pounds
 
 
@@ -764,3 +769,9 @@ print(c.b)
 # did .03177 6-3.9
 
 
+# 32.5 = scale
+# 34.68 = sample holder
+
+# 2.18 diff
+
+# 
