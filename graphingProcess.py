@@ -78,6 +78,7 @@ class GraphingProcess(QtWidgets.QMainWindow):
         # Timer to poll queue
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.check_queue)
+        
         self.timer.start(100)  # 10 Hz
 
    #NOTE: POWERMETER IS ACTUALLY POLLING QUITE SLOW.... so i made it update only when powermeter updates and the graph is way slower. 
