@@ -32,3 +32,6 @@ The gui is simple, and includes the ability to add moves. Each move has a target
 Additionally, the software includes the ability to display real time plots, which currently consist of a micrometer position vs. time plot, a powermeter1 vs. time plot, a powermeter2 vs. time plot, a normalized power difference vs. time plot and a delta pol vs. time plot, which does not update in real time.   
   
 As data is taken from each sensor, it is added to queues that are dispatched from the producer thread to the consumer PyQtGraph process. the PyQtGraph process dequeues data from the queues into arrays (slow, I know, but the PyQtGraphs can only plot array to my knowledge), which are then plotted. Each device thread also keeps a seperate queue from the one that is read in the PyQtGraph process and dumps it all into a csv so we can perform later analysis. 
+
+
+![Software main screen](images/main_screen.png)
