@@ -7,9 +7,12 @@ class AngleFinder:
         self.sin_func = None
         self.optimalAlpha = 0
         self.y_values = None
-        self.x_values = [-separation, 0, separation]  # Initialize x-values
+        self.x_values = [-separation, -separation+np.pi/18, 0, separation - np.pi/18, separation]  # Initialize x-values
 
     def findAngle(self, y_values):
+        for i in range(100):
+            print("POWERS: ", y_values)
+            
         self.y_values = y_values
 
         # Define the sine function with fixed frequency B = 2, 'sensitivity' with respect to alpha will always have this frequency

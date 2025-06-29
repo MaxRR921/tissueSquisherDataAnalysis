@@ -1,4 +1,3 @@
-import dataAnalysisVmaster
 import numpy as np
 import tkinter as tk
 import controller
@@ -13,6 +12,10 @@ from ttkthemes import ThemedTk
 import polarimeter
 import angleFinder
 import csv
+import multiprocessing
+import graphingProcess
+
+from scipy.interpolate import interp1d
 
 """!THINKING MAYBE I SHOULD JUSt iNitiAlize all of the threads in init, then call them later"""
 
@@ -34,6 +37,10 @@ class Gui:
         self.window.title("Data GUI")
         self.window.geometry("800x800")
         self.numExecutions = 1
+        self.signalGraph = multiprocessing.Queue()
+        self.signalAngleFinder = threading.Event()
+        self.signalAngleFinder.clear()
+        
 
         #Initializing device classes.
         try:
@@ -42,12 +49,13 @@ class Gui:
             print("Micrometer Connection Error")
             self.micrometerController = None
 
+        self.polarimeter = None
         try:
             self.polarimeter = polarimeter.Polarimeter(self.micrometerController)
             self.polarimeterThread = threading.Thread(target=self.polarimeter.start, args=[])
         except:
             print("Polarimeter Connection Error")
-            self.polarimeter = None
+            
 
         try:
             self.powermeter = powermeter.Powermeter()
@@ -98,16 +106,26 @@ class Gui:
         #list of times recorded
         self.timeList = []
 
+        self.deltaPowerDifferences = []
+        
+
+        self.pyqt_process = None
+
         # adding listFrame
         self.listFrame = tk.Frame(self.window, width=800, height=1000)  # Adjust the width here for the left panel
         self.listFrame.grid(row=0, column=0, columnspan= 2, rowspan=2, sticky="nsew")
         self.listFrame.grid_propagate(False)
+
+
 
         # Create top menu frame
         self.topMenuFrame = tk.Frame(self.window, height=30, background="light grey")  # Adjust the height here
         self.topMenuFrame.grid(row=0, column=0, columnspan=2, sticky="new")
         self.topMenuFrame.grid_propagate(False)
         self.addTopMenuButtons()
+        
+        self.readSavedIdealAlpha()
+        self.readSavedIdealBeta() 
         
         #create bottomFrame 
         self.bottomFrame = tk.Frame(self.window, height=80, background="light grey")
@@ -169,6 +187,12 @@ class Gui:
             
         self.powermeterThread.join()
 
+
+        if self.pyqt_process is not None and self.pyqt_process.is_alive():
+                print("Terminating PyQt process...")
+                self.pyqt_process.terminate()
+                self.pyqt_process.join()
+
         self.root.destroy()
 
     """run begins the main loop. this is fine just a tkinter thing"""
@@ -177,19 +201,20 @@ class Gui:
 
     """addTopMenuButtons is executed from init, calls the methods that create all of the buttons"""
     def addTopMenuButtons(self):
-        self.__dropdownButton(self.topMenuFrame)
         self.__browseDataFileButton(self.topMenuFrame)
+        self.__startGraphingButton(self.topMenuFrame)
+        self.__findAngleButton(self.topMenuFrame)
+        self.alphaLabel = ttk.Label(self.topMenuFrame, text="Ideal Alpha: N/A")
+        self.alphaLabel.pack(side='left')
+        self.betaLabel = ttk.Label(self.topMenuFrame, text="Ideal Ideal Beta: N/A")
+        self.betaLabel.pack(side='left')
+         
 
     #ALL BUTTONS IN TOP MENU
-
-
     """browseDataFile button creates the button for browsing for the data files."""
     def __browseDataFileButton(self, frameTopMenu):
         browseDataFileButton = ttk.Button(frameTopMenu, text="browse for data file", command=lambda: self.__browseFile())
         browseDataFileButton.pack(side='left')
-
-    
-
 
     """browseFile opens the file browser, is executed from the button"""
     def __browseFile(self):
@@ -197,127 +222,36 @@ class Gui:
         if self.filePath:
             self.__plot()
     
-
-
-        
-        
-
-
-
-    
-        
-
-
     """startpolarimeterthread starts the thread for data collection from the powlarimeter. This thread runs polarimeter.start"""
     def __startPolarimeterThread(self):
         print("SHOULD START")
         self.polarimeterThread = threading.Thread(target=self.polarimeter.start, args=[])
         self.polarimeterThread.start()
 
-    """dropdownButton creates the dropdown button for all of the graphs that the user has the option to add"""
-    def __dropdownButton(self, frameTopMenu):
-        dropdownButton = ttk.Menubutton(frameTopMenu, text="Add Graphs", direction="below")
-        dropdownMenu = tk.Menu(dropdownButton, tearoff=False)
-        dropdownMenu.add_command(label="Micrometer position vs. Time", command=self.__option1)
-        dropdownMenu.add_command(label="Power difference vs. Time", command=self.__option2)
-        dropdownMenu.add_command(label="Polarimter Δpol vs. Time ", command=self.__option3)
-        dropdownMenu.add_command(label="power1 vs. distance ", command=self.__option4)
-        dropdownMenu.add_command(label="power2 vs. distance ", command=self.__option5)
+    def __startGraphingButton(self, frameTopMenu):
+        startPyQtButton = ttk.Button(frameTopMenu, text='Start PyQt Plot', command=lambda: self.startPyqtProcess())
+        startPyQtButton.pack(side="left")
 
-        dropdownMenu.add_command(label="power dif vs. time", command=self.__option6)
+    def __findAngleButton(self, frameTopMenu):
+        findAngleButton = ttk.Button(frameTopMenu, text='open angle finder', command=lambda: self.findAngle())
+        findAngleButton.pack(side="left")
 
-        dropdownMenu.add_command(label="power 1 vs. time", command=self.__option7)
+    def startPyqtProcess(self):
+        """Spawn a separate process that runs the PyQt/pyqtgraph event loop."""
+        # If not already running (or if the process has ended), start it
+        if self.pyqt_process is None or not self.pyqt_process.is_alive():
+            print("Starting PyQt process...")
+            if not self.polarimeter == None:
+                self.pyqt_process = multiprocessing.Process(target=graphingProcess.run_pyqt_app,
+                                                            args=(self.signalGraph, self.micrometerController.plotQueue, self.powermeter.device1PlotQueue, self.powermeter.device2PlotQueue, self.polarimeter.dataAnalyzer.phaseQueue, self.polarimeter.dataAnalyzer.strainQueue))
+                self.pyqt_process.start()
+            elif self.polarimeter == None:
+                self.pyqt_process = multiprocessing.Process(target=graphingProcess.run_pyqt_app,
+                                                            args=(self.signalGraph, self.micrometerController.plotQueue, self.powermeter.device1PlotQueue, self.powermeter.device2PlotQueue, None, None))
+                self.pyqt_process.start()
+        else:
+            print("PyQt process is already running!")        
 
-        dropdownMenu.add_command(label="power 2 vs. time", command=self.__option8)
-
-        dropdownButton["menu"] = dropdownMenu
-        dropdownButton.pack(side="left")
-
-
-
-    """options are all of the options to select the plots you want to see displayed in real time (semi real time
-    in the case of the polarimeter plot). iti initializes all of the plot2D objects""" 
-    def __option1(self):
-        print("Option 1 selected")
-        def remove_plot(plot):
-            self.plotList.remove(plot)
-            self.micrometerPlot = None  # Clear the reference
-            print(f"Plot '{plot.title}' closed and removed from plotList.")
-        
-        self.micrometerPlot = Plot2D('micrometer plot', 'time', 'distance', on_close=remove_plot)
-        self.plotList.append(self.micrometerPlot)
-
-    def __option2(self):
-        print("Option 2 selected")
-        def remove_plot(plot):
-            self.plotList.remove(plot)
-            self.powerPlot = None  # Clear the reference
-            print(f"Plot '{plot.title}' closed and removed from plotList.")
-        
-        self.powerPlot = Plot2D('power plot', 'distance (mm)', 'power (um)', True, on_close=remove_plot)
-        self.plotList.append(self.powerPlot)
-
-    def __option3(self):
-        print("Option 3 selected")
-        def remove_plot(plot):
-            self.plotList.remove(plot)
-            self.polPlot = None  # Clear the reference
-            print(f"Plot '{plot.title}' closed and removed from plotList.")
-        
-        self.polPlot = Plot2D('polarimeter plot', 'strain', 'phase', on_close=remove_plot)
-        self.plotList.append(self.polPlot)
-
-    def __option4(self):
-        print("Option 4 selected")
-        def remove_plot(plot):
-            self.plotList.remove(plot)
-            self.pow1Plot = None  # Clear the reference
-            print(f"Plot '{plot.title}' closed and removed from plotList.")
-        
-        self.pow1Plot = Plot2D('power 1 plot', 'distance', 'power', on_close=remove_plot)
-        self.plotList.append(self.pow1Plot)
-
-    def __option5(self):
-        print("Option 5 selected")
-        def remove_plot(plot):
-            self.plotList.remove(plot)
-            self.pow2Plot = None  # Clear the reference
-            print(f"Plot '{plot.title}' closed and removed from plotList.")
-        
-        self.pow2Plot = Plot2D('power 2 plot', 'distance', 'power', on_close=remove_plot)
-        self.plotList.append(self.pow2Plot)
-
-    def __option6(self):
-        print("Option 6 selected")
-        def remove_plot(plot):
-            self.plotList.remove(plot)
-            self.noisePlotPowDif = None  # Clear the reference
-            print(f"Plot '{plot.title}' closed and removed from plotList.")
-        
-        self.noisePlotPowDif = Plot2D("power dif vs time", 'time', 'power dif', on_close=remove_plot)
-        self.plotList.append(self.noisePlotPowDif)
-
-    def __option7(self):
-        print("Option 7 selected")
-        def remove_plot(plot):
-            self.plotList.remove(plot)
-            self.noisePlotPow1 = None  # Clear the reference
-            print(f"Plot '{plot.title}' closed and removed from plotList.")
-        
-        self.noisePlotPow1 = Plot2D("power 1 vs time", 'time', 'power dif', on_close=remove_plot)
-        self.plotList.append(self.noisePlotPow1)
-
-    def __option8(self):
-        print("Option 8 selected")
-        def remove_plot(plot):
-            self.plotList.remove(plot)
-            self.noisePlotPow2 = None  # Clear the reference
-            print(f"Plot '{plot.title}' closed and removed from plotList.")
-        
-        self.noisePlotPow2 = Plot2D("power 2 vs time", 'time', 'power dif', on_close=remove_plot)
-        self.plotList.append(self.noisePlotPow2)
-            
-            
 
     """adds all of the buttons in the bottom frame"""
     def addBottomFrameButtons(self, listFrame):
@@ -329,7 +263,7 @@ class Gui:
         listFrame.grid_columnconfigure(2, weight=1)
         listFrame.grid_columnconfigure(3, weight=2)
         
-        executeAllMovesButton = ttk.Button(listFrame, text='execute all moves', command=lambda: (self.saveNumExecutions(numExec), self.startExecuteThread(self.moveList)))
+        executeAllMovesButton = ttk.Button(listFrame, text='execute all moves', command=lambda: (self.saveNumExecutions(numExec), self.startExecuteThread(self.moveList, True)))
         executeAllMovesButton.grid(row=2, column=0, sticky='sw', pady=5, padx=30)
 
         recordNoiseButton = ttk.Button(listFrame, text='collect noise', command=lambda: (self.startNoiseThread()))
@@ -364,8 +298,9 @@ class Gui:
         raiseMove.velocity = "1"
         raiseMove.targetHeight = "12"
         listTemp = []
+        self.numExecutions = 1
         listTemp.append(raiseMove)
-        self.startExecuteThread(listTemp)
+        self.startExecuteThread(listTemp, False)
 
 
         
@@ -373,10 +308,9 @@ class Gui:
     """startExecuteThread resets all of the constantly polling plots... starts the execute thread which calls 
     thecollect method. 
     !! should make it just use self.movelist...."""
-    def startExecuteThread(self, moveList):
-        for plot in self.plotList:
-            plot.resetPlot()
-        self.executeThread = threading.Thread(target=self.__collect, args=[moveList])
+    def startExecuteThread(self, moveList, collectData):
+        self.signalGraph.put("STOP")
+        self.executeThread = threading.Thread(target=self.__collect, args=[moveList, collectData])
         self.executeThread.start()
 
     def startNoiseThread(self):
@@ -408,7 +342,205 @@ class Gui:
             self.noisePlotPow2.generateCsvFromPlot("power 2 vs. time.csv")
         except:
             print("plot not open")
+
+
+
+    #STRANGE: NOTE: when doing this sometimes the pyqt plots just don't do anything. Maybe add a little wait?
+
+    # Need to figure out how to get the data into the angleFinder script. We need to get the minumum and maximum from the power difference!
+            
+            #plan: 
+            # two new queues in the powermeters, pop them off in here and interpolate just like I did for the plot. I feel like this is good because the thing 
+
+    def findAngle(self):
+        powerRatios = []
+        new_window = tk.Toplevel()
+        new_window.title("Angle Data Collection")
+        new_window.geometry("300x200")
+        angle = -20
+
+        rotate_label = ttk.Label(new_window, text=f"Rotate to {angle} degrees.")
+        rotate_label.pack(pady=(10, 0))
+
+        # Min Height
+        ttk.Label(new_window, text="Min Height:").pack(pady=(10, 0))
+        min_height_entry = ttk.Entry(new_window)
+        min_height_entry.pack()
+
+        # Max Height
+        ttk.Label(new_window, text="Max Height:").pack(pady=(10, 0))
+        max_height_entry = ttk.Entry(new_window)
+        max_height_entry.pack()
         
+
+        # Dropdown for saving target: alpha or beta
+        ttk.Label(new_window, text="Save to:").pack(pady=(10, 0))
+        save_target = tk.StringVar(value="alpha")  # default value
+        save_dropdown = ttk.Combobox(new_window, textvariable=save_target, state="readonly")
+        save_dropdown['values'] = ("alpha", "beta")
+        save_dropdown.pack()
+    
+
+
+        # Begin Collection Button
+        def begin_collection():
+            nonlocal angle
+            min_height = str(min_height_entry.get())
+            max_height = str(max_height_entry.get())
+            self.signalAngleFinder.clear()
+            
+            if float(max_height) <= float(min_height):
+                print("can't enter this height")
+                return
+
+            listTemp = []
+            positionMove = move.Move(self.micrometerController)
+            positionMove.velocity = "1"
+            positionMove.targetHeight = max_height
+            listTemp.append(positionMove)
+            self.numExecutions = 1
+            self.startExecuteThread(listTemp, False)
+            self.signalAngleFinder.wait()
+            self.signalAngleFinder.clear()
+
+            time.sleep(3) #need time to reinitialize everything
+            listTemp = []
+            
+            lowerMove = move.Move(self.micrometerController)
+            lowerMove.velocity = ".1" 
+            lowerMove.targetHeight = min_height
+            listTemp.append(lowerMove)
+
+            raiseMove = move.Move(self.micrometerController)
+            raiseMove.velocity = ".1"
+            raiseMove.targetHeight = max_height
+            listTemp.append(raiseMove)
+            self.numExecutions = 3
+            self.powermeter.updatingAngleQueues.set()
+            print("Finding angle: ", self.powermeter.updatingAngleQueues.is_set())
+            self.startExecuteThread(listTemp, True)
+            self.signalAngleFinder.wait()
+            self.signalAngleFinder.clear()
+            self.powermeter.updatingAngleQueues.clear()
+            print("Finding angle: ", self.powermeter.updatingAngleQueues.is_set())
+            print("SHOULD NOW RAISE MICROMETER!!!")
+            time.sleep(3)
+            self.__raiseMicrometer()
+            self.signalAngleFinder.wait()
+            self.signalAngleFinder.clear()
+            angle += 10 
+            powerRatios.append(self.findDeltaPowerDif())
+            if(angle > 20):
+                rotate_label.config(text="compute the ideal angle")
+            else:
+                rotate_label.config(text=f"Rotate to {angle} degrees.")
+
+
+
+
+            
+
+
+        def start_collection_thread():
+            self.angleThread = threading.Thread(target=begin_collection, args=[])
+            self.angleThread.start()
+            
+
+
+        ttk.Button(new_window, text="Begin Collection", command=start_collection_thread).pack(pady=20)
+
+        def show_angle():
+            angle = self.angleFind.findAngle(powerRatios)
+
+            self.angleFind.plot()
+            ttk.Label(new_window, text=f"Ideal Angle: {angle:.2f}°").pack()
+            print("SHOULD SAVE ANGLE", save_target.get())
+
+            if save_target.get() == "alpha":
+                self.updateIdealAlpha(angle)
+            elif save_target.get() == "beta":
+                self.updateIdealBeta(angle)
+
+        ttk.Button(
+            new_window,
+            text="Compute Ideal Angle",
+            command=show_angle
+        ).pack()
+
+    def findDeltaPowerDif(self):
+        time1 = []
+        power1 = []
+        time2 = []
+        power2 = []
+        while not self.powermeter.angle1Queue.empty():
+            x,y = self.powermeter.angle1Queue.get_nowait()
+            time1.append(x)
+            power1.append(y)
+        while not self.powermeter.angle2Queue.empty():
+            x,y = self.powermeter.angle2Queue.get_nowait()
+            time2.append(x)
+            power2.append(y)
+        print("power 1: ", power1)
+        print("power 2:", power2)
+
+        interp_func = interp1d(time2, power2, kind='linear', fill_value='extrapolate')
+        aligned_pow2 = interp_func(time1)
+        diff = power1 / aligned_pow2
+        deltaDiff = np.abs(np.max(diff) - np.min(diff))
+        for i in range(50):
+            print(deltaDiff)
+        return deltaDiff
+    
+
+
+    # 2 things: 
+    # 1. read for ideal alpha from file on startup, update label
+    # 2. take in angle, write to file, update label
+
+    def readSavedIdealAlpha(self):
+        try:
+            with open("idealAlpha.txt", "r") as f:
+                alpha = f.read().strip()
+            self.alphaLabel.config(text=f"Ideal Alpha: {alpha}°")
+        except FileNotFoundError:
+            self.alphaLabel.config(text="ideal alpha not saved")
+
+    def readSavedIdealBeta(self):
+        try:
+            with open("idealBeta.txt", "r") as f:
+                beta = f.read().strip()
+            self.betaLabel.config(text=f"Ideal Beta: {beta}°")
+        except FileNotFoundError:
+            self.betaLabel.config(text="ideal beta not saved")
+
+    def updateIdealAlpha(self, alpha):
+        print("UPDATING IDEAL ALPHA!!!!!!!")
+        try:
+            with open("idealAlpha.txt", "w") as f:
+                f.write(str(alpha))
+            self.alphaLabel.config(text=f"Ideal Alpha: {alpha}°")
+        except Exception as e:
+            self.alphaLabel.config(text="Failed to save ideal alpha")
+            print(f"Error saving alpha: {e}")
+
+    
+
+    def updateIdealBeta(self, beta):
+        try:
+            with open("idealBeta.txt", "w") as f:
+                f.write(str(beta))
+            self.betaLabel.config(text=f"Ideal Beta: {beta}°")
+        except Exception as e:
+            self.betaLabel.config(text="Failed to save ideal alpha")
+            print(f"Error saving beta: {e}")
+
+
+
+    
+        
+
+
+
     """collect is a lot of logic. !should make it just use self.movelist
     if the plots currently aren't updating, it calls the recursive updatePlots function to update the plots 
     every 100 ms. Should just have this instead of having all plots update all of the time.
@@ -423,17 +555,58 @@ class Gui:
     """
     this starts the collection thread, each move.execute blocks the thread until the move completes 
     """
-    def __collect(self, moveList):
-        print("collecting data")
-        if not self.updatingPlots.is_set():
-            self.updatingPlots.set() 
 
-        #POLARIMETER NEEDS TO START RUNNING BEFORE MOVES EXECUTE. IT DOESN'T CONSTANTLY RUN LIKE THE POWERMETER.
-        if(self.polarimeter is not None):
-            self.polarimeter.run = True
-            self.__startPolarimeterThread()
-        else:
-            print("No polarimeter Connected")
+    #two options for the plotting: 
+    #1. plots constantly update even when moves aren't executing 
+    #2. only update when moves are executing 
+    # conclusion: make both
+    # how should we do it? 
+    # 1. enable plotting button after window is open. This sends a signal to all devices saying that it's time to start adding to the queues
+    # 2. Reset plots button: clears the plots
+    # 3. if plots are disabled when execution is started, all of the plots are reset and enabled. 
+
+
+    #collection sequence:
+    #1. make a new flag: executing 
+    #2. when executing is set, sensors add to their Queue.queue's 
+    #3. When executing is set, sensors add to their multiprocessing.queue's
+    #. when executed is set, gui takes all the sensor Queue.queue's and copies them to arrays, then writes the arrays to csv's (check if you
+    # can write a queue directly to a csv. It will write micrometer position vs. power 1 and 2 to the csvs to start.)
+    
+
+
+    def __collect(self, moveList, collectData):
+        print("collecting data")
+        if collectData:
+            if not self.updatingPlots.is_set():
+                self.updatingPlots.set() 
+
+            if not self.micrometerController.updatingCsvQueue.is_set():
+                self.micrometerController.updatingCsvQueue.set()
+                
+            if not self.powermeter.updatingDevice1CsvQueue.is_set():
+                self.powermeter.updatingDevice1CsvQueue.set()
+            
+            if not self.powermeter.updatingDevice2CsvQueue.is_set():
+                self.powermeter.updatingDevice2CsvQueue.set()
+
+            if self.polarimeter is not None:
+                if not self.polarimeter.updatingCsvQueue.is_set():
+                    self.polarimeter.updatingCsvQueue.set()
+
+            if self.pyqt_process is not None and self.pyqt_process.is_alive():
+                self.micrometerController.updatingPlotQueue.set()
+                self.powermeter.updatingDevice1PlotQueue.set()
+                self.powermeter.updatingDevice2PlotQueue.set()
+
+
+            #POLARIMETER NEEDS TO START RUNNING BEFORE MOVES EXECUTE. IT DOESN'T CONSTANTLY RUN LIKE THE POWERMETER.
+            if(self.polarimeter is not None):
+                self.polarimeter.run = True
+                self.__startPolarimeterThread()
+            else:
+                print("No polarimeter Connected")
+
         #WARNING: BECAUSE of comparing move.targethiehgt to micrometer position, can only have one decimal place micrometer movement
         # ALSO: won't recognize values like 0.1 and .1 as being the same. I'll fix this later.
         for i in range(self.numExecutions):
@@ -447,9 +620,74 @@ class Gui:
                     break
 
         self.executed.set()
-        self.updatingPlots.clear()
+        # time.sleep(2)
+
+        self.micrometerController.updatingCsvQueue.clear()
+        self.micrometerController.updatingPlotQueue.clear()
+        self.powermeter.updatingDevice1CsvQueue.clear()
+        self.powermeter.updatingDevice2CsvQueue.clear()
+        self.powermeter.updatingDevice1PlotQueue.clear()
+        self.powermeter.updatingDevice2PlotQueue.clear()
+        if self.polarimeter is not None:
+            self.polarimeter.dataAnalyzer.finishAnalyzeDataSignal.wait()
+            self.polarimeter.dataAnalyzer.finishAnalyzeDataSignal.clear()
+            self.polarimeter.updatingCsvQueue.clear()
+        self.generateCsvs()
         print("DONE")
 
+    def generateCsvs(self):
+        micrometerArray = []
+        powermeter1Array = []
+        powermeter2Array = []
+        while not self.micrometerController.csvQueue.empty():
+            micrometerArray.append(self.micrometerController.csvQueue.get())
+
+        while not self.powermeter.device1CsvQueue.empty():
+            powermeter1Array.append(self.powermeter.device1CsvQueue.get())
+
+        while not self.powermeter.device2CsvQueue.empty():
+            powermeter2Array.append(self.powermeter.device2CsvQueue.get())
+
+        if micrometerArray:
+            with open("micrometertime.csv", mode="w", newline="") as f:
+                writer = csv.writer(f)
+                # Optionally, write a header row first:
+                writer.writerow(["position (mm)", "time (seconds since jan 1 1975)"])
+                # Each element of the tuple goes into its own CSV column
+                for row_tuple in micrometerArray:
+                    writer.writerow(row_tuple)
+        
+
+        if powermeter1Array:
+            with open("power1time.csv", mode="w", newline="") as f:
+                writer = csv.writer(f)
+                # Optionally, write a header row first:
+                writer.writerow(["power 1 (W)", "time (seconds since jan 1 1975)"])
+                # Each element of the tuple goes into its own CSV column
+                for row_tuple in powermeter1Array:
+                    writer.writerow(row_tuple)
+
+        if powermeter2Array:
+            with open("power2time.csv", mode="w", newline="") as f:
+                writer = csv.writer(f)
+                # Optionally, write a header row first:
+                writer.writerow(["power 2 (W)", "time (seconds since jan 1 1975)"])
+                # Each element of the tuple goes into its own CSV column
+                for row_tuple in powermeter2Array:
+                    writer.writerow(row_tuple)
+
+        if self.polarimeter is not None:
+            if self.polarimeter.dataAnalyzer.phase is not None and self.polarimeter.dataAnalyzer.strain is not None:
+                with open("polarimetertime.csv", mode="w", newline="") as f:
+                    writer = csv.writer(f)
+                    print(f"Phase: {self.polarimeter.dataAnalyzer.phase}")
+                    print(f"Strain: {self.polarimeter.dataAnalyzer.strain}")
+                    writer.writerow(["phase", "strain"])
+                    for phase_val, strain_val in zip(self.polarimeter.dataAnalyzer.phase, self.polarimeter.dataAnalyzer.strain):
+                        writer.writerow([phase_val, strain_val])
+                    self.polarimeter.dataAnalyzer.strain = None
+                    self.polarimeter.dataAnalyzer.phase = None
+                
 
     """addmove adds the move to the movelist and then udpates the move gui adding the move"""
     def __addMove(self, frameMoveList):
@@ -471,49 +709,9 @@ class Gui:
     """DEAL WITH PLOTTING TRY CATCH""" 
     def updatePlotsFromData(self):
         self.timeStamp = time.time()
-        if self.updatingPlots.is_set():
-            if(self.micrometerPlot is not None):
-                try:
-                    if(self.micrometerController.downward):
-                        self.micrometerPlot.updatePlot(self.timeStamp, self.micrometerController.micrometerPosition[3:].strip())
-                except:
-                    print("micrometer not found")
-            if self.powerPlot is not None: 
-                try:
-                    self.powerPlot.updatePlot(self.micrometerController.micrometerPosition[3:].strip(), abs(self.powermeter.device1Data - self.powermeter.device2Data))
-                except:
-                    print("not enough powermeters connected.")
-            if self.pow1Plot is not None:
-                try:
-                    self.pow1Plot.updatePlot(self.micrometerController.micrometerPosition[3:].strip(), self.powermeter.device1Data)
-
-                except:
-                    print("not enough powermeters connected.")
-            if self.pow2Plot is not None:
-                try:
-                    self.pow2Plot.updatePlot(self.micrometerController.micrometerPosition[3:].strip(), self.powermeter.device2Data)
-                except:
-                    print("not enough powermeters connected.")
-            if self.noisePlotPowDif is not None:  
-                try:
-                    self.noisePlotPowDif.updatePlot(time.time(), self.powermeter.device1Data - self.powermeter.device2Data)
-                except:
-                    print("noise not going")
-            if self.noisePlotPow1 is not None:
-                try:
-                    self.noisePlotPow1.updatePlot(time.time(), self.powermeter.device1Data)
-                except:
-                    print("noise not going")
-            if self.noisePlotPow2 is not None:
-                try:
-                    self.noisePlotPow2.updatePlot(time.time(), self.powermeter.device2Data)
-                except:
-                    print("noise not going")
-
         if (self.executed.is_set()): #right here all of the things that need to be done immediately after move(s) are done executing happen
             if self.polarimeter is not None:
                 self.polarimeter.run = False
-                self.strain, self.phase  = dataAnalysisVmaster.analyzeData(self.polarimeter.s1List, self.polarimeter.s2List, self.polarimeter.s3List, self.polarimeter.timeList)
             else:
                 print("polarimeter could not be told to stop running because no polarimeter detected.")
 
@@ -525,23 +723,8 @@ class Gui:
                 self.pow1Plot.generateCsvFromPlot("pow1.csv")
             if self.pow2Plot is not None:
                 self.pow2Plot.generateCsvFromPlot("pow2.csv")
-            print("PHASE")
-            print(self.phase)
-            print("STRAIN")
-            print(self.strain)
             self.updatingPlots.clear() 
-            if self.polPlot is not None:
-                self.polPlot.updatePlot(self.polarimeter.positionList, self.phase.tolist())
-                self.polPlot.colorLines()
-                self.polPlot.generateCsvFromPlot("pol.csv")
-            
-            if self.powerPlot is not None:
-                self.powerPlot.colorLines()
-            
-                        
-
-                
-                
+            self.signalAngleFinder.set()
             self.executed.clear()
             self.stopExecution = False
 

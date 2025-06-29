@@ -1,8 +1,11 @@
 import serial
 import time
 import tkinter as tk
+import threading
+import queue
+import multiprocessing
 #NOTE: EACH COMMAND SENT TO THE CONTROLLER TAKES ABOUT 10 ms from command sent to result returned to computer. (for error)
-
+"""new branch"""
 class Controller:
     """init sets the usb serial settings for the micrometer controller, telling what port it should be in 
     !!!! add dynamic port checking so that you don't have to manually go into the code and change the port to the right
@@ -26,6 +29,13 @@ class Controller:
         parity = serial.PARITY_NONE
         stopBits = serial.STOPBITS_ONE
         dataBits = serial.EIGHTBITS
+        self.updatingCsvQueue = threading.Event()
+        self.updatingCsvQueue.clear()
+        self.csvQueue = queue.Queue()
+        self.updatingPlotQueue = threading.Event()
+        self.updatingPlotQueue.clear()
+        self.plotQueue = multiprocessing.Queue()
+
 
         #self.root.after(100, self.updatePlotFromData)
         
@@ -98,11 +108,23 @@ class Controller:
         print("disconnected")
 
 
+    """invert input takes in an input string and inverts it."""
+    def invertHeight(self, num_str):
+        try:
+            num = float(num_str)  # Convert to float to handle decimals
+            if 0 <= num <= 12:
+                return str(12 - num)  # Convert back to string
+            else:
+                raise ValueError("Number must be between 0 and 12")
+        except ValueError:
+            raise ValueError("Invalid input: must be a number between 0 and 12")
+
     """goToHeight takes in an input height and writes the command to the controller to got o that height
     for some reason i'm doing all this other bs here too but i'm too scared to change it right now 
     !TODO: look into this. LOOK INTO THIS LATER"""
-    def goToHeight(self, inputHeight):
-        
+    def goToHeight(self, inputHeight): #polling rate is pretty consistently .03 - .04 seconds = 30 miliseconds as of 3/13/2025
+
+        inputHeight = self.invertHeight(inputHeight) 
 
         positionCommand = "1" + "PA" + inputHeight + "\r\n"
         inBytes = bytes(positionCommand, 'utf-8')
@@ -124,6 +146,12 @@ class Controller:
             inBytes = bytes(getPositionCommand, 'utf-8')
             self.ser.write(inBytes)
             self.micrometerPosition = self.ser.readline()
+            if(self.updatingCsvQueue.is_set()):
+                self.csvQueue.put((float(self.micrometerPosition[3:].strip()), time.time()))
+            if(self.updatingPlotQueue.is_set()):
+                x = 12 - float(self.micrometerPosition[3:].strip())
+                print("XINCONTROLLER: ", x)
+                self.plotQueue.put((time.time(), x))
             # print(self.micrometerPosition)
             self.timeStamp = time.time()
             self.ser.write(b'1TS\r\n')
