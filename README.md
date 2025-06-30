@@ -10,8 +10,6 @@ This software interfaces with four devices: the two powermeters, the polarimeter
      
 **Recommended Devices(if you want to actually build the stress sensor and replicate our tests):** Thorlabs PAX1000 series polarimeter, PM fiber optic cable (jacketed and bare), 1550 Nm 50 mw laser, linear stage, presshead    
   
-**Build available to download on Windows.** The powermeters and polarimeter require windows-exclusive drivers, so I haven't provided a build for mac. You can run it and use only the micrometer control capabilites, although other issues may arise.
-  
 ## Download Source Code
 **Required Dependencies:** numpy, tkinter, time, threading, tkthemes, csv, multiprocessing, sys, PyQt5, scipy, ctypes, queue, serial, win32com.client, pythoncom
 
