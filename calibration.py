@@ -231,7 +231,7 @@ class Calibration:  # Px - Py/Px+Py Use Ex0, normalize power, should match
     def calcNormalizedPowerDifference(self, S1, S2):
         return (S2 - S1) / (S1 + S2)
 
-    def calcNormalizedPowers(self, Sx, Sy):
+    def calcNormalizedPowers(self, Sx, Sy): # returns powers percentage change in power difference
         S1 = Sx/(Sx + Sy)
         S2 = Sy/(Sx + Sy)
         return S1, S2
@@ -594,41 +594,170 @@ class Calibration:  # Px - Py/Px+Py Use Ex0, normalize power, should match
         right = self.l * self.b
         return left * right
 
-    def rankFeatures(self, n_samples=1000):
-
+    def rankFeatures(self, n_samples=1000, force_range=(0, 0.1)):
+        """
+        Rank feature importance using Random Forest with all relevant variables
+        
+        Parameters:
+        -----------
+        n_samples : int, number of samples to generate
+        force_range : tuple, force range for sampling
+        
+        Returns:
+        --------
+        dict: Feature importance rankings and model performance metrics
+        """
+        from sklearn.model_selection import train_test_split
+        from sklearn.metrics import mean_squared_error, r2_score
+        import matplotlib.pyplot as plt
+        
+        print("Generating comprehensive feature dataset...")
+        
         # Generate feature matrix
         features = []
         targets = []
-
+        
+        np.random.seed(42)
+        
         for _ in range(n_samples):
-            # Sample random values
-            force = np.random.uniform(0, 0.1)
-            alpha = np.random.uniform(0, np.pi / 2)
-            beta = np.random.uniform(0, np.pi / 2)
-            l = np.random.uniform(0, 0.03)  # interaction length
-
-            # Set parameters and calculate
-            self.alpha, self.beta = alpha, beta
+            # Sample random values for variable parameters
+            force = np.random.uniform(force_range[0], force_range[1])
+            alpha = np.random.uniform(0, np.pi/2)
+            beta = np.random.uniform(0, np.pi/2)
+            gamma = np.random.uniform(0, np.pi)
+            delta = np.random.uniform(0, 2*np.pi)
+            l = np.random.uniform(0.00, 0.03)  # interaction length range
+            
+            # Set parameters
+            self.alpha = alpha
+            self.beta = beta
+            self.gamma = gamma
+            self.delta = delta
             self.l = l
+            
+            # Calculate powers and target
             Sx, Sy = self.__calcPowersFromExEy(force)
-            # power_diff = self.calcNormalizedPowerDifference(Sx, Sy) # this does (px -py) - (px + py)
-
-
-            features.append([force, alpha, beta, force / (np.pi * self.b ** 2), l])
+            power_diff = self.calcNormalizedPowerDifference(Sx, Sy)
+            
+            # Calculate derived features
+            stress = force / (np.pi * self.b ** 2)
+            f_normalized = force / self.l
+            normalized_force = 2 * self.N ** 3 * (1 + self.sigma) * (self.p_12 - self.p_11) * self.Lb_0 * f_normalized / (
+                    self.fiberWavelength * np.pi * self.b * self.Y)
+            phi = 0.5 * np.arctan2(normalized_force * np.sin(2 * alpha),
+                                  1 + normalized_force * np.cos(2 * alpha))
+            
+            # Calculate beat length parameters
+            Lb = self.Lb_0 * (1 + normalized_force ** 2 + 2 * normalized_force * np.cos(2 * alpha)) ** (-1/2)
+            deltaN = (2 * np.pi) / (self.k * Lb)
+            Ns = self.N + (deltaN / 2)
+            Nf = self.N - (deltaN / 2)
+            
+            # Calculate interaction length to beat length ratio
+            lOverLb_0 = l / self.Lb_0
+            lOverLb = l / Lb
+            
+            feature_row = [
+                force,              # Applied force
+                alpha,              # Fiber axis orientation angle
+                beta,               # Polarization angle 1
+                gamma,              # Polarization angle 2
+                delta,              # Phase angle
+                l,                  # Interaction length
+                stress,             # Stress (force/area)
+                normalized_force,   # Normalized force parameter
+                phi,                # Stress-dependent phase angle
+                Lb,                 # Modified beat length under stress
+                deltaN,             # Birefringence change
+                Ns,                 # Slow axis refractive index
+                Nf,                 # Fast axis refractive index
+                lOverLb_0,          # l/Lb_0 ratio
+                lOverLb,            # l/Lb ratio
+                self.b,             # Fiber radius
+                self.Y,             # Young's modulus
+                self.sigma,         # Poisson's ratio
+                self.N,             # Refractive index
+                self.p_11,          # Photoelastic constant 1
+                self.p_12,          # Photoelastic constant 2
+                self.Lb_0,          # Unstressed beat length
+                self.fiberWavelength, # Operating wavelength
+                self.k,             # Wave number
+                Sx,                 # X-polarized power
+                Sy                  # Y-polarized power
+            ]
+            
+            features.append(feature_row)
             targets.append(power_diff)
-
+        
+        # Feature names
+        feature_names = [
+            'force', 'alpha', 'beta', 'gamma', 'delta', 'interaction_length',
+            'stress', 'normalized_force', 'phi', 'beat_length_modified', 
+            'birefringence_change', 'refractive_index_slow', 'refractive_index_fast',
+            'l_over_Lb0_ratio', 'l_over_Lb_ratio', 'fiber_radius', 'youngs_modulus',
+            'poisson_ratio', 'refractive_index', 'photoelastic_p11', 'photoelastic_p12',
+            'beat_length_unstressed', 'wavelength', 'wave_number', 'power_x', 'power_y'
+        ]
+        
+        # Convert to arrays
+        X = np.array(features)
+        y = np.array(targets)
+        
+        # Split data
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+        
         # Train Random Forest
-        rf = RandomForestRegressor(n_estimators=100)
-        rf.fit(features, targets)
-
-        # Get importance scores
-        importance = rf.feature_importances_
-        feature_names = ['force', 'alpha', 'beta', 'stress', 'interaction length']
-
-        # Rank and display
-        ranking = sorted(zip(feature_names, importance), key=lambda x: x[1], reverse=True)
-
-        return ranking
+        print("Training Random Forest model...")
+        rf = RandomForestRegressor(n_estimators=100, random_state=42, n_jobs=-1, max_depth=5)
+        rf.fit(X_train, y_train)
+        
+        # Make predictions
+        y_pred = rf.predict(X_test)
+        
+        # Calculate performance metrics
+        mse = mean_squared_error(y_test, y_pred)
+        r2 = r2_score(y_test, y_pred)
+        
+        # Get feature importance
+        importance_scores = rf.feature_importances_
+        
+        # Create ranking
+        ranking = list(zip(feature_names, importance_scores))
+        ranking.sort(key=lambda x: x[1], reverse=True)
+        
+        # Print results
+        print(f"\nModel Performance:")
+        print(f"R² Score: {r2:.4f}")
+        print(f"MSE: {mse:.6f}")
+        print(f"RMSE: {np.sqrt(mse):.6f}")
+        
+        print(f"\nTop 15 Most Important Features (Gini Importance):")
+        print("=" * 55)
+        for i, (feature, importance) in enumerate(ranking[:15]):
+            print(f"{i+1:2d}. {feature:25s} : {importance:.4f}")
+        
+        # Plot feature importance
+        plt.figure(figsize=(12, 10))
+        top_features = ranking[:20]
+        features_plot = [f[0] for f in top_features]
+        importance_plot = [f[1] for f in top_features]
+        
+        plt.barh(range(len(features_plot)), importance_plot)
+        plt.yticks(range(len(features_plot)), features_plot)
+        plt.xlabel('Gini Importance')
+        plt.title('Top 20 Feature Importance Rankings (Random Forest)')
+        plt.gca().invert_yaxis()
+        plt.tight_layout()
+        plt.show()
+        
+        return {
+            'ranking': ranking,
+            'model': rf,
+            'r2_score': r2,
+            'mse': mse,
+            'rmse': np.sqrt(mse),
+            'feature_names': feature_names
+        }
 
 
 npoints = 500
