@@ -66,8 +66,6 @@ class Gui:
             self.powermeter = None
 
         # Event booleans
-        self.updatingPlots = threading.Event() 
-        self.updatingPlots.clear()
         self.triedMicrometer = False
         self.executed = threading.Event()
         self.executed.clear()
@@ -167,7 +165,6 @@ class Gui:
         if self.powermeter is not None:
             self.powermeter.stop()
         self.stopExecution = True
-        self.updatingPlots.clear() 
         try:
             self.executeThread.join()
         except:
@@ -323,12 +320,9 @@ class Gui:
         t = 20
         start_time = time.time()
         end_time = start_time 
-        if not self.updatingPlots.is_set():
-            self.updatingPlots.set()
         while(end_time - start_time < t):
            end_time = time.time() 
            print("waiting")
-        self.updatingPlots.clear()
         try:
             self.noisePlotPowDif.generateCsvFromPlot("power dif vs. time.csv")
         except:
@@ -578,8 +572,6 @@ class Gui:
     def __collect(self, moveList, collectData):
         print("collecting data")
         if collectData:
-            if not self.updatingPlots.is_set():
-                self.updatingPlots.set() 
 
             if not self.micrometerController.updatingCsvQueue.is_set():
                 self.micrometerController.updatingCsvQueue.set()
@@ -723,7 +715,6 @@ class Gui:
                 self.pow1Plot.generateCsvFromPlot("pow1.csv")
             if self.pow2Plot is not None:
                 self.pow2Plot.generateCsvFromPlot("pow2.csv")
-            self.updatingPlots.clear() 
             self.signalAngleFinder.set()
             self.executed.clear()
             self.stopExecution = False
