@@ -8,7 +8,7 @@ This software interfaces with four devices: the two powermeters, the polarimeter
 ## How To Run  
 **Required Devices:** Two Newport 845-PE-RS Virtual Optical Powermeters, One Newport TRB12CC linear actuator and CONEX-CC controller
      
-**Recommended Devices(if you want to actually build the stress sensor and replicate our tests):** Thorlabs PAX1000 series polarimeter, PM fiber optic cable (jacketed and bare), 1550 Nm 50 mw laser, linear stage, presshead    
+**Recommended Devices (if you want to actually build the stress sensor and replicate our tests):** Thorlabs PAX1000 series polarimeter, PM fiber optic cable (jacketed and bare), 1550 Nm 50 mw laser, linear stage, presshead    
   
 ## Download Source Code
 **Required Dependencies:** numpy, tkinter, time, threading, tkthemes, csv, multiprocessing, sys, PyQt5, scipy, ctypes, queue, serial, win32com.client, pythoncom
