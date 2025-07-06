@@ -253,7 +253,9 @@ class Gui:
     """adds all of the buttons in the bottom frame"""
     def addBottomFrameButtons(self, listFrame):
         numExec = tk.StringVar()
+        timeRecord = tk.StringVar()
         ttk.Entry(listFrame, textvariable=numExec).grid(row=2, column=1, sticky='sw', pady=5)
+        ttk.Entry(listFrame, textvariable=numExec).grid(row=1, column=5, sticky='sw', pady=5)
         listFrame.grid_rowconfigure(0, weight=1)
         listFrame.grid_rowconfigure(1, weight=0)
         listFrame.grid_columnconfigure(1, weight=0)
@@ -263,8 +265,8 @@ class Gui:
         executeAllMovesButton = ttk.Button(listFrame, text='execute all moves', command=lambda: (self.saveNumExecutions(numExec), self.startExecuteThread(self.moveList, True)))
         executeAllMovesButton.grid(row=2, column=0, sticky='sw', pady=5, padx=30)
 
-        recordNoiseButton = ttk.Button(listFrame, text='collect noise', command=lambda: (self.startNoiseThread()))
-        recordNoiseButton.grid(row=1, column=2, sticky='sw', pady=5, padx=30)
+        recordNoiseButton = ttk.Button(listFrame, text='Record for Time:', command=lambda: (self.startNoiseThread()))
+        recordNoiseButton.grid(row=1, column=3, sticky='sw', pady=5, padx=30)
 
         addMoveButton = ttk.Button(listFrame, text='add move', command=lambda: self.__addMove(listFrame))
         addMoveButton.grid(row=1, column=0, sticky='sw', pady=5, padx=30)
