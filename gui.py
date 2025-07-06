@@ -103,6 +103,8 @@ class Gui:
         self.noisePlotPow2 = None 
         #list of times recorded
         self.timeList = []
+        
+        self.execTime = 1000
 
         self.deltaPowerDifferences = []
         
@@ -298,7 +300,7 @@ class Gui:
         try:
             self.execTime = int(execTime.get())
             print(f"Saved number of executions: {self.execTime}")
-        except ValueError:
+        except:
             print("Invalid input, please enter a valid number")
 
     def __raiseMicrometer(self):
@@ -428,7 +430,6 @@ class Gui:
             positionMove.targetHeight = max_height
             listTemp.append(positionMove)
             self.numExecutions = 1
-            self.execTime = 1
             self.startExecuteThread(listTemp, False)
             self.signalAngleFinder.wait()
             self.signalAngleFinder.clear()
