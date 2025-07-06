@@ -265,7 +265,7 @@ class Gui:
         executeAllMovesButton = ttk.Button(listFrame, text='execute all moves', command=lambda: (self.saveNumExecutions(numExec), self.startExecuteThread(self.moveList, True)))
         executeAllMovesButton.grid(row=2, column=0, sticky='sw', pady=5, padx=30)
 
-        recordNoiseButton = ttk.Button(listFrame, text='Record for Time:', command=lambda: (self.startNoiseThread()))
+        recordNoiseButton = ttk.Button(listFrame, text='Record for Time:', command=lambda: (self.saveExecuteTime(timeRecord), self.startNoiseThread(timeRecord)))
         recordNoiseButton.grid(row=1, column=3, sticky='sw', pady=5, padx=30)
 
         addMoveButton = ttk.Button(listFrame, text='add move', command=lambda: self.__addMove(listFrame))
@@ -289,6 +289,15 @@ class Gui:
         try:
             self.numExecutions = int(numExec.get())
             print(f"Saved number of executions: {self.numExecutions}")
+        except ValueError:
+            print("Invalid input, please enter a valid number")
+
+    """ saveExecutTime is called when Record for time is pressed, saves the time the user entered
+    in the little box at the bottom, checks for invalid input in the textbox."""
+    def saveExecuteTime(self, execTime):
+        try:
+            self.execTime = int(execTime.get())
+            print(f"Saved number of executions: {self.execTime}")
         except ValueError:
             print("Invalid input, please enter a valid number")
 
@@ -344,7 +353,7 @@ class Gui:
 
         currTime = time.time()
 
-        while(time.time() - currTime < 10 and not self.stopExecution):
+        while(time.time() - currTime < self.execTime and not self.stopExecution):
             print("collecting noise data")
         
         
@@ -419,6 +428,7 @@ class Gui:
             positionMove.targetHeight = max_height
             listTemp.append(positionMove)
             self.numExecutions = 1
+            self.execTime = 1
             self.startExecuteThread(listTemp, False)
             self.signalAngleFinder.wait()
             self.signalAngleFinder.clear()
