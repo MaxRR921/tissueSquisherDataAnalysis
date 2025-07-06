@@ -255,7 +255,7 @@ class Gui:
         numExec = tk.StringVar()
         timeRecord = tk.StringVar()
         ttk.Entry(listFrame, textvariable=numExec).grid(row=2, column=1, sticky='sw', pady=5)
-        ttk.Entry(listFrame, textvariable=numExec).grid(row=1, column=5, sticky='sw', pady=5)
+        ttk.Entry(listFrame, textvariable=numExec).grid(row=1, column=4, sticky='sw', pady=5)
         listFrame.grid_rowconfigure(0, weight=1)
         listFrame.grid_rowconfigure(1, weight=0)
         listFrame.grid_columnconfigure(1, weight=0)
@@ -313,32 +313,56 @@ class Gui:
         self.executeThread.start()
 
     def startNoiseThread(self):
-        for plot in self.plotList:
-            plot.resetPlot()
+        self.signalGraph.put("STOP")
         self.noiseThread = threading.Thread(target=self.__collectNoise)
         self.noiseThread.start()
 
     def __collectNoise(self):
-        t = 20
-        start_time = time.time()
-        end_time = start_time 
-        while(end_time - start_time < t):
-           end_time = time.time() 
-           print("waiting")
-        try:
-            self.noisePlotPowDif.generateCsvFromPlot("power dif vs. time.csv")
-        except:
-            print("plot not open")
-        try:
-            self.noisePlotPow1.generateCsvFromPlot("power 1 vs. time.csv")
-        except:
-            print("plot not open")
+        print("collecting data")
+            
+        if not self.powermeter.updatingDevice1CsvQueue.is_set():
+            self.powermeter.updatingDevice1CsvQueue.set()
+        
+        if not self.powermeter.updatingDevice2CsvQueue.is_set():
+            self.powermeter.updatingDevice2CsvQueue.set()
 
-        try:
-            self.noisePlotPow2.generateCsvFromPlot("power 2 vs. time.csv")
-        except:
-            print("plot not open")
+        if self.polarimeter is not None:
+            if not self.polarimeter.updatingCsvQueue.is_set():
+                self.polarimeter.updatingCsvQueue.set()
 
+        if self.pyqt_process is not None and self.pyqt_process.is_alive():
+            self.micrometerController.updatingPlotQueue.set()
+            self.powermeter.updatingDevice1PlotQueue.set()
+            self.powermeter.updatingDevice2PlotQueue.set()
+
+        #POLARIMETER NEEDS TO START RUNNING BEFORE MOVES EXECUTE. IT DOESN'T CONSTANTLY RUN LIKE THE POWERMETER.
+        if(self.polarimeter is not None):
+            self.polarimeter.run = True
+            self.__startPolarimeterThread()
+        else:
+            print("No polarimeter Connected")
+
+        currTime = time.time()
+
+        while(time.time() - currTime < 10 and not self.stopExecution):
+            print("collecting noise data")
+        
+        
+        self.executed.set()
+        # time.sleep(2)
+
+        self.micrometerController.updatingCsvQueue.clear()
+        self.micrometerController.updatingPlotQueue.clear()
+        self.powermeter.updatingDevice1CsvQueue.clear()
+        self.powermeter.updatingDevice2CsvQueue.clear()
+        self.powermeter.updatingDevice1PlotQueue.clear()
+        self.powermeter.updatingDevice2PlotQueue.clear()
+        if self.polarimeter is not None:
+            self.polarimeter.dataAnalyzer.finishAnalyzeDataSignal.wait()
+            self.polarimeter.dataAnalyzer.finishAnalyzeDataSignal.clear()
+            self.polarimeter.updatingCsvQueue.clear()
+        self.generateCsvs()
+        print("DONE")
 
 
     #STRANGE: NOTE: when doing this sometimes the pyqt plots just don't do anything. Maybe add a little wait?
