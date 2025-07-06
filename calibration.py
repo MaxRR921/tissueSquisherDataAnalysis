@@ -46,9 +46,9 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
           # β = 55.9° → 55.9·π/180 ≈ 0.9757 rad
 
           # γ = 18.6° → 18.6·π/180 ≈ 0.3240 rad
-          self.alpha = 0.8136
-          self.beta  = .9757 
-          self.gamma =.3240 
+          self.alpha = np.pi/4
+          self.beta  = np.pi/4
+          self.gamma = np.pi/4
           self.delta =  0
           self.eta = 376.730313
 
@@ -191,7 +191,30 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
 
      
 
+     def calcForce(self, Fsample, dFiber):
+
+          # Given values
+          F_sample = Fsample            # N
+          D_sample = self.l         # meters (diameter of sample)
+          d_fiber = dFiber          # meters (diameter of fiber)
+
+          # A_sample = π * (D_sample^2) / 4
+          A_sample = np.pi * (D_sample**2) / 4
+
+          # A_fiber = D_sample * (π * d_fiber / 2)
+          A_fiber = D_sample * (np.pi * d_fiber / 2)
+
+          # Force on fiber
+          F_fiber = F_sample * (A_fiber / A_sample)
+
+          # Output
+          print(f"A_sample = {A_sample:.6e} m^2")
+          print(f"A_fiber = {A_fiber:.6e} m^2")
+          print(f"F_fiber = {F_fiber:.6f} N")
+
+          return F_fiber
        
+
 
      def __calcPower(self, Ex, Ey):
 
@@ -336,7 +359,7 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
                     self.gamma = gammaValues[i]
                     Ex, Ey = self.__calcFields(forces[j])
                     S1, S2 = self.__calcPower(Ex, Ey)
-                    s1Arr[i], s2Arr[i] = self.calcNormalizedPower(S1, S2)
+                    s1Arr[i], s2Arr[i] = self.calcNormalizedPowers(S1, S2)
                print("S1:", s1Arr)
                curves.append((forces[j], s1Arr.copy()-s2Arr.copy()))
                print("S1:")
@@ -364,7 +387,7 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
                s2Arr = np.zeros(len(betaValues))
                for i in range(len(betaValues)):
                     self.beta = betaValues[i]
-                    S1, S2 = self.__calcPowersFromExEy(forces[j])
+                    S1, S2 = self.__calcFields(forces[j])
                     s1Arr[i] = self.calcNormalizedPowerDifference(S1, S2)
                print("S1:", s1Arr)
                curves.append((forces[j], s1Arr))
@@ -538,12 +561,16 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
 
           plt.plot(x_fit, y_fit, '--', label='Fitted Curve', color='tab:red')
 
+          print("MIN STRESS: ", np.min(stresses), "MAX STRESS", np.max(stresses))
+          print("MAX POWER: ", np.max(Sdiff), "MIN POWER: ", np.min(Sdiff))
+
           plt.xlabel('Power Difference Normalized')
           plt.ylabel('Stress')
           plt.title('Force vs Power Difference')
           plt.legend()
           plt.grid(True)
           plt.show()
+          
 
 
 
@@ -556,8 +583,8 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
      #   minPower = np.min(sdiffs)
      #   maxPower = np.max(sdiffs[sdiffs != 0])
      #   minPower = np.min(sdiffs[sdiffs != 0])
-          minPower = .240
-          maxPower = .253
+          minPower = -.329
+          maxPower = -.186
           print("Max power: ", maxPower, "Min power: ", minPower)
 
           finds = []
@@ -638,8 +665,11 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
                     
 
 npoints = 500
-c = Calibration(.01800)
-c.calculateAlphaAndBeta(184) # 6.71 N is the target force
+c = Calibration(.03154)
+print(c.calcForce(1.6835, .0002)/.0002)
+#4.0861
+# c.calculateAlphaAndBeta(c.calcForce(1.6835, .0002)/.0002) # 6.71 N is the target force
+
 
 
 
@@ -651,17 +681,17 @@ c.calculateAlphaAndBeta(184) # 6.71 N is the target force
 
 # c.plotNormalizedPowersVsDelta(np.linspace(0,np.pi,500), np.linspace(0,.08993091942,3))
 # c.plotStressVsPowerDifference(np.linspace(0, 0.090748, 500))
-# c.plotPowerDifferencesNormalized(np.linspace(0, 0.08993091942, 500))  
+c.plotPowerDifferencesNormalized(np.linspace(0, c.calcForce(4.0861, .0002)/.0002, 500))  
 # c.plotNormalizedPowersSeperately(np.linspace(0,0.08993091942, 500)) 
 # c.plotNormalizedPowersVsAlpha(np.linspace(0,np.pi,500), np.linspace(0,0.03177983425,3)) #GOOD! look at envelope maximum... 45 degrees is the maximum of the envelope
-# c.plotNormalizedPowersVsGamma(np.linspace(0,np.pi,500), np.linspace(0,0.090748,3))
+# c.plotNormalizedPowersVsGamma(np.linspace(0,np.pi,500), np.linspace(0, 184 ,3))
 # c.plotNormalizedPowersVsBeta(np.linspace(0,np.pi,500), np.linspace(0,.08993091942,3))
 # alphas = np.deg2rad([30, 45, 60, 75])
 # c.plotPhiVsNormalizedForce(np.linspace(0,50,500), alphas)
 # gammas = np.deg2rad([30, 45, 60, 75])
 # c.plotGammaVsSingleForce(gammas, 0.090748)
 
-print(c.b)
+# print(c.b)
 
 # func = c.generate_function_powerdiff_to_force()
 
@@ -784,3 +814,5 @@ print(c.b)
 
 
 # 
+
+#-.06771
