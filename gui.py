@@ -255,7 +255,7 @@ class Gui:
         numExec = tk.StringVar()
         timeRecord = tk.StringVar()
         ttk.Entry(listFrame, textvariable=numExec).grid(row=2, column=1, sticky='sw', pady=5)
-        ttk.Entry(listFrame, textvariable=numExec).grid(row=1, column=4, sticky='sw', pady=5)
+        ttk.Entry(listFrame, textvariable=timeRecord).grid(row=1, column=4, sticky='sw', pady=5)
         listFrame.grid_rowconfigure(0, weight=1)
         listFrame.grid_rowconfigure(1, weight=0)
         listFrame.grid_columnconfigure(1, weight=0)
