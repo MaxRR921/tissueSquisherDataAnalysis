@@ -264,7 +264,7 @@ class Gui:
         executeAllMovesButton.grid(row=2, column=0, sticky='sw', pady=5, padx=30)
 
         recordNoiseButton = ttk.Button(listFrame, text='collect noise', command=lambda: (self.startNoiseThread()))
-        recordNoiseButton.grid(row=1, column=3, sticky='sw', pady=5, padx=30)
+        recordNoiseButton.grid(row=1, column=2, sticky='sw', pady=5, padx=30)
 
         addMoveButton = ttk.Button(listFrame, text='add move', command=lambda: self.__addMove(listFrame))
         addMoveButton.grid(row=1, column=0, sticky='sw', pady=5, padx=30)
