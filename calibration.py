@@ -46,9 +46,9 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
           # β = 55.9° → 55.9·π/180 ≈ 0.9757 rad
 
           # γ = 18.6° → 18.6·π/180 ≈ 0.3240 rad
-          self.alpha = np.pi/4
-          self.beta  = np.pi/4
-          self.gamma = np.pi/4
+          self.alpha = 0
+          self.beta  = 0
+          self.gamma = 0 
           self.delta =  0
           self.eta = 376.730313
 
@@ -288,9 +288,7 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
                     Sx, Sy = self.__calcFields(forces[j])
                     SxChua, SyChua = self.__calcPowersChua(forces[j])
                     SdifferencesCrossIntensityChua[i] = self.calcNormalizedPowerDifference(SxChua, SyChua)
-                    # SdifferencesChua[i] = self.__calcNormalizedCrossIntensityChua(forces[j])
                     Sdifferences[i] = self.calcNormalizedPowerDifference(Sx, Sy)
-                    # print('sdifference: ', Sdifferences[i])
                curvesChuaCrossIntensity.append((forces[j], SdifferencesCrossIntensityChua.copy()))
                curvesChua.append((forces[j], SdifferencesChua.copy()))
                curves.append((forces[j], Sdifferences.copy()))
@@ -314,7 +312,7 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
           plt.grid(True)
 
           plt.show()
-          self.alpha = np.pi/4
+          self.alpha = 0
        
 
 
@@ -357,11 +355,10 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
                s2Arr = np.zeros(len(gammaValues))
                for i in range(len(gammaValues)):
                     self.gamma = gammaValues[i]
-                    Ex, Ey = self.__calcFields(forces[j])
-                    S1, S2 = self.__calcPower(Ex, Ey)
-                    s1Arr[i], s2Arr[i] = self.calcNormalizedPowers(S1, S2)
+                    S1, S2 = self.__calcFields(forces[j])
+                    s1Arr[i] = self.calcNormalizedPowerDifference(S1, S2)
                print("S1:", s1Arr)
-               curves.append((forces[j], s1Arr.copy()-s2Arr.copy()))
+               curves.append((forces[j], s1Arr))
                print("S1:")
 
           for curve in curves:
@@ -374,7 +371,7 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
           plt.grid(True)
 
           plt.show()
-          self.gamma = np.pi/4
+          self.gamma = 0 
 
 
      def plotNormalizedPowersVsBeta(self, betaValues, forces):
@@ -403,7 +400,7 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
           plt.grid(True)
 
           plt.show()
-          self.beta = np.pi/4
+          self.beta = 0 
 
      def plotPhiVsNormalizedForce(self, f, alphaVals):
           phiValues = []
@@ -526,17 +523,17 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
           # --- Plot 1: Sdiff vs Force ---
           stresses = forces/(np.pi*self.b**2)
           plt.figure()
-          plt.plot(stresses, Sdiff, label='Sdifference (W)', color='tab:blue')
+          plt.plot(forces, Sdiff, label='Sdifference (W)', color='tab:blue')
 
-          interp = PchipInterpolator(stresses, Sdiff)
-          x_fit = np.linspace(min(stresses), max(stresses), 500)
+          interp = PchipInterpolator(forces, Sdiff)
+          x_fit = np.linspace(min(forces), max(forces), 500)
 
           # Interpolated (fitted) power differences
           y_fit = interp(x_fit)
 
           plt.plot(x_fit, y_fit, '--', label='Fitted Curve', color='tab:orange')
 
-          plt.xlabel('Stress')
+          plt.xlabel('force')
           plt.ylabel('Power Difference Normalized')
           plt.title('Power Difference vs Force')
           plt.legend()
@@ -548,11 +545,11 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
           # 
           # --- Plot 2: Force vs Sdiff (inverted axes) ---
           plt.figure()
-          plt.plot(Sdiff, stresses, label='Force (N)', color='tab:green')
+          plt.plot(Sdiff, forces, label='Force (N)', color='tab:green')
 
           sorted_idx = np.argsort(Sdiff)
           Sdiff_sorted = Sdiff[sorted_idx]
-          stresses_sorted = stresses[sorted_idx]
+          stresses_sorted = forces[sorted_idx]
           interp = PchipInterpolator(Sdiff_sorted, stresses_sorted)
           x_fit = np.linspace(min(Sdiff_sorted), max(Sdiff_sorted), 500)
 
@@ -561,11 +558,11 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
 
           plt.plot(x_fit, y_fit, '--', label='Fitted Curve', color='tab:red')
 
-          print("MIN STRESS: ", np.min(stresses), "MAX STRESS", np.max(stresses))
+          print("MIN STRESS: ", np.min(forces), "MAX STRESS", np.max(forces))
           print("MAX POWER: ", np.max(Sdiff), "MIN POWER: ", np.min(Sdiff))
 
           plt.xlabel('Power Difference Normalized')
-          plt.ylabel('Stress')
+          plt.ylabel('force')
           plt.title('Force vs Power Difference')
           plt.legend()
           plt.grid(True)
@@ -576,9 +573,9 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
 
      def calculateAlphaAndBeta(self, targetForce):
           curves = []
-          df = pd.read_csv('avg.csv')
-          sdiffs = df['Sdifference'].dropna().values
-          print("sdiffs: ", sdiffs)
+          # df = pd.read_csv('avg.csv')
+          # sdiffs = df['Sdifference'].dropna().values
+          # print("sdiffs: ", sdiffs)
      #   maxPower = np.max(sdiffs)
      #   minPower = np.min(sdiffs)
      #   maxPower = np.max(sdiffs[sdiffs != 0])
@@ -681,11 +678,19 @@ print(c.calcForce(1.6835, .0002)/.0002)
 
 # c.plotNormalizedPowersVsDelta(np.linspace(0,np.pi,500), np.linspace(0,.08993091942,3))
 # c.plotStressVsPowerDifference(np.linspace(0, 0.090748, 500))
+c.gamma = np.pi/4 
+c.beta = 0
+c.alpha = np.pi/4
+
+
+
+#MESSAGE HARRISON: noticed from the plots that when the gamma and alpha are too close to zero it doesnt work well, calibration will fail because we go through a larger portion of the curve and get non-function behavior That's why my results from the other day were wrong.
 c.plotPowerDifferencesNormalized(np.linspace(0, c.calcForce(4.0861, .0002)/.0002, 500))  
-# c.plotNormalizedPowersSeperately(np.linspace(0,0.08993091942, 500)) 
-# c.plotNormalizedPowersVsAlpha(np.linspace(0,np.pi,500), np.linspace(0,0.03177983425,3)) #GOOD! look at envelope maximum... 45 degrees is the maximum of the envelope
-# c.plotNormalizedPowersVsGamma(np.linspace(0,np.pi,500), np.linspace(0, 184 ,3))
-# c.plotNormalizedPowersVsBeta(np.linspace(0,np.pi,500), np.linspace(0,.08993091942,3))
+c.plotNormalizedPowersVsAlpha(np.linspace(0,np.pi,500), np.linspace(0,c.calcForce(4.0861, .0002)/.0002,3)) #GOOD! look at envelope maximum... 45 degrees is the maximum of the envelope
+c.plotNormalizedPowersVsGamma(np.linspace(0,np.pi,500), np.linspace(0, c.calcForce(4.0861, .0002)/.0002,3))
+c.alpha = .087
+c.gamma = .087
+c.plotNormalizedPowersVsBeta(np.linspace(0,np.pi,500), np.linspace(0,c.calcForce(1.6835, .0002)/.0002,3))
 # alphas = np.deg2rad([30, 45, 60, 75])
 # c.plotPhiVsNormalizedForce(np.linspace(0,50,500), alphas)
 # gammas = np.deg2rad([30, 45, 60, 75])
@@ -812,7 +817,28 @@ c.plotPowerDifferencesNormalized(np.linspace(0, c.calcForce(4.0861, .0002)/.0002
 #interaction length: 19.13
 
 
+#7/6:
+# Slope = 0.0, Found force max = 97.898349, force min = 3.897924, α=0.0°, β=34.1°, gamma=6.2
+# Slope = 0.0, Found force max = 98.357063, force min = 3.905824, α=3.1°, β=34.1°, gamma=6.2
+# Slope = 0.0, Found force max = 99.985516, force min = 3.960257, α=6.2°, β=34.1°, gamma=6.2
+# Slope = 0.0, Found force max = 102.881567, force min = 4.064529, α=9.3°, β=34.1°, gamma=6.2
+# Slope = 0.0, Found force max = 103.000497, force min = 4.784336, α=37.2°, β=27.9°, gamma=21.7
+# Slope = 0.0, Found force max = 104.822470, force min = 4.899857, α=37.2°, β=21.7°, gamma=27.9
+# Slope = 0.0, Found force max = 97.898349, force min = 3.897924, α=0.0°, β=6.2°, gamma=34.1
+# Slope = 0.0, Found force max = 98.582501, force min = 3.936087, α=3.1°, β=6.2°, gamma=34.1
+# Slope = 0.0, Found force max = 100.449737, force min = 4.022607, α=6.2°, β=6.2°, gamma=34.1
+# Slope = 0.0, Found force max = 103.613227, force min = 4.162890, α=9.3°, β=6.2°, gamma=34.1
+# Slope = 0.0, Found force max = 97.898349, force min = 3.897924, α=0.0°, β=83.8°, gamma=55.9
+# Slope = 0.0, Found force max = 98.357063, force min = 3.905824, α=3.1°, β=83.8°, gamma=55.9
+# Slope = 0.0, Found force max = 99.985516, force min = 3.960257, α=6.2°, β=83.8°, gamma=55.9
+# Slope = 0.0, Found force max = 102.881567, force min = 4.064529, α=9.3°, β=83.8°, gamma=55.9
+# Slope = 0.0, Found force max = 103.000497, force min = 4.784336, α=37.2°, β=68.3°, gamma=62.1
+# Slope = 0.0, Found force max = 104.822470, force min = 4.899857, α=37.2°, β=62.1°, gamma=68.3
+# Slope = 0.0, Found force max = 97.898349, force min = 3.897924, α=0.0°, β=55.9°, gamma=83.8
+# Slope = 0.0, Found force max = 98.582501, force min = 3.936087, α=3.1°, β=55.9°, gamma=83.8
+# Slope = 0.0, Found force max = 100.449737, force min = 4.022607, α=6.2°, β=55.9°, gamma=83.8
+# Slope = 0.0, Found force max = 103.613227, force min = 4.162890, α=9.3°, β=55.9°, gamma=83.8
 
-# 
 
+#
 #-.06771
