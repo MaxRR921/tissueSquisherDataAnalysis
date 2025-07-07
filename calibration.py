@@ -685,6 +685,8 @@ c.alpha = np.pi/4
 
 
 #MESSAGE HARRISON: noticed from the plots that when the gamma and alpha are too close to zero it doesnt work well, calibration will fail because we go through a larger portion of the curve and get non-function behavior That's why my results from the other day were wrong.
+#What can happen is we can still see sensitivits at different angles of beta, but the force doesn't cause a large change in power difference, namely  different forces don't have different power difference deltas for certain angles.
+
 c.plotPowerDifferencesNormalized(np.linspace(0, c.calcForce(4.0861, .0002)/.0002, 500))  
 c.plotNormalizedPowersVsAlpha(np.linspace(0,np.pi,500), np.linspace(0,c.calcForce(4.0861, .0002)/.0002,3)) #GOOD! look at envelope maximum... 45 degrees is the maximum of the envelope
 c.plotNormalizedPowersVsGamma(np.linspace(0,np.pi,500), np.linspace(0, c.calcForce(4.0861, .0002)/.0002,3))
