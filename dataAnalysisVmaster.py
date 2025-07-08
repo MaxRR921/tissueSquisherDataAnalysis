@@ -2,8 +2,10 @@ import numpy as np
 import pandas as pd
 import multiprocessing 
 import threading
+import polarimeterCalibration
 
 #TODO TAke out unnecessary imports 
+
 
 class DataAnalyzer:
     
@@ -23,6 +25,8 @@ class DataAnalyzer:
         s1List = []
         s2List = []
         s3List = []
+
+
         timeList = []
         while not s1Queue.empty():
             s1List.append(s1Queue.get()) 
@@ -35,6 +39,8 @@ class DataAnalyzer:
 
         while not timeQueue.empty():
             timeList.append(timeQueue.get())
+
+        self.polCalibrator = polarimeterCalibration.PolarimeterCalibrator(s1List, s2List, s3List)
         s1ListNp = np.array(s1List)
         s2ListNp = np.array(s2List)
         s3ListNp = np.array(s3List)
