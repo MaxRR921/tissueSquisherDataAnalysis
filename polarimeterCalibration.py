@@ -114,9 +114,9 @@ class PolarimeterCalibrator:
         min_len = min(len(s1_fit.real), len(s2), len(s3))
         ax.scatter(s1_fit.real[:min_len], s2[:min_len], s3[:min_len], label="Theoretical")
 
-        print("ALPHA: " + alpha)
-        print("BETA: " + beta)
-        print("GAMMA: " + gamma)
+        print("ALPHA: ", alpha)
+        print("BETA: " , beta)
+        print("GAMMA: " , gamma)
 
         ax.set_xlabel('s1')
         ax.set_ylabel('s2')
