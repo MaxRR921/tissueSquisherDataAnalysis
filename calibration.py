@@ -580,8 +580,8 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
      #   minPower = np.min(sdiffs)
      #   maxPower = np.max(sdiffs[sdiffs != 0])
      #   minPower = np.min(sdiffs[sdiffs != 0])
-          minPower = -.329
-          maxPower = -.186
+          minPower = .063
+          maxPower = .09
           print("Max power: ", maxPower, "Min power: ", minPower)
 
           finds = []
@@ -589,11 +589,11 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
           done = False
      #   self.gamma = 1.3
           lengths = [0.01818]
-          for gamma in np.linspace(0, np.pi/2, 30):
+          for gamma in np.linspace(0, np.pi/2, 90):
                self.gamma = gamma 
-               for alpha in np.linspace(0, np.pi/2, 30):
+               for alpha in np.linspace(0, np.pi/2, 90):
                     self.alpha = alpha
-                    for beta in np.linspace(0, np.pi/2, 30):
+                    for beta in np.linspace(0, np.pi/2, 90):
                          self.beta = beta
                          forces = np.linspace(0, targetForce, 500)
                          stresses = forces/(np.pi * self.b**2)
@@ -665,7 +665,7 @@ npoints = 500
 c = Calibration(.03154)
 print(c.calcForce(1.6835, .0002)/.0002)
 #4.0861
-# c.calculateAlphaAndBeta(c.calcForce(1.6835, .0002)/.0002) # 6.71 N is the target force
+c.calculateAlphaAndBeta(c.calcForce(4.0861, .0002)/.0002) # 6.71 N is the target force
 
 
 
@@ -679,7 +679,7 @@ print(c.calcForce(1.6835, .0002)/.0002)
 # c.plotNormalizedPowersVsDelta(np.linspace(0,np.pi,500), np.linspace(0,.08993091942,3))
 # c.plotStressVsPowerDifference(np.linspace(0, 0.090748, 500))
 c.gamma = np.pi/4 
-c.beta = 0
+c.beta = np.pi/3
 c.alpha = np.pi/4
 
 
@@ -687,12 +687,11 @@ c.alpha = np.pi/4
 #MESSAGE HARRISON: noticed from the plots that when the gamma and alpha are too close to zero it doesnt work well, calibration will fail because we go through a larger portion of the curve and get non-function behavior That's why my results from the other day were wrong.
 #What can happen is we can still see sensitivits at different angles of beta, but the force doesn't cause a large change in power difference, namely  different forces don't have different power difference deltas for certain angles.
 
+
 c.plotPowerDifferencesNormalized(np.linspace(0, c.calcForce(4.0861, .0002)/.0002, 500))  
-c.plotNormalizedPowersVsAlpha(np.linspace(0,np.pi,500), np.linspace(0,c.calcForce(4.0861, .0002)/.0002,3)) #GOOD! look at envelope maximum... 45 degrees is the maximum of the envelope
-c.plotNormalizedPowersVsGamma(np.linspace(0,np.pi,500), np.linspace(0, c.calcForce(4.0861, .0002)/.0002,3))
-c.alpha = .087
-c.gamma = .087
-c.plotNormalizedPowersVsBeta(np.linspace(0,np.pi,500), np.linspace(0,c.calcForce(1.6835, .0002)/.0002,3))
+# c.plotNormalizedPowersVsAlpha(np.linspace(0,np.pi,500), np.linspace(0,c.calcForce(4.0861, .0002)/.0002,3)) #GOOD! look at envelope maximum... 45 degrees is the maximum of the envelope
+# c.plotNormalizedPowersVsGamma(np.linspace(0,np.pi,500), np.linspace(0, c.calcForce(4.0861, .0002)/.0002,3))
+# c.plotNormalizedPowersVsBeta(np.linspace(0,np.pi,500), np.linspace(0,c.calcForce(1.6835, .0002)/.0002,3))
 # alphas = np.deg2rad([30, 45, 60, 75])
 # c.plotPhiVsNormalizedForce(np.linspace(0,50,500), alphas)
 # gammas = np.deg2rad([30, 45, 60, 75])
@@ -842,5 +841,36 @@ c.plotNormalizedPowersVsBeta(np.linspace(0,np.pi,500), np.linspace(0,c.calcForce
 # Slope = 0.0, Found force max = 103.613227, force min = 4.162890, α=9.3°, β=55.9°, gamma=83.8
 
 
+
+
+
+#7/7 actual alpha = around 45, actual gamma = around 0
+
+
+#7/7 less weight:
+
+# Slope = 0.0, Found force max = 101.120728, force min = 27.019259, α=43.4°, β=46.6°, gamma=6.2
+# Slope = 0.0, Found force max = 101.120728, force min = 27.019259, α=43.4°, β=83.8°, gamma=43.4
+# Slope = 0.0, Found force max = 76.083265, force min = 20.900032, α=40.3°, β=6.2°, gamma=46.6
+# Slope = 0.0, Found force max = 76.083265, force min = 20.900032, α=40.3°, β=43.4°, gamma=83.8
+
+
+
+# 7/7 more weight: 
+# Slope = 0.0, Found force max = 255.585391, force min = 60.508062, α=52.8°, β=46.6°, gamma=0.0
+# Slope = 0.0, Found force max = 238.454330, force min = 59.464134, α=55.9°, β=46.6°, gamma=0.0
+# Slope = 0.0, Found force max = 231.070047, force min = 59.417046, α=59.0°, β=46.6°, gamma=0.0
+# Slope = 0.0, Found force max = 231.459129, force min = 60.340783, α=62.1°, β=46.6°, gamma=0.0
+# Slope = 0.0, Found force max = 240.394652, force min = 62.311717, α=65.2°, β=46.6°, gamma=0.0
+# Slope = 0.0, Found force max = 255.585391, force min = 60.508062, α=52.8°, β=90.0°, gamma=43.4
+# Slope = 0.0, Found force max = 238.454330, force min = 59.464134, α=55.9°, β=90.0°, gamma=43.4
+# Slope = 0.0, Found force max = 231.070047, force min = 59.417046, α=59.0°, β=90.0°, gamma=43.4
+# Slope = 0.0, Found force max = 231.459129, force min = 60.340783, α=62.1°, β=90.0°, gamma=43.4
+# Slope = 0.0, Found force max = 240.394652, force min = 62.311717, α=65.2°, β=90.0°, gamma=43.4
+
+
+
 #
 #-.06771
+
+#TODO: third point in fitting, stress strain curve, polarimeter comparison.
