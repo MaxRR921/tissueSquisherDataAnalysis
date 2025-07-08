@@ -24,9 +24,9 @@ class PolarimeterCalibrator:
         """
 
 
-        s1   = stokes1
-        s2   = stokes2 
-        s3   = stokes3
+        s1   = np.array(stokes1)
+        s2   = np.array(stokes2) 
+        s3   = np.array(stokes3)
 
         # ----------------------------------------------------------------------
         # 2) PRE-PROCESSING  (polar coordinates, theta unwrap, circle fit)
@@ -123,7 +123,7 @@ class PolarimeterCalibrator:
             - exp( δ_vec * j) * sin(γ) * (exp(arg * j) * (sin(β) * cos(φ) ** 2
                     + cos(β) * sin(φ) * cos(φ)) + sin(β) * sin(φ) ** 2
                     - cos(β) * cos(φ) * sin(φ))))
-        )
+        
 
         s2_fit = (
             2 * (cos(γ) * sin(δ_vec) * (sin(β) * sin(φ) ** 2 +
@@ -255,6 +255,9 @@ class PolarimeterCalibrator:
                     (s3_fit - s3[exp_i]) ** 2)
         α = α_vec[np.argmin(err)]
 
+        print("ALPHA IS ", α )
+        print("BETA IS: ", β)
+        print("GAMMA IS: ", γ)
         # ----------------------------------------------------------------------
         # 6) FINAL THEORETICAL CURVE vs F (0 → fMax)
         # ----------------------------------------------------------------------
@@ -286,7 +289,7 @@ class PolarimeterCalibrator:
             - exp( δ * j) * sin(γ) * (exp(arg * j) * (sin(β) * cos(φ) ** 2
                     + cos(β) * sin(φ) * cos(φ)) + sin(β) * sin(φ) ** 2
                     - cos(β) * cos(φ) * sin(φ))))
-        )
+        
 
         s2_fit = (
             2 * (cos(γ) * sin(δ) * (sin(β) * sin(φ) ** 2 +
