@@ -110,7 +110,9 @@ class PolarimeterCalibrator:
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
         ax.scatter(s1, s2, s3, label="Experimental")
-        ax.scatter(s1_fit.real, s2[:len(s1_fit)], s3[:len(s1_fit)], label="Theoretical")
+        min_len = min(len(s1_fit.real), len(s2), len(s3))
+        ax.scatter(s1_fit.real[:min_len], s2[:min_len], s3[:min_len], label="Theoretical")
+
         ax.set_xlabel('s1')
         ax.set_ylabel('s2')
         ax.set_zlabel('s3')
