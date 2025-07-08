@@ -40,11 +40,11 @@ class DataAnalyzer:
         while not timeQueue.empty():
             timeList.append(timeQueue.get())
 
-        self.polCalibrator = polarimeterCalibration.PolarimeterCalibrator(s1List, s2List, s3List)
         s1ListNp = np.array(s1List)
         s2ListNp = np.array(s2List)
         s3ListNp = np.array(s3List)
         timeListNp = np.array(timeList)
+        self.polCalibrator = polarimeterCalibration.PolarimeterCalibrator(s1List, s2List, s3List)
 
         
 
