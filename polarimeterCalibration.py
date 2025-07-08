@@ -15,9 +15,9 @@ class PolarimeterCalibrator:
 
 
         # Load CSV data
-        s1 = stokes1
-        s2 = stokes2 
-        s3 = stokes3 
+        s1 = np.array(stokes1)
+        s2 = np.array(stokes2)
+        s3 = np.array(stokes3)
 
         # Convert Stokes vector to polar coordinates
         sx = np.sqrt(s1 ** 2 + s2 ** 2)
