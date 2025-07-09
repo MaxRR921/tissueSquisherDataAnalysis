@@ -17,6 +17,10 @@ class PolarimeterCalibrator:
         Converted one-for-one from the original MATLAB script
         “%theoretical circle trace: with polarizer”
         to pure-Python (NumPy + Matplotlib).
+
+        Save this as, e.g., circle_trace.py and run it with any 3.10+ interpreter.
+        It will pop up a file-picker so you can select the CSV file exactly
+        like MATLAB’s `uigetfile`.
         """
 
 
@@ -73,8 +77,8 @@ class PolarimeterCalibrator:
         p44    = (p11 - p12) / 2
         b      = 62.5e-6    # m
         Lb0    = 2e-3       # m
-        lam    = 1550e-9     # m
-        ℓ      = .03154   # m
+        lam    = 980e-9     # m
+        ℓ      = 22.90e-3   # m
 
         npts   = 1000
         alpha0 = 0.0
@@ -172,7 +176,7 @@ class PolarimeterCalibrator:
         # 5) SOLVE α (“alpha”)  (second big loop, f = fMax)
         # ----------------------------------------------------------------------
         α_vec = np.linspace(0, np.pi, npts)
-        fMax  = 455.875
+        fMax  = 259.10589
         exp_i = len(s1) - 1           # MATLAB’s 1024th point
 
         F = 2 * (Nidx ** 3) * (1 + sigma) * (p12 - p11) * Lb0 * fMax / (lam * np.pi * b * Y)
@@ -361,5 +365,13 @@ class PolarimeterCalibrator:
                     wrap -= 2
             pctr[i + 1] = wrap
         phase = phase + pctr - phase[0]
+
+        fig2 = plt.figure()
+        plt.plot(phase, f)
+        plt.title("force vs. phase")
+        plt.ylabel("force (N/m)")
+        plt.xlabel("phase (π radians)")
+
+        plt.show()
 
 
