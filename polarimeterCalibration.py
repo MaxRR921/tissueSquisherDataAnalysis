@@ -362,12 +362,4 @@ class PolarimeterCalibrator:
             pctr[i + 1] = wrap
         phase = phase + pctr - phase[0]
 
-        fig2 = plt.figure()
-        plt.plot(phase, f)
-        plt.title("force vs. phase")
-        plt.ylabel("force (N/m)")
-        plt.xlabel("phase (π radians)")
-
-        plt.show()
-
 

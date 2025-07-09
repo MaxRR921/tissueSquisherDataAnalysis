@@ -663,9 +663,9 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
 
 npoints = 500
 c = Calibration(.03154)
-print(c.calcForce(1.6835, .0002)/.0002)
+print(c.calcForce(4.0861, .0002)/.0002)
 #4.0861
-c.calculateAlphaAndBeta(c.calcForce(4.0861, .0002)/.0002) # 6.71 N is the target force
+# c.calculateAlphaAndBeta(c.calcForce(4.0861, .0002)/.0002) # 6.71 N is the target force
 
 
 
@@ -688,7 +688,7 @@ c.alpha = np.pi/4
 #What can happen is we can still see sensitivits at different angles of beta, but the force doesn't cause a large change in power difference, namely  different forces don't have different power difference deltas for certain angles.
 
 
-c.plotPowerDifferencesNormalized(np.linspace(0, c.calcForce(4.0861, .0002)/.0002, 500))  
+# c.plotPowerDifferencesNormalized(np.linspace(0, c.calcForce(4.0861, .0002)/.0002, 500))  
 # c.plotNormalizedPowersVsAlpha(np.linspace(0,np.pi,500), np.linspace(0,c.calcForce(4.0861, .0002)/.0002,3)) #GOOD! look at envelope maximum... 45 degrees is the maximum of the envelope
 # c.plotNormalizedPowersVsGamma(np.linspace(0,np.pi,500), np.linspace(0, c.calcForce(4.0861, .0002)/.0002,3))
 # c.plotNormalizedPowersVsBeta(np.linspace(0,np.pi,500), np.linspace(0,c.calcForce(1.6835, .0002)/.0002,3))
