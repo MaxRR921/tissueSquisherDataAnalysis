@@ -77,8 +77,8 @@ class PolarimeterCalibrator:
         p44    = (p11 - p12) / 2
         b      = 62.5e-6    # m
         Lb0    = 2e-3       # m
-        lam    = 980e-9     # m
-        ℓ      = 22.90e-3   # m
+        lam    = 1550-9     # m
+        ℓ      = .03154  # m
 
         npts   = 1000
         alpha0 = 0.0
@@ -366,12 +366,5 @@ class PolarimeterCalibrator:
             pctr[i + 1] = wrap
         phase = phase + pctr - phase[0]
 
-        fig2 = plt.figure()
-        plt.plot(phase, f)
-        plt.title("force vs. phase")
-        plt.ylabel("force (N/m)")
-        plt.xlabel("phase (π radians)")
-
-        plt.show()
 
 
