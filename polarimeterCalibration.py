@@ -17,10 +17,6 @@ class PolarimeterCalibrator:
         Converted one-for-one from the original MATLAB script
         “%theoretical circle trace: with polarizer”
         to pure-Python (NumPy + Matplotlib).
-
-        Save this as, e.g., circle_trace.py and run it with any 3.10+ interpreter.
-        It will pop up a file-picker so you can select the CSV file exactly
-        like MATLAB’s `uigetfile`.
         """
 
 
@@ -77,8 +73,8 @@ class PolarimeterCalibrator:
         p44    = (p11 - p12) / 2
         b      = 62.5e-6    # m
         Lb0    = 2e-3       # m
-        lam    = 980e-9     # m
-        ℓ      = 22.90e-3   # m
+        lam    = 1550e-9     # m
+        ℓ      = .03154   # m
 
         npts   = 1000
         alpha0 = 0.0
