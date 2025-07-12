@@ -66,6 +66,8 @@ class Gui:
             self.powermeter = None
 
         # Event booleans
+        self.updatingPlots = threading.Event() 
+        self.updatingPlots.clear()
         self.triedMicrometer = False
         self.executed = threading.Event()
         self.executed.clear()
@@ -78,6 +80,9 @@ class Gui:
         #setting up powermeter text in ui
         self.power1Text = tk.StringVar()
         self.power2Text = tk.StringVar()
+        self.s1Text = tk.StringVar()
+        self.s2Text = tk.StringVar()
+        self.s3Text = tk.StringVar()
         self.power1Text.set("p1 not reading")
         self.power2Text.set("p2 not reading") 
         
@@ -103,8 +108,6 @@ class Gui:
         self.noisePlotPow2 = None 
         #list of times recorded
         self.timeList = []
-        
-        self.execTime = 1000
 
         self.deltaPowerDifferences = []
         
@@ -167,6 +170,7 @@ class Gui:
         if self.powermeter is not None:
             self.powermeter.stop()
         self.stopExecution = True
+        self.updatingPlots.clear() 
         try:
             self.executeThread.join()
         except:
@@ -255,9 +259,7 @@ class Gui:
     """adds all of the buttons in the bottom frame"""
     def addBottomFrameButtons(self, listFrame):
         numExec = tk.StringVar()
-        timeRecord = tk.StringVar()
         ttk.Entry(listFrame, textvariable=numExec).grid(row=2, column=1, sticky='sw', pady=5)
-        ttk.Entry(listFrame, textvariable=timeRecord).grid(row=1, column=4, sticky='sw', pady=5)
         listFrame.grid_rowconfigure(0, weight=1)
         listFrame.grid_rowconfigure(1, weight=0)
         listFrame.grid_columnconfigure(1, weight=0)
@@ -267,8 +269,8 @@ class Gui:
         executeAllMovesButton = ttk.Button(listFrame, text='execute all moves', command=lambda: (self.saveNumExecutions(numExec), self.startExecuteThread(self.moveList, True)))
         executeAllMovesButton.grid(row=2, column=0, sticky='sw', pady=5, padx=30)
 
-        recordNoiseButton = ttk.Button(listFrame, text='Record for Time:', command=lambda: (self.saveExecuteTime(timeRecord), self.startNoiseThread()))
-        recordNoiseButton.grid(row=1, column=3, sticky='sw', pady=5, padx=30)
+        recordNoiseButton = ttk.Button(listFrame, text='collect noise', command=lambda: (self.startNoiseThread()))
+        recordNoiseButton.grid(row=2, column=3, sticky='sw', pady=5, padx=10)
 
         addMoveButton = ttk.Button(listFrame, text='add move', command=lambda: self.__addMove(listFrame))
         addMoveButton.grid(row=1, column=0, sticky='sw', pady=5, padx=30)
@@ -285,6 +287,12 @@ class Gui:
             power1Text = ttk.Label(listFrame, textvariable=self.power2Text).grid(row=2, column=3, sticky = 'e', pady=5, padx=10)
             timesText = ttk.Label(listFrame, text='times').grid(row=2, column=2, sticky= 'w', pady=5, padx=5)
 
+        if self.polarimeter is not None:
+            s1Text = ttk.Label(listFrame, textvariable=self.s1Text).grid(row=1, column=4, sticky = 'w', pady=5, padx=1)
+            s2Text = ttk.Label(listFrame, textvariable=self.s2Text).grid(row=1, column=4, sticky = 'w', pady=5, padx=1)
+            s3Text = ttk.Label(listFrame, textvariable=self.s3Text).grid(row=1, column=4, sticky = 'w', pady=5, padx=1)
+
+
     """ saveNumExecutions is called when executeall is pressed, saves the number of executions the user entered
     in the little box at the bottom, checks for invalid input in the textbox."""
     def saveNumExecutions(self, numExec):
@@ -292,15 +300,6 @@ class Gui:
             self.numExecutions = int(numExec.get())
             print(f"Saved number of executions: {self.numExecutions}")
         except ValueError:
-            print("Invalid input, please enter a valid number")
-
-    """ saveExecutTime is called when Record for time is pressed, saves the time the user entered
-    in the little box at the bottom, checks for invalid input in the textbox."""
-    def saveExecuteTime(self, execTime):
-        try:
-            self.execTime = int(execTime.get())
-            print(f"Saved number of executions: {self.execTime}")
-        except:
             print("Invalid input, please enter a valid number")
 
     def __raiseMicrometer(self):
@@ -324,56 +323,35 @@ class Gui:
         self.executeThread.start()
 
     def startNoiseThread(self):
-        self.signalGraph.put("STOP")
+        for plot in self.plotList:
+            plot.resetPlot()
         self.noiseThread = threading.Thread(target=self.__collectNoise)
         self.noiseThread.start()
 
     def __collectNoise(self):
-        print("collecting data")
-            
-        if not self.powermeter.updatingDevice1CsvQueue.is_set():
-            self.powermeter.updatingDevice1CsvQueue.set()
-        
-        if not self.powermeter.updatingDevice2CsvQueue.is_set():
-            self.powermeter.updatingDevice2CsvQueue.set()
+        t = 20
+        start_time = time.time()
+        end_time = start_time 
+        if not self.updatingPlots.is_set():
+            self.updatingPlots.set()
+        while(end_time - start_time < t):
+           end_time = time.time() 
+           print("waiting")
+        self.updatingPlots.clear()
+        try:
+            self.noisePlotPowDif.generateCsvFromPlot("power dif vs. time.csv")
+        except:
+            print("plot not open")
+        try:
+            self.noisePlotPow1.generateCsvFromPlot("power 1 vs. time.csv")
+        except:
+            print("plot not open")
 
-        if self.polarimeter is not None:
-            if not self.polarimeter.updatingCsvQueue.is_set():
-                self.polarimeter.updatingCsvQueue.set()
+        try:
+            self.noisePlotPow2.generateCsvFromPlot("power 2 vs. time.csv")
+        except:
+            print("plot not open")
 
-        if self.pyqt_process is not None and self.pyqt_process.is_alive():
-            self.micrometerController.updatingPlotQueue.set()
-            self.powermeter.updatingDevice1PlotQueue.set()
-            self.powermeter.updatingDevice2PlotQueue.set()
-
-        #POLARIMETER NEEDS TO START RUNNING BEFORE MOVES EXECUTE. IT DOESN'T CONSTANTLY RUN LIKE THE POWERMETER.
-        if(self.polarimeter is not None):
-            self.polarimeter.run = True
-            self.__startPolarimeterThread()
-        else:
-            print("No polarimeter Connected")
-
-        currTime = time.time()
-
-        while(time.time() - currTime < self.execTime and not self.stopExecution):
-            print("collecting noise data")
-        
-        
-        self.executed.set()
-        # time.sleep(2)
-
-        self.micrometerController.updatingCsvQueue.clear()
-        self.micrometerController.updatingPlotQueue.clear()
-        self.powermeter.updatingDevice1CsvQueue.clear()
-        self.powermeter.updatingDevice2CsvQueue.clear()
-        self.powermeter.updatingDevice1PlotQueue.clear()
-        self.powermeter.updatingDevice2PlotQueue.clear()
-        if self.polarimeter is not None:
-            self.polarimeter.dataAnalyzer.finishAnalyzeDataSignal.wait()
-            self.polarimeter.dataAnalyzer.finishAnalyzeDataSignal.clear()
-            self.polarimeter.updatingCsvQueue.clear()
-        self.generateCsvs()
-        print("DONE")
 
 
     #STRANGE: NOTE: when doing this sometimes the pyqt plots just don't do anything. Maybe add a little wait?
@@ -609,6 +587,9 @@ class Gui:
     def __collect(self, moveList, collectData):
         print("collecting data")
         if collectData:
+            if not self.updatingPlots.is_set():
+                self.updatingPlots.set() 
+
 
             if not self.micrometerController.updatingCsvQueue.is_set():
                 self.micrometerController.updatingCsvQueue.set()
@@ -752,6 +733,7 @@ class Gui:
                 self.pow1Plot.generateCsvFromPlot("pow1.csv")
             if self.pow2Plot is not None:
                 self.pow2Plot.generateCsvFromPlot("pow2.csv")
+            self.updatingPlots.clear() 
             self.signalAngleFinder.set()
             self.executed.clear()
             self.stopExecution = False
@@ -762,5 +744,13 @@ class Gui:
         if self.powermeter is not None:
             self.power1Text.set(str(self.powermeter.device1Data))
             self.power2Text.set(str(self.powermeter.device2Data))
+        
+        if self.polarimeter is not None:
+            self.s1Text.set(str(self.polarimeter.s1.value))
+            self.s2Text.set(str(self.polarimeter.s2.value))
+            self.s3Text.set(str(self.polarimeter.s3.value))
+
+            
+
         self.root.after(10, self.updatePlotsFromData)
 
