@@ -295,8 +295,8 @@ class Gui:
 
         if self.polarimeter is not None:
             s1Text = ttk.Label(listFrame, textvariable=self.s1Text).grid(row=1, column=2, sticky = 'w', pady=5, padx=1)
-            s2Text = ttk.Label(listFrame, textvariable=self.s2Text).grid(row=1, column=2, sticky = 'w', pady=5, padx=.2)
-            s3Text = ttk.Label(listFrame, textvariable=self.s3Text).grid(row=1, column=2, sticky = 'w', pady=5, padx=.2)
+            s2Text = ttk.Label(listFrame, textvariable=self.s2Text).grid(row=1, column=3, sticky = 'w', pady=5, padx=.2)
+            s3Text = ttk.Label(listFrame, textvariable=self.s3Text).grid(row=1, column=3, sticky = 'w', pady=5, padx=.2)
 
 
     """ saveNumExecutions is called when executeall is pressed, saves the number of executions the user entered
