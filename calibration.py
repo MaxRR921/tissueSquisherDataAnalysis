@@ -571,8 +571,64 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
           
 
 
-     # def findBestAlphaGamma(self, targetForce):
-     #      for alpha 
+     def findBestAlphaGamma(self, targetForce):
+          hitCount = 0
+          iterationCount = 0
+          Sdifferences = np.zeros(500)
+          out_path = "linear_hits.csv"
+          with open(out_path, "w", newline="") as fp:
+               writer = csv.writer(fp)
+               writer.writerow(["Equation", "alpha(rad)", "beta(rad)", "gamma(rad)"])
+               for alpha in np.linspace(0, 2*np.pi, 360):
+                    self.alpha = alpha
+                    print("HELLO ", iterationCount, "Hit count: ", hitCount)
+                    iterationCount += 1
+                    for gamma in np.linspace(0, 2*np.pi, 360):
+                         self.gamma = gamma
+                         for beta in np.linspace(0, 2*np.pi, 360):
+                              self.beta = beta
+                              Sx, Sy = self.__calcFields(0)
+                              if self.calcNormalizedPowerDifference(Sx, Sy) < .0001:
+                                   Sdifferences = np.zeros(500)
+                                   goodBetaCount = 0
+                                   for i in range(0,3):
+                                        # print("possible beta: ", self.beta)
+                                        self.beta = self.beta + (np.pi/2)
+                                        # print("beta: ", self.beta, "alpha: ", self.alpha, "gamma: ", self.gamma)
+                                        Sx, Sy = self.__calcFields(0)
+                                        # print("bang", self.beta)
+                                        if( self.calcNormalizedPowerDifference(Sx, Sy) < 0.0001):
+                                             # print("good beta: ", self.beta, "alpha: ", self.alpha, "gamma: ", self.gamma)
+                                             goodBetaCount += 1
+                                   if goodBetaCount == 3:
+                                        # print("GOING")
+                                        forces = np.linspace(0, targetForce, 500)
+                                        Sdiffs = np.empty_like(forces)
+
+                                        for i, f in enumerate(forces):
+                                             Sx, Sy = self.__calcFields(f)
+                                             Sdiffs[i] = self.calcNormalizedPowerDifference(Sx, Sy)
+
+                                             # ----- try linear fit -----
+                                        try:
+                                             m, b = np.polyfit(Sdiffs, forces, 1)
+                                             y_pred = m * Sdiffs + b
+                                             r2 = 1 - np.sum((forces - y_pred) ** 2) / np.sum((forces - forces.mean()) ** 2)
+
+                                             if r2 > 0.95:                 # hit!
+                                                  hitCount += 1
+                                                  eqn_str = f"F = {m:.6g}*Sdiff + {b:.6g}"
+                                                  writer.writerow([eqn_str, self.alpha, self.beta, self.gamma])
+
+                                        except Exception:                # fit failed → ignore
+                                             pass
+                                                       
+                                             print(Sdifferences)
+                                             # print("HITCOUNT: ", hitCount)
+                                             print("")
+                              
+
+
 
 
 
@@ -692,11 +748,12 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
 
 npoints = 500
 c = Calibration(.03154)
-print(c.calcForce(11.2940, .0002)/.0002)
+# print(c.calcForce(11.2940, .0002)/.0002)
 #4.0861
 # c.calculateAlphaAndBeta(c.calcForce(4.0861, .0002)/.0002) # 6.71 N is the target force
+c.findBestAlphaGamma(c.calcForce(11.29, .0002)/.0002)  
 
-c.findMinStartingDiff()
+# c.findMinStartingDiff()
 
 
 
@@ -717,10 +774,9 @@ c.findMinStartingDiff()
 
 
 # all angles at pi/5 good candidate 
-
-c.gamma = np.pi/5 
-c.alpha = np.pi/5 
-c.beta = np.pi/5
+c.gamma = 0.5250572680094361
+c.alpha = 0.0 
+c.beta = 8.4708
 c.plotPowerDifferencesNormalized(np.linspace(0, c.calcForce(11.29, .0002)/.0002, 500))  
 # c.findMinStartingDiff()
 # c.plotNormalizedPowersVsAlpha(np.linspace(0,np.pi,500), np.linspace(0,c.calcForce(4.0861, .0002)/.0002,3)) #GOOD! look at envelope maximum... 45 degrees is the maximum of the envelope
