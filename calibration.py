@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import ScalarFormatter
 import pandas as pd
 from scipy.interpolate import PchipInterpolator
+import csv
 """
 Potential issues:
 - Ex and Ey are each 1 value, not arrays. 
@@ -262,7 +263,7 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
      #      return np.abs( (S2/(S1+S2)) - (S1/(S1+S2)) ) 
 
      def calcNormalizedPowerDifference(self, S1, S2):
-          return (S2 - S1)/(S1+S2)
+          return np.abs((S2 - S1)/(S1+S2))
        
      def calcNormalizedPowers(self, Sx, Sy):
           return Sx/(Sx+Sy), Sy/(Sx+Sy)
@@ -570,6 +571,10 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
           
 
 
+     # def findBestAlphaGamma(self, targetForce):
+     #      for alpha 
+
+
 
      def calculateAlphaAndBeta(self, targetForce):
           curves = []
@@ -580,8 +585,10 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
      #   minPower = np.min(sdiffs)
      #   maxPower = np.max(sdiffs[sdiffs != 0])
      #   minPower = np.min(sdiffs[sdiffs != 0])
-          minPower = .063
-          maxPower = .09
+          minPower = .028
+          midPower = .032
+          maxPower = .035
+          difference = maxPower-minPower
           print("Max power: ", maxPower, "Min power: ", minPower)
 
           finds = []
@@ -589,11 +596,11 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
           done = False
      #   self.gamma = 1.3
           lengths = [0.01818]
-          for gamma in np.linspace(0, np.pi/2, 90):
+          for gamma in np.linspace(0, np.pi/2, 30):
                self.gamma = gamma 
-               for alpha in np.linspace(0, np.pi/2, 90):
+               for alpha in np.linspace(0, np.pi/2, 30):
                     self.alpha = alpha
-                    for beta in np.linspace(0, np.pi/2, 90):
+                    for beta in np.linspace(0, np.pi/2, 30):
                          self.beta = beta
                          forces = np.linspace(0, targetForce, 500)
                          stresses = forces/(np.pi * self.b**2)
@@ -606,10 +613,11 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
                               powerDifferences[i] = self.calcNormalizedPowerDifference(Sx, Sy)
                          # plot at α≈π/4, β≈π/4
                          theoreticalPmax = np.max(powerDifferences)
+                         theoreticalPmid = np.median(powerDifferences)
                          theoreticalPmin = np.min(powerDifferences)
 
                          
-                         if (minPower >= theoreticalPmin and maxPower <= theoreticalPmax):
+                         if (minPower >= theoreticalPmin and maxPower <= theoreticalPmax and np.isclose(midPower, theoreticalPmid)):
                               sorted_idx = np.argsort(powerDifferences)
                               Sdiff_sorted = powerDifferences[sorted_idx]
                               forces_sorted = forces[sorted_idx]
@@ -634,7 +642,7 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
                               print("FORCE Max (real val): ", np.abs(forceMax))
                               print("theoretical max force:", targetForce)
                               # print("fmin: ", stressMin, "fMax: ", stressMax, "alpha: ", np.rad2deg(alpha), "beta: ", np.rad2deg(beta), "gamma: ", np.rad2deg(gamma))
-                              if np.isclose(maxPower, theoreticalPmax, atol=.01) and np.isclose(minPower, theoreticalPmin, atol=.01):
+                              if np.isclose(difference, (theoreticalPmax-theoreticalPmin), atol=.01):
                                    finds.append(f"Slope = {y_fit[0]}, Found force max = {forceMax:.6f}, force min = {forceMin:.6f}, α={np.rad2deg(self.alpha):.1f}°, β={np.rad2deg(self.beta):.1f}°, gamma={np.rad2deg(self.gamma):.1f}")
                                    curves.append((x_fit, y_fit, maxPower, forceMax, minPower, forceMin))
                          else:
@@ -661,12 +669,34 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
 
                     
 
+     def findMinStartingDiff(self):
+          bzeros = []
+          self.alpha = np.pi/5
+          self.gamma = np.pi/5
+          for b in np.linspace(0, 2*np.pi, 360):
+               self.beta = b
+               Sx, Sy = self.__calcFields(0)
+               print("power diff: ", self.calcNormalizedPowerDifference(Sx, Sy))
+               if np.isclose(self.calcNormalizedPowerDifference(Sx, Sy), 0, atol=.01):
+                    bzeros.append(self.beta) 
+                              
+          with open("zeroes.csv", "w", newline="") as f:      # use "a" to append instead of overwrite
+               writer = csv.writer(f)
+               writer.writerow([ "beta"])     # header row
+
+               # write the data rows
+               for b in zip(bzeros):
+                    writer.writerow([b])
+          
+
+
 npoints = 500
 c = Calibration(.03154)
-print(c.calcForce(4.0861, .0002)/.0002)
+print(c.calcForce(11.2940, .0002)/.0002)
 #4.0861
 # c.calculateAlphaAndBeta(c.calcForce(4.0861, .0002)/.0002) # 6.71 N is the target force
 
+c.findMinStartingDiff()
 
 
 
@@ -678,17 +708,21 @@ print(c.calcForce(4.0861, .0002)/.0002)
 
 # c.plotNormalizedPowersVsDelta(np.linspace(0,np.pi,500), np.linspace(0,.08993091942,3))
 # c.plotStressVsPowerDifference(np.linspace(0, 0.090748, 500))
-c.gamma = np.pi/4 
-c.beta = np.pi/3
-c.alpha = np.pi/4
-
-
+# c.gamma = 6.2516115116661215 
+# c.beta = 4.609774144965928 
+# c.alpha = 2.3680346635098943
 
 #MESSAGE HARRISON: noticed from the plots that when the gamma and alpha are too close to zero it doesnt work well, calibration will fail because we go through a larger portion of the curve and get non-function behavior That's why my results from the other day were wrong.
 #What can happen is we can still see sensitivits at different angles of beta, but the force doesn't cause a large change in power difference, namely  different forces don't have different power difference deltas for certain angles.
 
 
-# c.plotPowerDifferencesNormalized(np.linspace(0, c.calcForce(4.0861, .0002)/.0002, 500))  
+# all angles at pi/5 good candidate 
+
+c.gamma = np.pi/5 
+c.alpha = np.pi/5 
+c.beta = np.pi/5
+c.plotPowerDifferencesNormalized(np.linspace(0, c.calcForce(11.29, .0002)/.0002, 500))  
+# c.findMinStartingDiff()
 # c.plotNormalizedPowersVsAlpha(np.linspace(0,np.pi,500), np.linspace(0,c.calcForce(4.0861, .0002)/.0002,3)) #GOOD! look at envelope maximum... 45 degrees is the maximum of the envelope
 # c.plotNormalizedPowersVsGamma(np.linspace(0,np.pi,500), np.linspace(0, c.calcForce(4.0861, .0002)/.0002,3))
 # c.plotNormalizedPowersVsBeta(np.linspace(0,np.pi,500), np.linspace(0,c.calcForce(1.6835, .0002)/.0002,3))
@@ -874,3 +908,17 @@ c.alpha = np.pi/4
 #-.06771
 
 #TODO: third point in fitting, stress strain curve, polarimeter comparison.
+
+
+# with just min and max in range:
+# Slope = 0.0, Found force max = 255.585391, force min = 86.052636, α=52.8°, β=46.6°, gamma=0.0
+# Slope = 0.0, Found force max = 238.454330, force min = 83.409153, α=55.9°, β=46.6°, gamma=0.0
+# Slope = 0.0, Found force max = 231.070047, force min = 82.441213, α=59.0°, β=46.6°, gamma=0.0
+# Slope = 0.0, Found force max = 231.459129, force min = 82.982068, α=62.1°, β=46.6°, gamma=0.0
+# Slope = 0.0, Found force max = 240.394652, force min = 85.061804, α=65.2°, β=46.6°, gamma=0.0
+# Slope = 0.0, Found force max = 255.585391, force min = 86.052636, α=52.8°, β=90.0°, gamma=43.4
+# Slope = 0.0, Found force max = 238.454330, force min = 83.409153, α=55.9°, β=90.0°, gamma=43.4
+# Slope = 0.0, Found force max = 231.070047, force min = 82.441213, α=59.0°, β=90.0°, gamma=43.4
+# Slope = 0.0, Found force max = 231.459129, force min = 82.982068, α=62.1°, β=90.0°, gamma=43.4
+# Slope = 0.0, Found force max = 240.394652, force min = 85.061804, α=65.2°, β=90.0°, gamma=43.4
+
