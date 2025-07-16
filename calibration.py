@@ -570,6 +570,64 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
           plt.show()
           
 
+     def findBestAlphaGammaMoreBetas(self, targetForce):
+          hitCount = 0
+          iterationCount = 0
+          Sdifferences = np.zeros(500)
+          out_path = "linear_hits.csv"
+          with open(out_path, "w", newline="") as fp:
+               writer = csv.writer(fp)
+               writer.writerow(["Equation", "alpha(rad)", "beta(rad)", "gamma(rad)"])
+               for alpha in np.linspace(0, 2*np.pi, 20):
+                    self.alpha = alpha
+                    print("HELLO ", iterationCount, "Hit count: ", hitCount)
+                    iterationCount += 1
+                    for gamma in np.linspace(0, 2*np.pi, 20):
+                         self.gamma = gamma
+                         for beta in np.linspace(0, 2*np.pi, 20):
+                              self.beta = beta
+                              SxToMatch, SyToMatch = self.__calcFields(0)
+                              Sdifferences = np.zeros(500)
+                              goodBetaCount = 0
+                              for i in range(0,3):
+                                   # print("possible beta: ", self.beta)
+                                   self.beta = self.beta + (np.pi/2)
+                                   # print("beta: ", self.beta, "alpha: ", self.alpha, "gamma: ", self.gamma)
+                                   Sx, Sy = self.__calcFields(0)
+                                   # print("bang", self.beta)
+                                   if np.isclose(self.calcNormalizedPowerDifference(Sx, Sy), self.calcNormalizedPowerDifference(SxToMatch, SyToMatch), atol=.01):
+                                        # print("good beta: ", self.beta, "alpha: ", self.alpha, "gamma: ", self.gamma)
+                                        goodBetaCount += 1
+                              if goodBetaCount == 3:
+                                   # print("GOING")
+                                   forces = np.linspace(0, targetForce, 500)
+                                   Sdiffs = np.empty_like(forces)
+
+                                   Sx0, Sy0 = self.__calcFields(0)
+                                   for i, f in enumerate(forces):
+                                        Sx, Sy = self.__calcFields(f)
+                                        Sdiffs[i] = self.calcNormalizedPowerDifference(Sx, Sy)
+
+                                        # ----- try linear fit -----
+                                   try:
+                                        m, b = np.polyfit(Sdiffs, forces, 1)
+                                        y_pred = m * Sdiffs + b
+                                        r2 = 1 - np.sum((forces - y_pred) ** 2) / np.sum((forces - forces.mean()) ** 2)
+
+                                        if r2 > 0.95:                 # hit!
+                                             hitCount += 1
+                                             eqn_str = f"F = {m:.6g}*Sdiff + {b:.6g}"
+                                             totalDiff = Sdiffs[500] - self.calcNormalizedPowerDifference(Sx0, Sy0)
+                                             writer.writerow([totalDiff, eqn_str, self.alpha, self.beta, self.gamma])
+
+                                   except Exception:                # fit failed → ignore
+                                        pass
+                                                  
+                                        print(Sdifferences)
+                                        # print("HITCOUNT: ", hitCount)
+                                        print("")
+
+
 
      def findBestAlphaGamma(self, targetForce):
           hitCount = 0
@@ -618,7 +676,7 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
                                              if r2 > 0.95:                 # hit!
                                                   hitCount += 1
                                                   eqn_str = f"F = {m:.6g}*Sdiff + {b:.6g}"
-                                                  writer.writerow([eqn_str, self.alpha, self.beta, self.gamma])
+                                             
 
                                         except Exception:                # fit failed → ignore
                                              pass
@@ -751,7 +809,7 @@ c = Calibration(.03154)
 # print(c.calcForce(11.2940, .0002)/.0002)
 #4.0861
 # c.calculateAlphaAndBeta(c.calcForce(4.0861, .0002)/.0002) # 6.71 N is the target force
-c.findBestAlphaGamma(c.calcForce(11.29, .0002)/.0002)  
+c.findBestAlphaGammaMoreBetas(c.calcForce(11.29, .0002)/.0002)  
 
 # c.findMinStartingDiff()
 
@@ -774,9 +832,13 @@ c.findBestAlphaGamma(c.calcForce(11.29, .0002)/.0002)
 
 
 # all angles at pi/5 good candidate 
-c.gamma = 0.5250572680094361
-c.alpha = 0.0 
-c.beta = 8.4708
+
+
+
+0.992081890607303,5.373776907456225,0.0
+c.alpha = 0.992081890607303 
+c.beta = 5.373776907456225
+c.gamma = 0.0 
 c.plotPowerDifferencesNormalized(np.linspace(0, c.calcForce(11.29, .0002)/.0002, 500))  
 # c.findMinStartingDiff()
 # c.plotNormalizedPowersVsAlpha(np.linspace(0,np.pi,500), np.linspace(0,c.calcForce(4.0861, .0002)/.0002,3)) #GOOD! look at envelope maximum... 45 degrees is the maximum of the envelope
