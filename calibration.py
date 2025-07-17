@@ -577,14 +577,15 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
           out_path = "linear_hits.csv"
           with open(out_path, "w", newline="") as fp:
                writer = csv.writer(fp)
-               writer.writerow(["Equation", "alpha(rad)", "beta(rad)", "gamma(rad)"])
-               for alpha in np.linspace(0, 2*np.pi, 20):
+               writer.writerow(["Difference", "Equation", "alpha(rad)", "beta(rad)", "gamma(rad)"])
+               for alpha in np.linspace(0, 2*np.pi, 30):
                     self.alpha = alpha
                     print("HELLO ", iterationCount, "Hit count: ", hitCount)
                     iterationCount += 1
-                    for gamma in np.linspace(0, 2*np.pi, 20):
+                    for gamma in np.linspace(0, 2*np.pi, 180):
                          self.gamma = gamma
-                         for beta in np.linspace(0, 2*np.pi, 20):
+                         print("HI")
+                         for beta in np.linspace(0, 2*np.pi, 180):
                               self.beta = beta
                               SxToMatch, SyToMatch = self.__calcFields(0)
                               Sdifferences = np.zeros(500)
@@ -617,15 +618,12 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
                                         if r2 > 0.95:                 # hit!
                                              hitCount += 1
                                              eqn_str = f"F = {m:.6g}*Sdiff + {b:.6g}"
-                                             totalDiff = Sdiffs[500] - self.calcNormalizedPowerDifference(Sx0, Sy0)
+                                             totalDiff = Sdiffs[499] - self.calcNormalizedPowerDifference(Sx0, Sy0)
                                              writer.writerow([totalDiff, eqn_str, self.alpha, self.beta, self.gamma])
 
                                    except Exception:                # fit failed → ignore
                                         pass
-                                                  
                                         print(Sdifferences)
-                                        # print("HITCOUNT: ", hitCount)
-                                        print("")
 
 
 
