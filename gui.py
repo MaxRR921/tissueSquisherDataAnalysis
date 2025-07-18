@@ -744,6 +744,100 @@ class Gui:
                 # Each element of the tuple goes into its own CSV column
                 for row_tuple in powermeter2Array:
                     writer.writerow(row_tuple)
+        
+
+            with open("powermeter1time.csv", mode="r", newline="") as f1:
+                reader1 = csv.reader(f1)
+                for row in reader1:
+                    if row:  # make sure row is not empty
+                        try:
+                            powermeter1Array.append(float(row[0]))
+                        except ValueError:
+                            pass  # or handle invalid data
+
+            # Read first column of powermeter2time.csv
+            with open("powermeter2time.csv", mode="r", newline="") as f2:
+                reader2 = csv.reader(f2)
+                for row in reader2:
+                    if row:
+                        try:
+                            powermeter2Array.append(float(row[0]))
+                        except ValueError:
+                            pass
+            
+
+        # ──────────────────────────────────────────────────────────────
+        # 1.  Read the first column of each CSV and convert to float
+        # ──────────────────────────────────────────────────────────────
+            powermeter1CalcArray, powermeter2CalcArray = [], []
+
+            for file_name, target in [("powermeter1time.csv", powermeter1CalcArray),
+                                    ("powermeter2time.csv", powermeter2CalcArray)]:
+                with open(file_name, mode="r", newline="") as f:
+                    reader = csv.reader(f)
+                    for row in reader:
+                        if not row:               # skip blank lines
+                            continue
+                        try:
+                            target.append(float(row[0]))
+                        except ValueError:        # skip header / malformed
+                            continue
+
+            # Convert to NumPy for vector math
+            pm1 = np.array(powermeter1CalcArray, dtype=float)
+            pm2 = np.array(powermeter2CalcArray, dtype=float)
+
+            # ──────────────────────────────────────────────────────────────
+            # 2.  Compute power difference
+            # ──────────────────────────────────────────────────────────────
+            powerdifference = pm1 - pm2          # ΔP = P₁ – P₂
+
+            # ──────────────────────────────────────────────────────────────
+            # 3.  Associate each sample with a force value
+            #     (here we assume measurements swept linearly 0 → 30 N)
+            #     Adjust force_min / force_max if your sweep was different.
+            # ──────────────────────────────────────────────────────────────
+            force_min, force_max = 0.0, 30.0     # newtons
+            forces = np.linspace(force_min, force_max, powerdifference.size)
+
+            # ──────────────────────────────────────────────────────────────
+            # 4.  Find the segment from the first upward change to the peak
+            # ──────────────────────────────────────────────────────────────
+            deriv = np.diff(powerdifference)     # simple discrete derivative
+
+            try:
+                start_idx = np.where(deriv > 0)[0][0]          # first rise
+            except IndexError:
+                start_idx = 0                                  # all flat/‑ve
+
+            peak_idx = start_idx + np.argmax(powerdifference[start_idx:])
+
+            seg_forces = forces[start_idx:peak_idx + 1]
+            seg_pdif   = powerdifference[start_idx:peak_idx + 1]
+
+            # ──────────────────────────────────────────────────────────────
+            # 5.  Fit a 2nd‑degree polynomial (quadratic) to that segment
+            #     Change deg=1 for linear, deg=3 for cubic, etc.
+            # ──────────────────────────────────────────────────────────────
+            coeffs   = np.polyfit(seg_forces, seg_pdif, deg=2)
+            fit_poly = np.poly1d(coeffs)
+            fit_vals = fit_poly(seg_forces)
+
+            # ──────────────────────────────────────────────────────────────
+            # 6.  Plot the raw data plus the fitted curve
+            # ──────────────────────────────────────────────────────────────
+            plt.figure(figsize=(8, 5))
+            plt.scatter(forces, powerdifference, s=10, label="ΔP (measured)")
+            plt.plot(seg_forces, fit_vals, linewidth=2, label="Quadratic fit")
+            plt.xlabel("Force (N)")
+            plt.ylabel("Power difference")
+            plt.title("Power Difference vs. Force")
+            plt.grid(True)
+            plt.legend()
+            plt.tight_layout()
+            plt.show()
+
+
 
         if self.polarimeter is not None:
             if self.polarimeter.dataAnalyzer.phase is not None and self.polarimeter.dataAnalyzer.strain is not None:
