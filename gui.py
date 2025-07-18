@@ -747,26 +747,6 @@ class Gui:
                     writer.writerow(row_tuple)
         
 
-            with open("powermeter1time.csv", mode="r", newline="") as f1:
-                reader1 = csv.reader(f1)
-                for row in reader1:
-                    if row:  # make sure row is not empty
-                        try:
-                            powermeter1Array.append(float(row[0]))
-                        except ValueError:
-                            pass  # or handle invalid data
-
-            # Read first column of powermeter2time.csv
-            with open("powermeter2time.csv", mode="r", newline="") as f2:
-                reader2 = csv.reader(f2)
-                for row in reader2:
-                    if row:
-                        try:
-                            powermeter2Array.append(float(row[0]))
-                        except ValueError:
-                            pass
-            
-
         # ──────────────────────────────────────────────────────────────
         # 1.  Read the first column of each CSV and convert to float
         # ──────────────────────────────────────────────────────────────
@@ -785,6 +765,10 @@ class Gui:
                             continue
 
             # Convert to NumPy for vector math
+            min_len = min(pm1.size, pm2.size)
+            pm1 = pm1[:min_len]
+            pm2 = pm2[:min_len]
+
             pm1 = np.array(powermeter1CalcArray, dtype=float)
             pm2 = np.array(powermeter2CalcArray, dtype=float)
 
