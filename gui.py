@@ -284,7 +284,7 @@ class Gui:
         stopExecutionButton.grid(row=1, column=1, sticky='sw', pady=5, padx=30)
 
         zeroButton = ttk.Button(listFrame, text='Zero Force', command=lambda: self.__zeroForce())
-        zeroButton.grid(row=1, column=4, sticky='sw', pady=5, padx=5)
+        zeroButton.grid(row=1, column=3, sticky='sw', pady=5, padx=20)
 
 
         raiseMicrometerButton = ttk.Button(listFrame, text='Raise Micrometer', command=lambda: self.__raiseMicrometer())
