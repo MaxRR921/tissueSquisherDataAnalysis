@@ -371,7 +371,7 @@ class Gui:
             print("No polarimeter Connected")
 
         currTime = time.time()
-        t = 20
+        t = self.execTime
         start_time = time.time()
         end_time = start_time 
         if not self.updatingPlots.is_set():
@@ -752,8 +752,8 @@ class Gui:
         # ──────────────────────────────────────────────────────────────
             powermeter1CalcArray, powermeter2CalcArray = [], []
 
-            for file_name, target in [("powermeter1time.csv", powermeter1CalcArray),
-                                    ("powermeter2time.csv", powermeter2CalcArray)]:
+            for file_name, target in [("power1time.csv", powermeter1CalcArray),
+                                    ("power2time.csv", powermeter2CalcArray)]:
                 with open(file_name, mode="r", newline="") as f:
                     reader = csv.reader(f)
                     for row in reader:
@@ -765,64 +765,18 @@ class Gui:
                             continue
 
             # Convert to NumPy for vector math
-            min_len = min(pm1.size, pm2.size)
-            pm1 = pm1[:min_len]
-            pm2 = pm2[:min_len]
 
             pm1 = np.array(powermeter1CalcArray, dtype=float)
             pm2 = np.array(powermeter2CalcArray, dtype=float)
+
+            min_len = min(pm1.size, pm2.size)
+            pm1 = pm1[:min_len]
+            pm2 = pm2[:min_len]
 
             # ──────────────────────────────────────────────────────────────
             # 2.  Compute power difference
             # ──────────────────────────────────────────────────────────────
             powerdifference = pm1 - pm2          # ΔP = P₁ – P₂
-
-            # ──────────────────────────────────────────────────────────────
-            # 3.  Associate each sample with a force value
-            #     (here we assume measurements swept linearly 0 → 30 N)
-            #     Adjust force_min / force_max if your sweep was different.
-            # ──────────────────────────────────────────────────────────────
-            force_min, force_max = 0.0, 30.0     # newtons
-            forces = np.linspace(force_min, force_max, powerdifference.size)
-
-            # ──────────────────────────────────────────────────────────────
-            # 4.  Find the segment from the first upward change to the peak
-            # ──────────────────────────────────────────────────────────────
-            deriv = np.diff(powerdifference)     # simple discrete derivative
-
-            try:
-                start_idx = np.where(deriv > 0)[0][0]          # first rise
-            except IndexError:
-                start_idx = 0                                  # all flat/‑ve
-
-            peak_idx = start_idx + np.argmax(powerdifference[start_idx:])
-
-            seg_forces = forces[start_idx:peak_idx + 1]
-            seg_pdif   = powerdifference[start_idx:peak_idx + 1]
-
-            # ──────────────────────────────────────────────────────────────
-            # 5.  Fit a 2nd‑degree polynomial (quadratic) to that segment
-            #     Change deg=1 for linear, deg=3 for cubic, etc.
-            # ──────────────────────────────────────────────────────────────
-            coeffs   = np.polyfit(seg_forces, seg_pdif, deg=2)
-            fit_poly = np.poly1d(coeffs)
-            fit_vals = fit_poly(seg_forces)
-
-            # ──────────────────────────────────────────────────────────────
-            # 6.  Plot the raw data plus the fitted curve
-            # ──────────────────────────────────────────────────────────────
-            plt.figure(figsize=(8, 5))
-            plt.scatter(forces, powerdifference, s=10, label="ΔP (measured)")
-            plt.plot(seg_forces, fit_vals, linewidth=2, label="Quadratic fit")
-            plt.xlabel("Force (N)")
-            plt.ylabel("Power difference")
-            plt.title("Power Difference vs. Force")
-            plt.grid(True)
-            plt.legend()
-            plt.tight_layout()
-            plt.show()
-
-
 
         if self.polarimeter is not None:
             if self.polarimeter.dataAnalyzer.phase is not None and self.polarimeter.dataAnalyzer.strain is not None:
