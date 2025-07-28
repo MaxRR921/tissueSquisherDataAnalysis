@@ -283,6 +283,8 @@ class Gui:
         stopExecutionButton = ttk.Button(listFrame, text='Stop Execution', command=lambda: setattr(self, 'stopExecution', True))
         stopExecutionButton.grid(row=1, column=1, sticky='sw', pady=5, padx=30)
 
+        zeroButton = ttk.Button(listFrame, text='Zero Force', command=lambda: self.__zeroForce())
+        zeroButton.grid(row=1, column=4, sticky='sw', pady=5, padx=5)
 
 
         raiseMicrometerButton = ttk.Button(listFrame, text='Raise Micrometer', command=lambda: self.__raiseMicrometer())
@@ -344,8 +346,8 @@ class Gui:
         self.noiseThread = threading.Thread(target=self.__collectNoise)
         self.noiseThread.start()
 
-    # def __zeroForce(self):
-
+    def __zeroForce(self):
+        print("ZEROED FORCE")
 
     def __collectNoise(self):
         print("collecting data")
