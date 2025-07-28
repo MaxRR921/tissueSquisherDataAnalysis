@@ -153,8 +153,8 @@ class GraphingProcess(QtWidgets.QMainWindow):
             sum = self.y_data2 + aligned_pow2
 
         if diff is not None and sum is not None:
-            self.curve6.setData(self.x_data2, diff/sum)
-            force = 7.56766e+03 * (diff/sum)**2 + 3.36137e+02 * (diff/sum) + 2.81108e-01
+            # self.curve6.setData(self.x_data2, diff/sum)
+            force = 5269.96 * (diff/sum)
             self.curve5.setData(diff/sum, force)
 
 
