@@ -551,23 +551,21 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
           sorted_idx = np.argsort(Sdiff)
           Sdiff_sorted = Sdiff[sorted_idx]
           stresses_sorted = forces[sorted_idx]
-          interp = PchipInterpolator(Sdiff_sorted, stresses_sorted)
-          x_fit = np.linspace(min(Sdiff_sorted), max(Sdiff_sorted), 500)
+          m, b = np.polyfit(Sdiff_sorted, stresses_sorted, 1)
+          print(f"y = {m:.6g} * x + {b:.6g}")
 
-          # Interpolated (fitted) power differences
-          y_fit = interp(x_fit)
+          # R² for the linear fit
+          y_pred = m*np.asarray(Sdiff_sorted) + b
+          r2 = 1 - np.sum((np.asarray(stresses_sorted) - y_pred)**2) / \
+                    np.sum((np.asarray(stresses_sorted) - np.mean(stresses_sorted))**2)
+          print(f"R^2 = {r2:.4f}")
 
-          plt.plot(x_fit, y_fit, '--', label='Fitted Curve', color='tab:red')
-
-          print("MIN STRESS: ", np.min(forces), "MAX STRESS", np.max(forces))
-          print("MAX POWER: ", np.max(Sdiff), "MIN POWER: ", np.min(Sdiff))
-
-          plt.xlabel('Power Difference Normalized')
-          plt.ylabel('force')
-          plt.title('Force vs Power Difference')
-          plt.legend()
-          plt.grid(True)
-          plt.show()
+          # optional: draw the line and annotate on your existing plot
+          ax = plt.gca()
+          ax.plot(x_fit, m*x_fit + b, label=f"Linear fit: y={m:.3g}x+{b:.3g}")
+          ax.text(0.05, 0.95, f"y={m:.3g}x+{b:.3g}\nR²={r2:.4f}",
+               transform=ax.transAxes, va='top')
+          ax.legend()
           
 
      def findBestAlphaGammaMoreBetas(self, targetForce):
@@ -625,64 +623,115 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
                                         pass
                                         print(Sdifferences)
 
+     def plotWRTInteractionLength(self, minLength, maxLength, maxForce):
+          self.alpha = np.pi/4
+          self.beta  = np.pi/2
+          self.gamma = np.pi/2
+
+          interactionLengths = np.linspace(minLength, maxLength, 500)
+          forces             = np.linspace(0, maxForce, 500)
+          totalDifferences   = np.zeros(500, dtype=float)
+
+          for i in range(500):
+               self.l = interactionLengths[i]
+               Sdiffs = np.zeros(500, dtype=float)
+               for j in range(500):
+                    Sx, Sy   = self.__calcFields(forces[j])
+                    Sdiffs[j] = self.calcNormalizedPowerDifference(Sx, Sy)
+               totalDifferences[i] = Sdiffs[-1] - Sdiffs[0]
+
+          # ── plot totalDifferences w.r.t. interaction length ──
+          import matplotlib.pyplot as plt
+          plt.figure()
+          plt.plot(interactionLengths, totalDifferences)
+          plt.xlabel("Interaction length")
+          plt.ylabel("Total difference (Sdiff_end − Sdiff_start)")
+          plt.title("Total difference vs interaction length")
+          plt.grid(True)
+          plt.tight_layout()
+          plt.show()
+
+
+
+
+               
+
+
+
+           
+
+
 
 
      def findBestAlphaGamma(self, targetForce):
           hitCount = 0
           iterationCount = 0
           Sdifferences = np.zeros(500)
-          out_path = "linear_hits.csv"
+          out_path = "linear_hits_2.csv"
           with open(out_path, "w", newline="") as fp:
                writer = csv.writer(fp)
-               writer.writerow(["Equation", "alpha(rad)", "beta(rad)", "gamma(rad)"])
-               for alpha in np.linspace(0, 2*np.pi, 360):
-                    self.alpha = alpha
-                    print("HELLO ", iterationCount, "Hit count: ", hitCount)
-                    iterationCount += 1
-                    for gamma in np.linspace(0, 2*np.pi, 360):
-                         self.gamma = gamma
-                         for beta in np.linspace(0, 2*np.pi, 360):
-                              self.beta = beta
-                              Sx, Sy = self.__calcFields(0)
-                              if self.calcNormalizedPowerDifference(Sx, Sy) < .0001:
-                                   Sdifferences = np.zeros(500)
-                                   goodBetaCount = 0
-                                   for i in range(0,3):
-                                        # print("possible beta: ", self.beta)
-                                        self.beta = self.beta + (np.pi/2)
-                                        # print("beta: ", self.beta, "alpha: ", self.alpha, "gamma: ", self.gamma)
-                                        Sx, Sy = self.__calcFields(0)
-                                        # print("bang", self.beta)
-                                        if( self.calcNormalizedPowerDifference(Sx, Sy) < 0.0001):
-                                             # print("good beta: ", self.beta, "alpha: ", self.alpha, "gamma: ", self.gamma)
-                                             goodBetaCount += 1
-                                   if goodBetaCount == 3:
-                                        # print("GOING")
-                                        forces = np.linspace(0, targetForce, 500)
-                                        Sdiffs = np.empty_like(forces)
+               writer.writerow(["total diff", "Equation", "alpha(rad)", "beta(rad)", "gamma(rad)"])
+               # for alpha in np.linspace(0, 2*np.pi, 30):
+               #      self.alpha = alpha
+               #      print("HELLO ", iterationCount, "Hit count: ", hitCount)
+               #      iterationCount += 1
+               #      for gamma in np.linspace(np.pi/5, np.pi/3, 30):
+                         # self.gamma = gamma
+                         # self.alpha = 0.698132
+                         # self.gamma = 0.698132
+               self.alpha = np.pi/4
+               self.gamma = 0.2
+               for beta in np.linspace(0, 2* np.pi, 360):
+                    self.beta = beta
+                    print("calc")
+                    SxtoMatch, SytoMatch = self.__calcFields(0)
+                    # if self.calcNormalizedPowerDifference(SxtoMatch, SytoMatch) < :
+                    Sdifferences = np.zeros(500)
+                    goodBetaCount = 0
+                    for i in range(0,3):
+                         # print("possible beta: ", self.beta)
+                         self.beta = self.beta + (np.pi/2)
+                         # print("beta: ", self.beta, "alpha: ", self.alpha, "gamma: ", self.gamma)
+                         Sx, Sy = self.__calcFields(0)
+                         # print("bang", self.beta, "count ", goodBetaCount)
+                         if np.isclose(self.calcNormalizedPowerDifference(SxtoMatch, SytoMatch), self.calcNormalizedPowerDifference(Sx, Sy), .01):
+                              # print("good beta: ", self.beta, "alpha: ", self.alpha, "gamma: ", self.gamma)
+                              goodBetaCount += 1
+                    if goodBetaCount == 3:
+                         print("GOING")
+                         forces = np.linspace(0, targetForce, 500)
+                         Sdiffs = np.empty_like(forces)
 
-                                        for i, f in enumerate(forces):
-                                             Sx, Sy = self.__calcFields(f)
-                                             Sdiffs[i] = self.calcNormalizedPowerDifference(Sx, Sy)
+                         for i, f in enumerate(forces):
+                         
+                              Sx, Sy = self.__calcFields(f)
+                              Sdiffs[i] = self.calcNormalizedPowerDifference(Sx, Sy)
+                              # print(Sdiffs)
 
-                                             # ----- try linear fit -----
-                                        try:
-                                             m, b = np.polyfit(Sdiffs, forces, 1)
-                                             y_pred = m * Sdiffs + b
-                                             r2 = 1 - np.sum((forces - y_pred) ** 2) / np.sum((forces - forces.mean()) ** 2)
+                              # ----- try linear fit -----
+                         try:
+                              m, b = np.polyfit(Sdiffs, forces, 1)
+                              y_pred = m * Sdiffs + b
+                              r2 = 1 - np.sum((forces - y_pred) ** 2) / np.sum((forces - forces.mean()) ** 2)
 
-                                             if r2 > 0.95:                 # hit!
-                                                  hitCount += 1
-                                                  eqn_str = f"F = {m:.6g}*Sdiff + {b:.6g}"
-                                             
-
-                                        except Exception:                # fit failed → ignore
-                                             pass
-                                                       
-                                             print(Sdifferences)
-                                             # print("HITCOUNT: ", hitCount)
-                                             print("")
+                              if r2 > 0.99:                 # hit!
+                                   hitCount += 1
+                                   eqn_str = f"F = {m:.6g}*Sdiff + {b:.6g}"
+                              else:
+                                   eqn_str = f"no equation"
+                                   
+                              totalDiff = Sdiffs[499] - Sdiffs[0]
+                              print("WRITING")
+                              writer.writerow([totalDiff, eqn_str, self.alpha, self.beta, self.gamma])
                               
+
+                         except Exception:                # fit failed → ignore
+                              pass
+                                        
+                              print(Sdifferences)
+                              # print("HITCOUNT: ", hitCount)
+                              print("except")
+                    
 
 
 
@@ -697,9 +746,9 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
      #   minPower = np.min(sdiffs)
      #   maxPower = np.max(sdiffs[sdiffs != 0])
      #   minPower = np.min(sdiffs[sdiffs != 0])
-          minPower = .028
-          midPower = .032
-          maxPower = .035
+          minPower = 0
+          # midPower = .032
+          maxPower = .05
           difference = maxPower-minPower
           print("Max power: ", maxPower, "Min power: ", minPower)
 
@@ -708,11 +757,11 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
           done = False
      #   self.gamma = 1.3
           lengths = [0.01818]
-          for gamma in np.linspace(0, np.pi/2, 30):
+          for gamma in np.linspace(0.610865,0.959931, 5):
                self.gamma = gamma 
-               for alpha in np.linspace(0, np.pi/2, 30):
+               for alpha in np.linspace(0.610865,0.959931, 5):
                     self.alpha = alpha
-                    for beta in np.linspace(0, np.pi/2, 30):
+                    for beta in np.linspace(0.610865,0.959931, 5):
                          self.beta = beta
                          forces = np.linspace(0, targetForce, 500)
                          stresses = forces/(np.pi * self.b**2)
@@ -729,53 +778,53 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
                          theoreticalPmin = np.min(powerDifferences)
 
                          
-                         if (minPower >= theoreticalPmin and maxPower <= theoreticalPmax and np.isclose(midPower, theoreticalPmid)):
-                              sorted_idx = np.argsort(powerDifferences)
-                              Sdiff_sorted = powerDifferences[sorted_idx]
-                              forces_sorted = forces[sorted_idx]
-                              Sdiff_unique, unique_indices = np.unique(Sdiff_sorted, return_index=True)
-                              forces_unique = forces_sorted[unique_indices]
-                              if len(Sdiff_unique) < 2:
-                                   print(f"Skipping α={np.rad2deg(alpha):.1f}, β={np.rad2deg(beta):.1f}, γ={np.rad2deg(gamma):.1f} — only one unique Sdiff")
-                                   continue  # Skip this case
-                              interp = PchipInterpolator(Sdiff_unique, forces_unique)
+                         # if (powerDifferences[0] < .01):
+                         sorted_idx = np.argsort(powerDifferences)
+                         Sdiff_sorted = powerDifferences[sorted_idx]
+                         forces_sorted = forces[sorted_idx]
+                         Sdiff_unique, unique_indices = np.unique(Sdiff_sorted, return_index=True)
+                         forces_unique = forces_sorted[unique_indices]
+                         if len(Sdiff_unique) < 2:
+                              # print(f"Skipping α={np.rad2deg(alpha):.1f}, β={np.rad2deg(beta):.1f}, γ={np.rad2deg(gamma):.1f} — only one unique Sdiff")
+                              continue  # Skip this case
+                         interp = PchipInterpolator(Sdiff_unique, forces_unique)
 
-                              x_fit = np.linspace(min(Sdiff_sorted), max(Sdiff_sorted), 500)
+                         x_fit = np.linspace(min(Sdiff_sorted), max(Sdiff_sorted), 500)
 
-                              # Interpolated (fitted) power differences
-                              y_fit = interp(x_fit)
+                         # Interpolated (fitted) power differences
+                         y_fit = interp(x_fit)
 
 
-                              # Interpolated (fitted) power differences
-                              print("powerDifferences range:", np.min(powerDifferences), np.max(powerDifferences))
-                              print("sdiffs range:", minPower, maxPower)
-                              forceMax = interp(maxPower)
-                              forceMin = interp(minPower)
-                              print("FORCE Max (real val): ", np.abs(forceMax))
-                              print("theoretical max force:", targetForce)
-                              # print("fmin: ", stressMin, "fMax: ", stressMax, "alpha: ", np.rad2deg(alpha), "beta: ", np.rad2deg(beta), "gamma: ", np.rad2deg(gamma))
-                              if np.isclose(difference, (theoreticalPmax-theoreticalPmin), atol=.01):
-                                   finds.append(f"Slope = {y_fit[0]}, Found force max = {forceMax:.6f}, force min = {forceMin:.6f}, α={np.rad2deg(self.alpha):.1f}°, β={np.rad2deg(self.beta):.1f}°, gamma={np.rad2deg(self.gamma):.1f}")
-                                   curves.append((x_fit, y_fit, maxPower, forceMax, minPower, forceMin))
-                         else:
-                              print("Invalid range")
+                         # Interpolated (fitted) power differences
+                         print("powerDifferences range:", np.min(powerDifferences), np.max(powerDifferences), "beta: ", self.beta)
+                         print("sdiffs range:", minPower, maxPower)
+                         forceMax = interp(maxPower)
+                         forceMin = interp(minPower)
+                         print("FORCE Max (real val): ", np.abs(forceMax))
+                         print("theoretical max force:", targetForce)
+                         # print("fmin: ", stressMin, "fMax: ", stressMax, "alpha: ", np.rad2deg(alpha), "beta: ", np.rad2deg(beta), "gamma: ", np.rad2deg(gamma))
+                         if np.isclose(difference, (theoreticalPmax-theoreticalPmin), atol=.1):
+                              finds.append(f"Slope = {y_fit[0]}, Found force max = {forceMax:.6f}, force min = {forceMin:.6f}, α={np.rad2deg(self.alpha):.1f}°, β={np.rad2deg(self.beta):.1f}°, gamma={np.rad2deg(self.gamma):.1f}")
+                              curves.append((x_fit, y_fit, maxPower, forceMax, minPower, forceMin))
+                    # else:
+                    #      print("Invalid range")
 
 
           for find in finds:
                print(find)
 
-          plt.figure(figsize=(8, 6))
-          for x_fit, y_fit, maxP, stressMax, minP, stressMin in curves:
-               plt.plot(x_fit, y_fit)
-               plt.plot(maxP, stressMax, 'ro')  # red point for max
-               plt.plot(minP, stressMin, 'bo')  # blue point for min
+               plt.figure(figsize=(8, 6))
+               for x_fit, y_fit, maxP, stressMax, minP, stressMin in curves:
+                    plt.plot(x_fit, y_fit)
+                    plt.plot(maxP, stressMax, 'ro')  # red point for max
+                    plt.plot(minP, stressMin, 'bo')  # blue point for min
 
-               plt.xlabel('Power Difference')
-               plt.ylabel('Force')
-               plt.title('Fitted Curves with Fmin and Fmax Points')
-               plt.grid(True)
-               plt.tight_layout()
-               plt.show()
+                    plt.xlabel('Power Difference')
+                    plt.ylabel('Force')
+                    plt.title('Fitted Curves with Fmin and Fmax Points')
+                    plt.grid(True)
+                    plt.tight_layout()
+                    plt.show()
 
 
 
@@ -799,15 +848,37 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
                # write the data rows
                for b in zip(bzeros):
                     writer.writerow([b])
+     
+     def rad2Deg(self,rad):
+          return (rad*180)/2
+
+     def deg2Rad(self, deg):
+          return (deg*2*np.pi)/180
+
           
 
 
 npoints = 500
-c = Calibration(.03154)
+c = Calibration(.037)
+# c.plotWRTInteractionLength(.0249, .0251, c.calcForce(6.4888, .002)/.002)
+
+
+#only need to characterize change. we will zero it and scale it with user inputted interaction length
+
+#let's figure out exactly what interaction length does. 
+
+
+
+
+
+
+# ,0.959931
+# print(c.rad2Deg(1.57))
 # print(c.calcForce(11.2940, .0002)/.0002)
 #4.0861
-# c.calculateAlphaAndBeta(c.calcForce(4.0861, .0002)/.0002) # 6.71 N is the target force
-c.findBestAlphaGammaMoreBetas(c.calcForce(11.29, .0002)/.0002)  
+# c.calculateAlphaAndBeta(c.calcForce(6.4888, .0002)/.0002) # 6.71 N is the target force
+
+# c.findBestAlphaGamma(c.calcForce(11.29, .0002)/.0002)  
 
 # c.findMinStartingDiff()
 
@@ -816,6 +887,28 @@ c.findBestAlphaGammaMoreBetas(c.calcForce(11.29, .0002)/.0002)
 
 
 # 1. Updates for the new changes to the setup and 
+
+
+
+
+#Need to find a balance of real input and mathematically calculated input as well as angle knowingness 
+
+# two questions: Does apc vs fc connection affect the SENSITIVITY?? If it does, we need to replace it 
+# Regardless of all this, rotating beta to find zeros in power difference obviously doesn't work because the system is lossy
+# BOTTOM LINE: connector mismatch issue makes it so right now, we can't look at the starting point. We need to be only looking at change in force and power difference. 
+
+# KNOWING ALL THIS: 
+
+# we can at the very worst try to use the calibrated weight method to generate curves at those weights after setting the angles manually. 
+# for this methdod, we need to calibrate 
+# take data, write a paper
+# 
+
+# at  
+
+# our method needs to be able to predict force from power difference with <5% error. 
+
+#  so what if we find alpha beta and gamma normally in the setup, then using the calibration do a DIFFERENCE SWEEP to find the 
 
 
 
@@ -833,13 +926,31 @@ c.findBestAlphaGammaMoreBetas(c.calcForce(11.29, .0002)/.0002)
 
 
 
-0.992081890607303,5.373776907456225,0.0
-c.alpha = 0.992081890607303 
-c.beta = 5.373776907456225
-c.gamma = 0.0 
-c.plotPowerDifferencesNormalized(np.linspace(0, c.calcForce(11.29, .0002)/.0002, 500))  
+# 5.416539057913437,5.695233609440715,4.071784891803531
+# 0.8666462492661499,7.312327728183139,0.8883124054978035
+# 2.383277185481912,7.095666165866602,0.8016477805711886
+#3.8999081216976745,5.57903522965084,0.7005390514901377
+#5.416539057913437,4.71238898038469,0.7872036764167527
+# 5.416539057913437,5.7956967919673765,0.8738683013433677
+
+
+#40.34482758637878 deg 62.06896551781433 deg 50.06896551736558f
+
+#need to fix things... I'm thinking fc connector is not working right bc powers will change in the same directions... So rotating beta really just means
+#nothing if you think about it ... So, what I'm gonna do is align alpha and gamma, (0 alpha 90 gamma, try to find out what beta is )
+
+#0.7853981633974483,5.867514970005449,0.2
+
+c.alpha = np.pi/4
+c.beta =  np.pi/4
+c.gamma = np.pi/2
+c.plotPowerDifferencesNormalized(np.linspace(0, c.calcForce(15, .0002)/.0002, 500))
+
+## WE'LL TRY ALPHA = pi/4, beta = pi/4, gamma = pi/2
+
 # c.findMinStartingDiff()
-# c.plotNormalizedPowersVsAlpha(np.linspace(0,np.pi,500), np.linspace(0,c.calcForce(4.0861, .0002)/.0002,3)) #GOOD! look at envelope maximum... 45 degrees is the maximum of the envelope
+c.plotNormalizedPowersVsAlpha(np.linspace(0,np.pi,500), np.linspace(0,c.calcForce(6.4888, .0002)/.0002,3)) #GOOD! look at envelope maximum... 45 degrees is the maximum of the envelope
+
 # c.plotNormalizedPowersVsGamma(np.linspace(0,np.pi,500), np.linspace(0, c.calcForce(4.0861, .0002)/.0002,3))
 # c.plotNormalizedPowersVsBeta(np.linspace(0,np.pi,500), np.linspace(0,c.calcForce(1.6835, .0002)/.0002,3))
 # alphas = np.deg2rad([30, 45, 60, 75])
