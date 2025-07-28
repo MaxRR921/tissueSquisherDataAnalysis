@@ -276,14 +276,13 @@ class Gui:
 
         recordNoiseButton = ttk.Button(listFrame, text='Record for Time:', command=lambda: (self.saveExecuteTime(timeRecord), self.startNoiseThread()))
         recordNoiseButton.grid(row=1, column=3, sticky='sw', pady=5, padx=30)
-        recordNoiseButton = ttk.Button(listFrame, text='collect noise', command=lambda: (self.startNoiseThread()))
-        recordNoiseButton.grid(row=2, column=3, sticky='sw', pady=5, padx=10)
 
         addMoveButton = ttk.Button(listFrame, text='add move', command=lambda: self.__addMove(listFrame))
         addMoveButton.grid(row=1, column=0, sticky='sw', pady=5, padx=30)
 
         stopExecutionButton = ttk.Button(listFrame, text='Stop Execution', command=lambda: setattr(self, 'stopExecution', True))
         stopExecutionButton.grid(row=1, column=1, sticky='sw', pady=5, padx=30)
+
 
 
         raiseMicrometerButton = ttk.Button(listFrame, text='Raise Micrometer', command=lambda: self.__raiseMicrometer())
@@ -344,6 +343,9 @@ class Gui:
             plot.resetPlot()
         self.noiseThread = threading.Thread(target=self.__collectNoise)
         self.noiseThread.start()
+
+    # def __zeroForce(self):
+
 
     def __collectNoise(self):
         print("collecting data")
