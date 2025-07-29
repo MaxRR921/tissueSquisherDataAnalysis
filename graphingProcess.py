@@ -155,6 +155,7 @@ class GraphingProcess(QtWidgets.QMainWindow):
             diff = self.y_data2 - aligned_pow2
             sum = self.y_data2 + aligned_pow2
             while not self.signalZero.empty():
+                self.curve5.clear()
                 self.initial = np.mean(diff/sum)
                 self.signalZero.get_nowait()
 
