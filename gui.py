@@ -39,6 +39,7 @@ class Gui:
         self.window.geometry("800x800")
         self.numExecutions = 1
         self.signalGraph = multiprocessing.Queue()
+        self.signalZero = multiprocessing.Queue()
         self.signalAngleFinder = threading.Event()
         self.signalAngleFinder.clear()
 
@@ -249,11 +250,11 @@ class Gui:
             print("Starting PyQt process...")
             if not self.polarimeter == None:
                 self.pyqt_process = multiprocessing.Process(target=graphingProcess.run_pyqt_app,
-                                                            args=(self.signalGraph, self.micrometerController.plotQueue, self.powermeter.device1PlotQueue, self.powermeter.device2PlotQueue, self.polarimeter.dataAnalyzer.phaseQueue, self.polarimeter.dataAnalyzer.strainQueue))
+                                                            args=(self.signalGraph, self.signalZero, self.micrometerController.plotQueue, self.powermeter.device1PlotQueue, self.powermeter.device2PlotQueue, self.polarimeter.dataAnalyzer.phaseQueue, self.polarimeter.dataAnalyzer.strainQueue))
                 self.pyqt_process.start()
             elif self.polarimeter == None:
                 self.pyqt_process = multiprocessing.Process(target=graphingProcess.run_pyqt_app,
-                                                            args=(self.signalGraph, self.micrometerController.plotQueue, self.powermeter.device1PlotQueue, self.powermeter.device2PlotQueue, None, None))
+                                                            args=(self.signalGraph, self.signalZero, self.micrometerController.plotQueue, self.powermeter.device1PlotQueue, self.powermeter.device2PlotQueue, None, None))
                 self.pyqt_process.start()
         else:
             print("PyQt process is already running!")        
@@ -284,7 +285,7 @@ class Gui:
         stopExecutionButton.grid(row=1, column=1, sticky='sw', pady=5, padx=30)
 
         zeroButton = ttk.Button(listFrame, text='Zero Force', command=lambda: self.__zeroForce())
-        zeroButton.grid(row=1, column=3, sticky='sw', pady=5, padx=70)
+        zeroButton.grid(row=1, column=3, sticky='sw', pady=5, padx=150)
 
 
         raiseMicrometerButton = ttk.Button(listFrame, text='Raise Micrometer', command=lambda: self.__raiseMicrometer())
@@ -347,6 +348,7 @@ class Gui:
         self.noiseThread.start()
 
     def __zeroForce(self):
+        self.signalZero.put("ZERO")
         print("ZEROED FORCE")
 
     def __collectNoise(self):

@@ -8,7 +8,7 @@ from scipy.interpolate import interp1d
 import numpy as np
 
 class GraphingProcess(QtWidgets.QMainWindow):
-    def __init__(self, signalGraph, micrometerQueue, powermeter1Queue, powermeter2Queue, phaseQueue, strainQueue):
+    def __init__(self, signalGraph, signalZero, micrometerQueue, powermeter1Queue, powermeter2Queue, phaseQueue, strainQueue):
         super().__init__()
         self.setWindowTitle("Multiple Subplots in a 2x2 Grid")
 
@@ -18,6 +18,8 @@ class GraphingProcess(QtWidgets.QMainWindow):
         self.phaseQueue = phaseQueue
         self.strainQueue = strainQueue
         self.signalGraph = signalGraph
+        self.signalZero = signalZero
+        self.initial = 0.0
         # Create a container widget and a QGridLayout
         container = QtWidgets.QWidget()
         layout = QtWidgets.QGridLayout(container)
@@ -85,6 +87,7 @@ class GraphingProcess(QtWidgets.QMainWindow):
     def check_queue(self):
         """Pull all items from the queue and update the plot."""
         diff = None
+                
         while not self.signalGraph.empty():
             if self.signalGraph.get_nowait() == "STOP":
                 self.plot1.clear()
@@ -151,11 +154,16 @@ class GraphingProcess(QtWidgets.QMainWindow):
             aligned_pow2 = interp_func(self.x_data2)
             diff = self.y_data2 - aligned_pow2
             sum = self.y_data2 + aligned_pow2
+            while not self.signalZero.empty():
+                self.initial = np.mean(diff/sum)
+                self.signalZero.get_nowait()
 
         if diff is not None and sum is not None:
-            # self.curve6.setData(self.x_data2, diff/sum)
-            force = 5269.96 * (diff/sum)
-            self.curve5.setData(diff/sum, force)
+            self.curve6.setData(self.x_data2, diff/sum)
+            if(self.initial != 0.0):
+                force = 5334.41 * (diff/sum - (self.initial)) 
+                print("INITIAL: ", self.initial)
+                self.curve5.setData(self.x_data2, force)
 
 
         self.curve1.setData(self.x_data1, self.y_data1)
@@ -166,8 +174,8 @@ class GraphingProcess(QtWidgets.QMainWindow):
 
 
 
-def run_pyqt_app(signalGraph, micrometerQueue, powermeter1Queue, powermeter2Queue, phaseQueue, strainQueue):
+def run_pyqt_app(signalGraph, signalZero, micrometerQueue, powermeter1Queue, powermeter2Queue, phaseQueue, strainQueue):
     app = QtWidgets.QApplication(sys.argv)
-    window = GraphingProcess(signalGraph, micrometerQueue, powermeter1Queue, powermeter2Queue, phaseQueue, strainQueue)
+    window = GraphingProcess(signalGraph, signalZero, micrometerQueue, powermeter1Queue, powermeter2Queue, phaseQueue, strainQueue)
     window.show()
     sys.exit(app.exec_())
