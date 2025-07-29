@@ -77,6 +77,9 @@ class GraphingProcess(QtWidgets.QMainWindow):
         self.y_data3 = []
         self.x_data4 = []
         self.y_data4 = []
+        self.force = [] 
+        self.diff = []
+        self.sum = []
         # Timer to poll queue
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.check_queue)
@@ -86,7 +89,7 @@ class GraphingProcess(QtWidgets.QMainWindow):
    #NOTE: POWERMETER IS ACTUALLY POLLING QUITE SLOW.... so i made it update only when powermeter updates and the graph is way slower. 
     def check_queue(self):
         """Pull all items from the queue and update the plot."""
-        diff = None
+        self.diff = None
                 
         while not self.signalGraph.empty():
             if self.signalGraph.get_nowait() == "STOP":
@@ -152,17 +155,18 @@ class GraphingProcess(QtWidgets.QMainWindow):
         if  self.x_data3 and self.y_data3 and self.y_data2:
             interp_func = interp1d(self.x_data3, self.y_data3, kind='linear', fill_value='extrapolate')
             aligned_pow2 = interp_func(self.x_data2)
-            diff = self.y_data2 - aligned_pow2
-            sum = self.y_data2 + aligned_pow2
+            self.diff = self.y_data2 - aligned_pow2
+            self.sum = self.y_data2 + aligned_pow2
             while not self.signalZero.empty():
                 self.curve5.clear()
-                self.initial = np.mean(diff/sum)
+                
+                self.initial = np.mean(self.diff/self.sum)
                 self.signalZero.get_nowait()
 
-        if diff is not None and sum is not None:
-            self.curve6.setData(self.x_data2, diff/sum)
+        if self.diff is not None and self.sum is not None:
+            self.curve6.setData(self.x_data2, self.diff/self.sum)
             if(self.initial != 0.0):
-                force = 5334.41 * (diff/sum - (self.initial)) 
+                force = 5334.41 * (self.diff/self.sum - (self.initial)) 
                 print("INITIAL: ", self.initial)
                 self.curve5.setData(self.x_data2, force)
 
