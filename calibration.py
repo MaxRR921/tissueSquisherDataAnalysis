@@ -859,10 +859,10 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
 
 
 npoints = 500
-c = Calibration(.037)
+c = Calibration(.031)
 # c.plotWRTInteractionLength(.0249, .0251, c.calcForce(6.4888, .002)/.002)
 
-
+print("CALCFORCE: ", c.calcForce(1.6835, .002)/.002)
 #only need to characterize change. we will zero it and scale it with user inputted interaction length
 
 #let's figure out exactly what interaction length does. 
@@ -944,12 +944,16 @@ c = Calibration(.037)
 c.alpha = np.pi/4
 c.beta =  np.pi/4
 c.gamma = np.pi/2
-c.plotPowerDifferencesNormalized(np.linspace(0, c.calcForce(15, .0002)/.0002, 500))
 
+
+c.plotPowerDifferencesNormalized(np.linspace(0, c.calcForce(25, .0002)/.0002, 500))
+
+
+print("CALC: ", c.calcForce(1.685,  .0002/.0002))
 ## WE'LL TRY ALPHA = pi/4, beta = pi/4, gamma = pi/2
 
 # c.findMinStartingDiff()
-c.plotNormalizedPowersVsAlpha(np.linspace(0,np.pi,500), np.linspace(0,c.calcForce(6.4888, .0002)/.0002,3)) #GOOD! look at envelope maximum... 45 degrees is the maximum of the envelope
+# c.plotNormalizedPowersVsAlpha(np.linspace(0,np.pi,500), np.linspace(0,c.calcForce(6.4888, .0002)/.0002,3)) #GOOD! look at envelope maximum... 45 degrees is the maximum of the envelope
 
 # c.plotNormalizedPowersVsGamma(np.linspace(0,np.pi,500), np.linspace(0, c.calcForce(4.0861, .0002)/.0002,3))
 # c.plotNormalizedPowersVsBeta(np.linspace(0,np.pi,500), np.linspace(0,c.calcForce(1.6835, .0002)/.0002,3))
