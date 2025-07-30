@@ -214,6 +214,11 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
           print(f"F_fiber = {F_fiber:.6f} N")
 
           return F_fiber
+
+
+     def calcForceCalibratedWeight(self, F, l):
+         return F/l 
+
        
 
 
@@ -748,7 +753,7 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
      #   minPower = np.min(sdiffs[sdiffs != 0])
           minPower = 0
           # midPower = .032
-          maxPower = .05
+          maxPower = .1
           difference = maxPower-minPower
           print("Max power: ", maxPower, "Min power: ", minPower)
 
@@ -757,11 +762,11 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
           done = False
      #   self.gamma = 1.3
           lengths = [0.01818]
-          for gamma in np.linspace(0.610865,0.959931, 5):
+          for gamma in np.linspace(0, np.pi/2, 30):
                self.gamma = gamma 
-               for alpha in np.linspace(0.610865,0.959931, 5):
+               for alpha in np.linspace(0,np.pi/2, 30):
                     self.alpha = alpha
-                    for beta in np.linspace(0.610865,0.959931, 5):
+                    for beta in np.linspace(0,np.pi/4, 30):
                          self.beta = beta
                          forces = np.linspace(0, targetForce, 500)
                          stresses = forces/(np.pi * self.b**2)
@@ -803,7 +808,7 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
                          print("FORCE Max (real val): ", np.abs(forceMax))
                          print("theoretical max force:", targetForce)
                          # print("fmin: ", stressMin, "fMax: ", stressMax, "alpha: ", np.rad2deg(alpha), "beta: ", np.rad2deg(beta), "gamma: ", np.rad2deg(gamma))
-                         if np.isclose(difference, (theoreticalPmax-theoreticalPmin), atol=.1):
+                         if np.isclose(difference, (theoreticalPmax-theoreticalPmin), atol=.01):
                               finds.append(f"Slope = {y_fit[0]}, Found force max = {forceMax:.6f}, force min = {forceMin:.6f}, α={np.rad2deg(self.alpha):.1f}°, β={np.rad2deg(self.beta):.1f}°, gamma={np.rad2deg(self.gamma):.1f}")
                               curves.append((x_fit, y_fit, maxPower, forceMax, minPower, forceMin))
                     # else:
@@ -862,7 +867,7 @@ npoints = 500
 c = Calibration(.031)
 # c.plotWRTInteractionLength(.0249, .0251, c.calcForce(6.4888, .002)/.002)
 
-print("CALCFORCE: ", c.calcForce(1.6835, .002)/.002)
+print("CALCFORCE: ", c.calcForce(4.0861, .002)/.002)
 #only need to characterize change. we will zero it and scale it with user inputted interaction length
 
 #let's figure out exactly what interaction length does. 
@@ -876,9 +881,9 @@ print("CALCFORCE: ", c.calcForce(1.6835, .002)/.002)
 # print(c.rad2Deg(1.57))
 # print(c.calcForce(11.2940, .0002)/.0002)
 #4.0861
-# c.calculateAlphaAndBeta(c.calcForce(6.4888, .0002)/.0002) # 6.71 N is the target force
+# c.calculateAlphaAndBeta(c.calcForce(1.6835, .0002)/.0002) # 6.71 N is the target force
 
-# c.findBestAlphaGamma(c.calcForce(11.29, .0002)/.0002)  
+c.findBestAlphaGamma(c.calcForceCalibratedWeight(1.6888))  
 
 # c.findMinStartingDiff()
 
@@ -945,11 +950,13 @@ c.alpha = np.pi/4
 c.beta =  np.pi/4
 c.gamma = np.pi/2
 
+#for ours we do pi/4, pi/4, pi/2 right now
 
-c.plotPowerDifferencesNormalized(np.linspace(0, c.calcForce(25, .0002)/.0002, 500))
+
+c.plotPowerDifferencesNormalized(np.linspace(0, c.calcForceCalibratedWeight(11.29, .031), 500))
 
 
-print("CALC: ", c.calcForce(1.685,  .0002/.0002))
+print("CALC: ", c.calcForce(6.4888,  .0002/.0002))
 ## WE'LL TRY ALPHA = pi/4, beta = pi/4, gamma = pi/2
 
 # c.findMinStartingDiff()
