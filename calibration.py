@@ -581,52 +581,42 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
           with open(out_path, "w", newline="") as fp:
                writer = csv.writer(fp)
                writer.writerow(["Difference", "Equation", "alpha(rad)", "beta(rad)", "gamma(rad)"])
-               for alpha in np.linspace(0, 2*np.pi, 30):
+               for alpha in np.linspace(0, np.pi/4, 90):
                     self.alpha = alpha
                     print("HELLO ", iterationCount, "Hit count: ", hitCount)
                     iterationCount += 1
-                    for gamma in np.linspace(0, 2*np.pi, 180):
+                    for gamma in np.linspace(0, np.pi/2, 90):
                          self.gamma = gamma
                          print("HI")
-                         for beta in np.linspace(0, 2*np.pi, 180):
+                         for beta in np.linspace(0, np.pi/2, 90):
                               self.beta = beta
                               SxToMatch, SyToMatch = self.__calcFields(0)
                               Sdifferences = np.zeros(500)
                               goodBetaCount = 0
-                              for i in range(0,3):
-                                   # print("possible beta: ", self.beta)
-                                   self.beta = self.beta + (np.pi/2)
-                                   # print("beta: ", self.beta, "alpha: ", self.alpha, "gamma: ", self.gamma)
-                                   Sx, Sy = self.__calcFields(0)
-                                   # print("bang", self.beta)
-                                   if np.isclose(self.calcNormalizedPowerDifference(Sx, Sy), self.calcNormalizedPowerDifference(SxToMatch, SyToMatch), atol=.01):
-                                        # print("good beta: ", self.beta, "alpha: ", self.alpha, "gamma: ", self.gamma)
-                                        goodBetaCount += 1
-                              if goodBetaCount == 3:
-                                   # print("GOING")
-                                   forces = np.linspace(0, targetForce, 500)
-                                   Sdiffs = np.empty_like(forces)
+                              # print("GOING")
+                              forces = np.linspace(0, targetForce, 500)
+                              Sdiffs = np.empty_like(forces)
 
-                                   Sx0, Sy0 = self.__calcFields(0)
-                                   for i, f in enumerate(forces):
-                                        Sx, Sy = self.__calcFields(f)
-                                        Sdiffs[i] = self.calcNormalizedPowerDifference(Sx, Sy)
+                              Sx0, Sy0 = self.__calcFields(0)
+                              for i, f in enumerate(forces):
+                                   Sx, Sy = self.__calcFields(f)
+                                   Sdiffs[i] = self.calcNormalizedPowerDifference(Sx, Sy)
 
-                                        # ----- try linear fit -----
-                                   try:
-                                        m, b = np.polyfit(Sdiffs, forces, 1)
-                                        y_pred = m * Sdiffs + b
-                                        r2 = 1 - np.sum((forces - y_pred) ** 2) / np.sum((forces - forces.mean()) ** 2)
+                                   # ----- try linear fit -----
+                              try:
+                                   m, b = np.polyfit(Sdiffs, forces, 1)
+                                   y_pred = m * Sdiffs + b
+                                   r2 = 1 - np.sum((forces - y_pred) ** 2) / np.sum((forces - forces.mean()) ** 2)
 
-                                        if r2 > 0.95:                 # hit!
-                                             hitCount += 1
-                                             eqn_str = f"F = {m:.6g}*Sdiff + {b:.6g}"
-                                             totalDiff = Sdiffs[499] - self.calcNormalizedPowerDifference(Sx0, Sy0)
-                                             writer.writerow([totalDiff, eqn_str, self.alpha, self.beta, self.gamma])
+                                   if r2 > 0.95 and (Sdiffs[499]-Sdiffs[0] > .03):                 # hit!
+                                        hitCount += 1
+                                        eqn_str = f"F = {m:.6g}*Sdiff + {b:.6g}"
+                                        totalDiff = Sdiffs[499] - self.calcNormalizedPowerDifference(Sx0, Sy0)
+                                        writer.writerow([totalDiff, eqn_str, self.alpha, self.beta, self.gamma])
 
-                                   except Exception:                # fit failed → ignore
-                                        pass
-                                        print(Sdifferences)
+                              except Exception:                # fit failed → ignore
+                                   pass
+                                   print(Sdifferences)
 
      def plotWRTInteractionLength(self, minLength, maxLength, maxForce):
           self.alpha = np.pi/4
@@ -873,6 +863,7 @@ print("CALCFORCE: ", c.calcForce(4.0861, .002)/.002)
 #let's figure out exactly what interaction length does. 
 
 
+c.findBestAlphaGammaMoreBetas(c.calcForceCalibratedWeight(1.6888, .031))
 
 
 
@@ -883,7 +874,7 @@ print("CALCFORCE: ", c.calcForce(4.0861, .002)/.002)
 #4.0861
 # c.calculateAlphaAndBeta(c.calcForce(1.6835, .0002)/.0002) # 6.71 N is the target force
 
-c.findBestAlphaGamma(c.calcForceCalibratedWeight(1.6888))  
+# c.findBestAlphaGamma(c.calcForceCalibratedWeight(1.6888))  
 
 # c.findMinStartingDiff()
 
