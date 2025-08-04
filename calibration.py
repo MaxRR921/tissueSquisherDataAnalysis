@@ -556,8 +556,8 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
           sorted_idx = np.argsort(Sdiff)
           Sdiff_sorted = Sdiff[sorted_idx]
           stresses_sorted = forces[sorted_idx]
-          m, b = np.polyfit(Sdiff_sorted, stresses_sorted, 1)
-          print(f"y = {m:.6g} * x + {b:.6g}")
+          m, m2, b = np.polyfit(Sdiff_sorted, stresses_sorted, 2)
+          print(f"y = {m:.6g} * x2 + {m2:.6g} * x + {b:.6g}")
 
           # R² for the linear fit
           y_pred = m*np.asarray(Sdiff_sorted) + b
@@ -577,23 +577,24 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
           hitCount = 0
           iterationCount = 0
           Sdifferences = np.zeros(500)
-          out_path = "linear_hits.csv"
+          out_path = "linear_hits3_new.csv"
+
           with open(out_path, "w", newline="") as fp:
                writer = csv.writer(fp)
-               writer.writerow(["Difference", "Equation", "alpha(rad)", "beta(rad)", "gamma(rad)"])
-               for alpha in np.linspace(0, np.pi/4, 90):
+               writer.writerow(["Difference", "Equation", "alpha(rad)", "beta(rad)", "gamma(rad)", "R^2", "Linear?"])
+               for alpha in np.linspace(0, np.pi / 4, 20):
                     self.alpha = alpha
                     print("HELLO ", iterationCount, "Hit count: ", hitCount)
                     iterationCount += 1
-                    for gamma in np.linspace(0, np.pi/2, 90):
+
+                    for gamma in np.linspace(0, np.pi / 2, 20):
                          self.gamma = gamma
                          print("HI")
-                         for beta in np.linspace(0, np.pi/2, 90):
+
+                         for beta in np.linspace(0, np.pi / 2, 20):
                               self.beta = beta
-                              SxToMatch, SyToMatch = self.__calcFields(0)
-                              Sdifferences = np.zeros(500)
-                              goodBetaCount = 0
-                              # print("GOING")
+                              print("BETA = ", self.beta)
+
                               forces = np.linspace(0, targetForce, 500)
                               Sdiffs = np.empty_like(forces)
 
@@ -602,21 +603,29 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
                                    Sx, Sy = self.__calcFields(f)
                                    Sdiffs[i] = self.calcNormalizedPowerDifference(Sx, Sy)
 
-                                   # ----- try linear fit -----
                               try:
+                                   # Linear fit: Force = m * Sdiff + b
                                    m, b = np.polyfit(Sdiffs, forces, 1)
                                    y_pred = m * Sdiffs + b
-                                   r2 = 1 - np.sum((forces - y_pred) ** 2) / np.sum((forces - forces.mean()) ** 2)
+                                   r2 = 1 - np.sum((forces - y_pred) ** 2) / np.sum((forces - np.mean(forces)) ** 2)
 
-                                   if r2 > 0.95 and (Sdiffs[499]-Sdiffs[0] > .03):                 # hit!
+                                   deltaS = Sdiffs[499] - Sdiffs[0]
+                                   print("delta s: ", deltaS)
+                                   is_linear = r2 > 0.93 and deltaS > 0.02
+
+                                   if is_linear:
                                         hitCount += 1
                                         eqn_str = f"F = {m:.6g}*Sdiff + {b:.6g}"
-                                        totalDiff = Sdiffs[499] - self.calcNormalizedPowerDifference(Sx0, Sy0)
-                                        writer.writerow([totalDiff, eqn_str, self.alpha, self.beta, self.gamma])
+                                   else:
+                                        eqn_str = "Not linear"
+                                   # if not (0 <= self.alpha <= np.pi/2 and 0 <= self.beta <= np.pi/2 and 0 <= self.gamma <= np.pi/2):
+                                   writer.writerow([deltaS, eqn_str, self.alpha, self.beta, self.gamma, f"{r2:.4f}", is_linear])
+                                   print(f"α={self.alpha:.3f}, β={self.beta:.3f}, γ={self.gamma:.3f} → R² = {r2:.4f} → Linear? {is_linear}")
 
-                              except Exception:                # fit failed → ignore
-                                   pass
-                                   print(Sdifferences)
+                              except Exception as e:
+                                   print(f"Fit failed at α={self.alpha:.3f}, β={self.beta:.3f}, γ={self.gamma:.3f}")
+                                   print(Sdiffs)
+
 
      def plotWRTInteractionLength(self, minLength, maxLength, maxForce):
           self.alpha = np.pi/4
@@ -823,6 +832,7 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
 
 
 
+     
                     
 
      def findMinStartingDiff(self):
@@ -854,7 +864,7 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
 
 
 npoints = 500
-c = Calibration(.031)
+c = Calibration(.1)
 # c.plotWRTInteractionLength(.0249, .0251, c.calcForce(6.4888, .002)/.002)
 
 print("CALCFORCE: ", c.calcForce(4.0861, .002)/.002)
@@ -863,7 +873,7 @@ print("CALCFORCE: ", c.calcForce(4.0861, .002)/.002)
 #let's figure out exactly what interaction length does. 
 
 
-c.findBestAlphaGammaMoreBetas(c.calcForceCalibratedWeight(1.6888, .031))
+# c.findBestAlphaGammaMoreBetas(c.calcForceCalibratedWeight(1, .1))
 
 
 
@@ -937,17 +947,49 @@ c.findBestAlphaGammaMoreBetas(c.calcForceCalibratedWeight(1.6888, .031))
 
 #0.7853981633974483,5.867514970005449,0.2
 
-c.alpha = np.pi/4
-c.beta =  np.pi/4
-c.gamma = np.pi/2
+
+# c.alpha = np.pi/4
+# c.beta =  np.pi/4
+# c.gamma = np.pi/2
+# 0.7853981633974483,5.972526423607336,0.2
+
+# c.alpha = 0.7853981633974483
+# c.beta = 5.972526423607336
+# c.gamma = 0.2
+
+# ,,
+# true beta is: 5.867514970005449
 
 #for ours we do pi/4, pi/4, pi/2 right now
+# 0.7853981633974483 0.7853981633974483 0.7853981633974483
+# 0.16534698176788384,1.074755381491245,0.16534698176788384
+# 0.24802047265182575,1.1574288723751869,0.3306939635357677
+# 0.24802047265182575,1.2401023632591288,0.4133674544197096
+# 0.0,0.16534698176788384,0.08267349088394192
 
 
-c.plotPowerDifferencesNormalized(np.linspace(0, c.calcForceCalibratedWeight(11.29, .031), 500))
+#0.6613879270715354,1.1574288723751869,0.16534698176788384
+#0.7027246725135063,0.992081890607303,0.16534698176788384
+
+#0.3306939635357677,1.1574288723751869,0.3306939635357677
+
+
+#BAD:
+#0.3306939635357677,0.3306939635357677,0.8267349088394192
+# 0.0,0.3306939635357677,0.4133674544197096
+c.alpha = 0.0  
+c.beta = 0.3306939635357677
+c.gamma = 0.4133674544197096
+
+
+#haivng trouble finding a LINEAR curve that still has enough sensitivity for a soft sample.
+
+
+c.plotPowerDifferencesNormalized(np.linspace(0, c.calcForceCalibratedWeight(2.4026, .031), 500))
 
 
 print("CALC: ", c.calcForce(6.4888,  .0002/.0002))
+print("CALC CALIBRATED WEIGHT: ", c.calcForceCalibratedWeight(2.4026, .018), 500)
 ## WE'LL TRY ALPHA = pi/4, beta = pi/4, gamma = pi/2
 
 # c.findMinStartingDiff()
