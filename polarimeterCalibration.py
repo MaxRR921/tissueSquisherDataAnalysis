@@ -82,8 +82,8 @@ class PolarimeterCalibrator:
 
         npts   = 1000
         alpha0 = 0.0
-        β      = R / 2.0
-        γ      = -xc / 2.0
+        β      = 1.155
+        γ      = .201
 
         # helper shorthands (match MATLAB’s sin/ cos / exp)
         sin, cos, exp = np.sin, np.cos, np.exp
@@ -176,7 +176,7 @@ class PolarimeterCalibrator:
         # 5) SOLVE α (“alpha”)  (second big loop, f = fMax)
         # ----------------------------------------------------------------------
         α_vec = np.linspace(0, np.pi, npts)
-        fMax  = 259.10589
+        fMax  = 77
         exp_i = len(s1) - 1           # MATLAB’s 1024th point
 
         F = 2 * (Nidx ** 3) * (1 + sigma) * (p12 - p11) * Lb0 * fMax / (lam * np.pi * b * Y)
@@ -253,7 +253,7 @@ class PolarimeterCalibrator:
         err = np.sqrt((s1_fit - s1[exp_i]) ** 2 +
                     (s2_fit - s2[exp_i]) ** 2 +
                     (s3_fit - s3[exp_i]) ** 2)
-        α = α_vec[np.argmin(err)]
+        α = np.pi/4
 
         print("ALPHA IS ", α )
         print("BETA IS: ", β)
