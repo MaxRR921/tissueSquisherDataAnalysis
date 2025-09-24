@@ -32,4 +32,4 @@ Additionally, the software includes the ability to display real time plots, whic
 As data is taken from each sensor, it is added to queues that are dispatched from the producer thread to the consumer PyQtGraph process. the PyQtGraph process dequeues data from the queues into arrays (slow, I know, but the PyQtGraphs can only plot array to my knowledge), which are then plotted. Each device thread also keeps a seperate queue from the one that is read in the PyQtGraph process and dumps it all into a csv so we can perform later analysis. 
 
 
-![Software main screen](images/main_screen.png)
+![Software main screen](bjasldfjas.png)
