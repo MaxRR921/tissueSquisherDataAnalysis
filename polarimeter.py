@@ -35,7 +35,7 @@ class Polarimeter():
         self.resetDevice = False
         self.resource =  resource = create_string_buffer(256)
         self.deviceCount = c_int()
-        self.dataAnalyzer = dataAnalysisVmaster.DataAnalyzer()
+        # self.dataAnalyzer = dataAnalysisVmaster.DataAnalyzer()
 
         # Check how many PAX1000 are connected
         self.lib.TLPAX_findRsrc(self.instrumentHandle, byref(self.deviceCount))
