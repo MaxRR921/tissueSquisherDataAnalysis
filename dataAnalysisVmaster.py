@@ -475,7 +475,9 @@ class DataAnalyzer:
 #     print(s1List)
 #     print(s2List)
 #     return strain, phase
+
 '''
+
 
 df = pd.read_csv("trial(Sheet1).csv")
 
