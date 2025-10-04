@@ -475,6 +475,10 @@ class DataAnalyzer:
 #     print(s1List)
 #     print(s2List)
 #     return strain, phase
+
+'''
+
+
 df = pd.read_csv("trial(Sheet1).csv")
 
 # Extract columns into NumPy arrays
@@ -500,3 +504,4 @@ print("s3Arr: ", s3Arr)
 print("timeArr: ", timeArr) 
 
 d.analyzeDataNoRealtime(s1Arr, s2Arr, s3Arr, timeArr)
+'''
