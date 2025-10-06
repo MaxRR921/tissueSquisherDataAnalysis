@@ -1054,11 +1054,9 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
 #only need to characterize change. we will zero it and scale it with user inputted interaction length
 
 #let's figure out exactly what interaction length does. 
-
-# for i in np.linspace(.001, .051, 50): 
-#      c.l = i
-#      p_name = f"linear_hits_{i}.csv"
-#      c.findBestAlphaGammaMoreBetas(c.calcForceCalibratedWeight(.5, i), p_name)
+# c = Calibration(0.02266)
+# p_name = f"linear_hits_{22.66}.csv"
+# c.findBestAlphaGammaMoreBetas(c.calcForceCalibratedWeight(.5, 0.02266), p_name)
 
 
 # prev = 0
@@ -1201,13 +1199,14 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
 # 1.4624655456366278,1.0833078115826873,1.2458039833200905
 #
 # 0.21666156231653746,0.2708269528956718,0.595819296370478
-c = Calibration(0.022428571428)
-c.alpha = 0.21666156231653746
-c.beta = 0.2708269528956718
-c.gamma = 0.595819296370478
+c = Calibration(0.02266)
+#0.4874885152122093,0.7583154681078811,0.6499846869496124
+c.alpha = np.pi/6 # - 30 deg
+c.beta = np.pi/4 # 45 deg
+c.gamma = (2*np.pi)/9 # 40 deg
 
 # c.plotPowerDifferencesNormalizedVsPhi(np.linspace(0, c.calcForceCalibratedWeight(.5, .0305), 1000))
-c.plotPowerDifferencesNormaized(np.linspace(0, c.calcForceCalibratedWeight(2, 0.022428571428), 1000))
+c.plotPowerDifferencesNormalized(np.linspace(0, c.calcForceCalibratedWeight(4, 0.02266), 1000))
 # c.plotInteractionLengths(c.calcForceCalibratedWeight(.5, 0.023448979591836734), np.linspace(.020, .024, 500))
 
 
