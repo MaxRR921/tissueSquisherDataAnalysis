@@ -6,6 +6,7 @@ from scipy.interpolate import PchipInterpolator
 import csv
 import os 
 import glob
+from mpl_toolkits.mplot3d import Axes3D  # needed for 3D projection
 
 """
 Potential issues:
@@ -669,7 +670,7 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
 
                                    deltaS = Sdiffs[499] - Sdiffs[0]
                                    print("delta s: ", deltaS)
-                                   is_linear = r2 > 0.999 and deltaS > 0.06
+                                   is_linear = r2 > 0.999 and deltaS > 0.1
 
                                    if is_linear:
                                         hitCount += 1
@@ -925,6 +926,7 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
           Sdifferences = np.zeros(500)
           linearities = np.zeros(len(interactionLengths))
 
+          totalPowerChanges = np.zeros(len(interactionLengths))
           for j, l in enumerate(interactionLengths):
                forces = np.linspace(0, targetForce, 500)
                Sdiffs = np.empty_like(forces)
@@ -944,13 +946,16 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
 
                     deltaS = Sdiffs[499] - Sdiffs[0]
                     print("delta s: ", deltaS)
-                    is_linear = r2 > 0.999 and deltaS > 0.06
+                    totalPowerChanges[j] = deltaS
+
+                    is_linear = r2 > 0.999 
 
                     if is_linear:
                          hitCount += 1
                          eqn_str = f"F = {m:.6g}*Sdiff + {b:.6g}"
                     else:
                          eqn_str = "Not linear"
+                         print("INTERACTION LENGTH:", self.l)
                     # if not (0 <= self.alpha <= np.pi/2 and 0 <= self.beta <= np.pi/2 and 0 <= self.gamma <= np.pi/2):
                     print(f"α={self.alpha:.3f}, β={self.beta:.3f}, γ={self.gamma:.3f} → R² = {r2:.4f} → Linear? {is_linear}")
 
@@ -958,14 +963,19 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
                     print(f"Fit failed at α={self.alpha:.3f}, β={self.beta:.3f}, γ={self.gamma:.3f}")
                     print(Sdiffs)
 
-          plt.figure()
-          plt.plot(interactionLengths, linearities, marker='o')
-          plt.xlabel('Interaction Length (mm)')
-          plt.ylabel('R² Linearity')
-          plt.title(f'Linearity vs Interaction Length (Target Force = {targetForce})')
-          plt.grid(True)
-          plt.show()
+          fig = plt.figure()
+          ax = fig.add_subplot(111, projection='3d')
 
+          # 3D line (with markers). If you prefer just points, use ax.scatter(...) instead.
+          ax.plot(interactionLengths, linearities, totalPowerChanges, marker='o')
+
+          ax.set_xlabel('Interaction Length (mm)')
+          ax.set_ylabel('R² Linearity')
+          ax.set_zlabel('Total Power Change (ΔS)')
+          ax.set_title(f'Linearity & ΔS vs Interaction Length (Target Force = {targetForce})')
+
+          plt.tight_layout()
+          plt.show()
 
 
           # Example usage
@@ -1041,14 +1051,14 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
 # collect_hits("./path/to/csvs", "filtered_hits.csv")
 
 # npoints = 1000
-# c = Calibration(0.023448979591836734)
+# c = Calibration(0.02266)
 #alpha, beta, gamma: 
 
 # 0.21666156231653746,0.2708269528956718,0.595819296370478
 
 # c.collect_hits("C:/dev/tissueSquisherDataAnalysis")
 # c.write_same_angles_diff_filenames()
-# c.plotWRTInteractionLength(.0249, .0251, c.calcForce(6.4888, .002)/.002)
+# c.plotWRTInteractionLength(.02261, .02266, c.calcForce(6.4888, .002)/.002)
 
 # print("CALCFORCE: ", c.calcForce(4.0, .003)/.002)
 #only need to characterize change. we will zero it and scale it with user inputted interaction length
@@ -1056,9 +1066,18 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
 #let's figure out exactly what interaction length does. 
 
 # for i in np.linspace(.001, .051, 50): 
-#      c.l = i
-#      p_name = f"linear_hits_{i}.csv"
-#      c.findBestAlphaGammaMoreBetas(c.calcForceCalibratedWeight(.5, i), p_name)
+# c = Calibration(.03183)
+p_name = f"linear_hits_{0.0212}.csv"
+# c.findBestAlphaGammaMoreBetas(c.calcForceCalibratedWeight(5, .03183), p_name)
+
+
+df = pd.read_csv(p_name)
+
+# Get the max of the 'difference' column
+max_diff = df['Difference'].max()
+
+print("Max difference:", max_diff)
+     
 
 
 # prev = 0
@@ -1201,14 +1220,30 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
 # 1.4624655456366278,1.0833078115826873,1.2458039833200905
 #
 # 0.21666156231653746,0.2708269528956718,0.595819296370478
-c = Calibration(0.022428571428)
-c.alpha = 0.21666156231653746
-c.beta = 0.2708269528956718
-c.gamma = 0.595819296370478
+#the sample - its 22 MILLLIMETERS 0 22.12 mm
+c = Calibration(0.021)
+# c.alpha = 0.81248085
+# c.beta = 0.8124808586870155
+# c.gamma = 0.8124808586870155
 
-# c.plotPowerDifferencesNormalizedVsPhi(np.linspace(0, c.calcForceCalibratedWeight(.5, .0305), 1000))
-c.plotPowerDifferencesNormaized(np.linspace(0, c.calcForceCalibratedWeight(2, 0.022428571428), 1000))
-# c.plotInteractionLengths(c.calcForceCalibratedWeight(.5, 0.023448979591836734), np.linspace(.020, .024, 500))
+# for .0212
+# 1.5707963267948966,0.7583154681078811,0.7583154681078811
+# 1.191638592740956,0.9208116398452842,0.5416539057913436
+# 0.7583154681078811,0.8666462492661499,0.6499846869496124
+
+# for .02266
+# 0.3545473175924873,F = 619.093*Sdiff + -35.9488,0.9749770304244186,1.1374732021618217,0.4874885152122093,1.0000,True
+##
+##
+# 1.5166309362157622,0.8124808586870155,1.2458039833200905
+# 1.5707963267948966,0.7583154681078811,0.7583154681078811
+c.alpha = np.pi/4  # - 30 deg
+c.beta = np.pi/3# 45 deg
+c.gamma = np.pi/2# 40 deg
+# 0.0,0.8124808586870155,0.8124808586870155
+# # c.plotPowerDifferencesNormalizedVsPhi(np.linspace(0, c.calcForceCalibratedWeight(.5, .0305), 1000))
+# c.plotPowerDifferencesNormalized(np.linspace(0, c.calcForceCalibratedWeight(.1, 0.0212), 1000))
+c.plotInteractionLengths(c.calcForceCalibratedWeight(10, 0.02200), np.linspace(.016, .032, 2000))
 
 
 # print("CALC: ", c.calcForce(6.4888,  .0002/.0002))
