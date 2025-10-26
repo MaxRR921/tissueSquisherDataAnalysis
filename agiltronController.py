@@ -7,6 +7,7 @@ class agiltronController:
         self.baudrate = 9600
         self.ser = None
         self.posCommand = bytes([0x01, 0x16, 0x00, 0x00, 0x00, 0x00])
+        self.running = False
 
 
     def openPort(self):
@@ -29,65 +30,72 @@ class agiltronController:
             print("Port not open. Opening port...")
             if not self.openPort():
                 return False
-
         try:
+            # show exact bytes that will be written
+            print("Writing bytes (hex):", data.hex(' '))
             self.ser.write(data)
-            print(f"Sent data: {data}")
+            try:
+                self.ser.flush()
+            except Exception:
+                pass
+            print(f"Sent data: {data} ({data.hex(' ')})")
             return True
         except serial.SerialException as e:
             print(f"Error sending data: {e}")
             return False
-
-    # take position in mm
-    # does not work
-    '''
-    def calculate_bytes(self, position):
-        byte1 = position / 65536
-        byte2 = position / 256
-        byte3 = position
-        return byte1, byte2, byte3
-    '''
 
     # ! Working !
     def pos_to_bytes(self,pos):
         byte0 = pos // 65536
         byte1 = (pos % 65536) // 256
         byte2 = pos % 256
-        print(hex(byte2))
+
+        print("Input position as integer: ", pos)
+
         out_bytes = bytes([0x01, 0x14, 0x00, byte0, byte1, byte2])
-        # bytes_withHex = [0x01, 0x14, 0x00, hex(byte0), hex(byte1), hex(byte2)]
-        # out_bytes = bytes([0x01, 0x14, 0x00, hex(byte0), hex(byte1), hex(byte2)])
-        print("out bytes: ",  out_bytes)
-        # out_bytes = out_bytes[:-1] # trim the newline from the bytes that is there for some reason
+        print("Output of pos_to_bytes: ",  out_bytes)
+
         return out_bytes
+
+    def start(self):
+        out = self.openPort()
+        if out == False:
+            return
+        else:
+            print("connection to port established")
+            self.closePort()
+            self.runMainLoop()
+
+
+    def runMainLoop(self):
+        time.sleep(0.5)
+        self.running = True;
+        user_input = "";
+        while self.running:
+            print("Input desired action (1 = setpos, 2 = getpos, exit) : ")
+            user_input = input()
+
+            if (user_input == "exit"):
+                print("Exiting program...")
+                break
+
+            if user_input == "1":
+                self.openPort()
+                bits_to_send = self.pos_to_bytes(self.getInputPos())
+                self.send_bits(bits_to_send)
+                self.closePort()
+
+    def getInputPos(self):
+        print("Input a value between 0 and 50:")
+        userinput = int(input())
+        return userinput
+
+    def getCurrentPos(self):
+        
 
 
 if __name__ == '__main__':
     # Create instance of controller
     controller = agiltronController()
 
-    # Example of sending some test data
-    test_pos = 8
-    data = controller.pos_to_bytes(test_pos)
-    # Result: b'\x01\x14\x00\x00\x00'
-    print("final data: ",data)
-
-    controller.openPort()
-
-
-
-    try:
-        # Send the test data
-        # controller.send_bits(controller.posCommand)
-
-        # response = controller.ser.read(6)
-        # print(f"Received: {response.hex(' ')}")
-
-        controller.send_bits(controller.pos_to_bytes(16))
-        #  ensure data is sent
-        time.sleep(1)
-
-
-    finally:
-        # close port
-        controller.closePort()
+    controller.start()
