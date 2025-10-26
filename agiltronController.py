@@ -1,6 +1,7 @@
 import serial
 import time
 
+
 class agiltronController:
     def __init__(self):
         self.port = '/dev/cu.SLAB_USBtoUART'
@@ -9,11 +10,10 @@ class agiltronController:
         self.posCommand = bytes([0x01, 0x16, 0x00, 0x00, 0x00, 0x00])
         self.running = False
 
-
     def openPort(self):
         try:
             self.ser = serial.Serial(self.port, self.baudrate, timeout=1)
-            time.sleep(0.3) # allow opening
+            time.sleep(0.3)  # allow opening
             print("Port opened")
             return True
         except serial.SerialException as e:
@@ -45,7 +45,7 @@ class agiltronController:
             return False
 
     # ! Working !
-    def pos_to_bytes(self,pos):
+    def pos_to_bytes(self, pos):
         byte0 = pos // 65536
         byte1 = (pos % 65536) // 256
         byte2 = pos % 256
@@ -53,7 +53,7 @@ class agiltronController:
         print("Input position as integer: ", pos)
 
         out_bytes = bytes([0x01, 0x14, 0x00, byte0, byte1, byte2])
-        print("Output of pos_to_bytes: ",  out_bytes)
+        print("Output of pos_to_bytes: ", out_bytes)
 
         return out_bytes
 
@@ -66,7 +66,6 @@ class agiltronController:
             self.closePort()
             self.runMainLoop()
 
-
     def runMainLoop(self):
         time.sleep(0.5)
         self.running = True;
@@ -75,14 +74,23 @@ class agiltronController:
             print("Input desired action (1 = setpos, 2 = getpos, exit) : ")
             user_input = input()
 
-            if (user_input == "exit"):
+            if user_input == "exit":
                 print("Exiting program...")
                 break
 
             if user_input == "1":
                 self.openPort()
-                bits_to_send = self.pos_to_bytes(self.getInputPos())
+                pos = self.getInputPos()
+                # scale input pos to 0-700000
+                pos = self.scale_int(pos)
+
+                bits_to_send = self.pos_to_bytes(pos)
                 self.send_bits(bits_to_send)
+                self.closePort()
+
+            if user_input == "2":
+                self.openPort()
+                self.getCurrentPos()
                 self.closePort()
 
     def getInputPos(self):
@@ -91,7 +99,30 @@ class agiltronController:
         return userinput
 
     def getCurrentPos(self):
-        
+        self.send_bits(self.posCommand)
+        response = self.ser.read(6)
+
+        print(f"Received: {response.hex(' ')}, ", response)
+
+        pos = int.from_bytes(response[3:6], byteorder='big')
+        print("Position as int:", pos)
+
+    def scale_int(self, value, in_min=0, in_max=50, out_min=0, out_max=700000):
+        """
+        Scale an integer from one range to another.
+        Args:
+            value: Input value to scale
+            in_min: Minimum of input range (default 0)
+            in_max: Maximum of input range (default 50)
+            out_min: Minimum of output range (default 0)
+            out_max: Maximum of output range (default 700000)
+
+        Returns:
+            Scaled integer value
+        """
+        # Linear interpolation formula
+        scaled = (value - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
+        return int(scaled)
 
 
 if __name__ == '__main__':
