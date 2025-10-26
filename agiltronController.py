@@ -53,7 +53,13 @@ class agiltronController:
         byte0 = pos // 65536
         byte1 = (pos % 65536) // 256
         byte2 = pos % 256
-        return bytes([0x01, 0x14, 0x00, byte0, byte1, byte2])
+        print(hex(byte2))
+        out_bytes = bytes([0x01, 0x14, 0x00, byte0, byte1, byte2])
+        # bytes_withHex = [0x01, 0x14, 0x00, hex(byte0), hex(byte1), hex(byte2)]
+        # out_bytes = bytes([0x01, 0x14, 0x00, hex(byte0), hex(byte1), hex(byte2)])
+        print("out bytes: ",  out_bytes)
+        # out_bytes = out_bytes[:-1] # trim the newline from the bytes that is there for some reason
+        return out_bytes
 
 
 if __name__ == '__main__':
@@ -61,14 +67,12 @@ if __name__ == '__main__':
     controller = agiltronController()
 
     # Example of sending some test data
-    test_pos = 10
+    test_pos = 8
     data = controller.pos_to_bytes(test_pos)
-    data = data[:-1]  # Remove last byte
     # Result: b'\x01\x14\x00\x00\x00'
+    print("final data: ",data)
 
-    print(data)
-
-    # controller.openPort()
+    controller.openPort()
 
 
 
@@ -79,7 +83,7 @@ if __name__ == '__main__':
         # response = controller.ser.read(6)
         # print(f"Received: {response.hex(' ')}")
 
-        # controller.send_bits(controller.pos_to_bytes(16))
+        controller.send_bits(controller.pos_to_bytes(16))
         #  ensure data is sent
         time.sleep(1)
 
