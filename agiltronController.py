@@ -1,10 +1,12 @@
 import serial
 import time
+import enumerateDevices as enumerate
+import ConnectionFinder
 
 
 class agiltronController:
     def __init__(self):
-        self.port = '/dev/cu.SLAB_USBtoUART'
+        self.port = ''
         self.baudrate = 9600
         self.ser = None
         self.posCommand = bytes([0x01, 0x16, 0x00, 0x00, 0x00, 0x00])
@@ -58,40 +60,43 @@ class agiltronController:
         return out_bytes
 
     def start(self):
+        # instantiate connection finder class
+        finder = ConnectionFinder.ConnectionFinder()
+        finder.find_slab_controller()
+        self.port = finder.port
+
+        # try opening port
         out = self.openPort()
-        if out == False:
-            return
+        if not out:
+            return False
         else:
-            print("connection to port established")
-            self.closePort()
+            print("Connection to port established")
             self.runMainLoop()
+            return True
 
     def runMainLoop(self):
         time.sleep(0.5)
-        self.running = True;
-        user_input = "";
+        self.running = True
+        user_input = ""
         while self.running:
             print("Input desired action (1 = setpos, 2 = getpos, exit) : ")
             user_input = input()
 
             if user_input == "exit":
+                self.closePort()
                 print("Exiting program...")
                 break
 
             if user_input == "1":
-                self.openPort()
                 pos = self.getInputPos()
                 # scale input pos to 0-700000
                 pos = self.scale_int(pos)
 
                 bits_to_send = self.pos_to_bytes(pos)
                 self.send_bits(bits_to_send)
-                self.closePort()
 
             if user_input == "2":
-                self.openPort()
                 self.getCurrentPos()
-                self.closePort()
 
     def getInputPos(self):
         print("Input a value between 0 and 50:")
@@ -107,6 +112,7 @@ class agiltronController:
         pos = int.from_bytes(response[3:6], byteorder='big')
         print("Position as int:", pos)
 
+    # claude generated ahh function 😭
     def scale_int(self, value, in_min=0, in_max=50, out_min=0, out_max=700000):
         """
         Scale an integer from one range to another.
@@ -120,13 +126,30 @@ class agiltronController:
         Returns:
             Scaled integer value
         """
+        # lerp lerp lerp
+        # lerp lerp
         # Linear interpolation formula
         scaled = (value - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
         return int(scaled)
 
+    def checkControllerConnection(self):
+        out = enumerate.find_silicon_labs_device()
+        if out is []:
+            print("Device could not be found.")
+            return False
+        else:
+            print("Device found: ")
+            for key, value in out[0].items():
+                if key == 'name':
+                    print(value)
+            return True
 
 if __name__ == '__main__':
     # Create instance of controller
     controller = agiltronController()
 
-    controller.start()
+    # controller.checkControllerConnection()
+
+    if not controller.start():
+        print("Controller could not start.")
+        exit()

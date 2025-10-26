@@ -195,6 +195,82 @@ def check_pyusb():
         print("Note: PyUSB also requires libusb: brew install libusb")
 
 
+def find_silicon_labs_device():
+    """Find CP2102N devices using pyusb and map to serial port"""
+    try:
+        import usb.core
+        import usb.util
+        import os
+        import glob
+    except ImportError:
+        print("PyUSB not installed. Install with: pip3 install pyusb")
+        print("Note: PyUSB also requires libusb: brew install libusb")
+        return []
+
+    # Silicon Labs CP210x VID is 0x10C4
+    # CP2102N PID is 0xEA60
+    SILICON_LABS_VID = 0x10C4
+    CP2102N_PID = 0xEA60
+
+    devices = []
+
+    # Find all Silicon Labs CP2102N devices using pyusb
+    usb_devices = usb.core.find(find_all=True, idVendor=SILICON_LABS_VID, idProduct=CP2102N_PID)
+
+    for dev in usb_devices:
+        device_info = {
+            'name': 'CP2102N USB to UART Bridge Controller',
+            'vendor_id': f"0x{dev.idVendor:04x}",
+            'product_id': f"0x{dev.idProduct:04x}",
+            'bus': dev.bus,
+            'address': dev.address
+        }
+
+        # Try to get additional device info
+        try:
+            if dev.manufacturer:
+                device_info['manufacturer'] = dev.manufacturer
+            if dev.product:
+                device_info['product'] = dev.product
+            if dev.serial_number:
+                device_info['serial'] = dev.serial_number
+        except:
+            pass
+
+        # Find the serial port on macOS - look for SLAB (Silicon Labs) device
+        try:
+            tty_output = run_command("ls /dev/tty.*")
+            print(tty_output)
+            if tty_output and not tty_output.startswith('Error'):
+                ports = tty_output.strip().split('\n')
+                for port in ports:
+                    if 'SLAB' in port:
+                        device_info['port'] = port
+                        break
+        except Exception as e:
+            print(f"Warning: Could not determine serial port: {e}")
+
+        devices.append(device_info)
+
+    # Print device information
+    for dev in devices:
+        print(f"\nFound CP2102N Device (via PyUSB):")
+        print(f"  Name: {dev.get('name', 'Unknown')}")
+        print(f"  Vendor ID: {dev.get('vendor_id', 'Unknown')}")
+        print(f"  Product ID: {dev.get('product_id', 'Unknown')}")
+        if 'manufacturer' in dev:
+            print(f"  Manufacturer: {dev['manufacturer']}")
+        if 'product' in dev:
+            print(f"  Product: {dev['product']}")
+        if 'serial' in dev:
+            print(f"  Serial: {dev['serial']}")
+        print(f"  Bus: {dev.get('bus', 'Unknown')}, Address: {dev.get('address', 'Unknown')}")
+        if 'port' in dev:
+            print(f"  Port: {dev['port']}")
+
+    return devices
+
+
 def main():
     """Main function to run all enumeration methods"""
     print("\n" + "=" * 60)
@@ -216,3 +292,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    print(find_silicon_labs_device())
