@@ -891,7 +891,7 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
 
 
 
-     
+#CHANGE BETA TO 45 DEGREES FROM ALPHA   
                     
 
      def findMinStartingDiff(self):
@@ -1051,14 +1051,18 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
 # collect_hits("./path/to/csvs", "filtered_hits.csv")
 
 # npoints = 1000
-# c = Calibration(0.02266)
+c = Calibration(0.022)
 #alpha, beta, gamma: 
 
 # 0.21666156231653746,0.2708269528956718,0.595819296370478
 
 # c.collect_hits("C:/dev/tissueSquisherDataAnalysis")
 # c.write_same_angles_diff_filenames()
-# c.plotWRTInteractionLength(.02261, .02266, c.calcForce(6.4888, .002)/.002)
+c.alpha = np.pi/4
+c.beta = np.pi/4
+c.gamma = np.pi/2
+
+c.plotWRTInteractionLength(.02261, .02266, c.calcForce(6.4888, .002)/.002)
 
 # print("CALCFORCE: ", c.calcForce(4.0, .003)/.002)
 #only need to characterize change. we will zero it and scale it with user inputted interaction length
@@ -1066,18 +1070,19 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
 #let's figure out exactly what interaction length does. 
 
 # for i in np.linspace(.001, .051, 50): 
-# c = Calibration(.03183)
-p_name = f"linear_hits_{0.0212}.csv"
-# c.findBestAlphaGammaMoreBetas(c.calcForceCalibratedWeight(5, .03183), p_name)
+# c = Calibration(.021)
+# p_name = f"linear_hits_{0.021}.csv"
+# c.findBestAlphaGammaMoreBetas(c.calcForceCalibratedWeight(5, .021), p_name)
 
 
-df = pd.read_csv(p_name)
+# df = pd.read_csv(p_name)
 
 # Get the max of the 'difference' column
-max_diff = df['Difference'].max()
+# max_diff = df['Difference'].max()
 
-print("Max difference:", max_diff)
+# print("Max difference:", max_diff)
      
+# TWIST BETA RELATIVE TO THE ALPHA CONFIGURATION
 
 
 # prev = 0
@@ -1237,12 +1242,12 @@ c = Calibration(0.021)
 ##
 # 1.5166309362157622,0.8124808586870155,1.2458039833200905
 # 1.5707963267948966,0.7583154681078811,0.7583154681078811
-c.alpha = np.pi/4  # - 30 deg
-c.beta = np.pi/3# 45 deg
+c.alpha = np.pi/3  # - 30 deg
+c.beta = np.pi/4 # 45 deg
 c.gamma = np.pi/2# 40 deg
 # 0.0,0.8124808586870155,0.8124808586870155
 # # c.plotPowerDifferencesNormalizedVsPhi(np.linspace(0, c.calcForceCalibratedWeight(.5, .0305), 1000))
-# c.plotPowerDifferencesNormalized(np.linspace(0, c.calcForceCalibratedWeight(.1, 0.0212), 1000))
+# c.plotPowerDifferencesNormalized(np.linspace(0, c.calcForceCalibratedWeight(1, 0.0212), 1000))
 c.plotInteractionLengths(c.calcForceCalibratedWeight(10, 0.02200), np.linspace(.016, .032, 2000))
 
 
