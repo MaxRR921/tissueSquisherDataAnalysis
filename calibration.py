@@ -1226,7 +1226,7 @@ c.plotWRTInteractionLength(.02261, .02266, c.calcForce(6.4888, .002)/.002)
 #
 # 0.21666156231653746,0.2708269528956718,0.595819296370478
 #the sample - its 22 MILLLIMETERS 0 22.12 mm
-c = Calibration(0.021)
+c = Calibration(0.03165)
 # c.alpha = 0.81248085
 # c.beta = 0.8124808586870155
 # c.gamma = 0.8124808586870155
@@ -1242,13 +1242,13 @@ c = Calibration(0.021)
 ##
 # 1.5166309362157622,0.8124808586870155,1.2458039833200905
 # 1.5707963267948966,0.7583154681078811,0.7583154681078811
-c.alpha = np.pi/3  # - 30 deg
+c.alpha = np.pi/4  # - 30 deg
 c.beta = np.pi/4 # 45 deg
 c.gamma = np.pi/2# 40 deg
 # 0.0,0.8124808586870155,0.8124808586870155
 # # c.plotPowerDifferencesNormalizedVsPhi(np.linspace(0, c.calcForceCalibratedWeight(.5, .0305), 1000))
-# c.plotPowerDifferencesNormalized(np.linspace(0, c.calcForceCalibratedWeight(1, 0.0212), 1000))
-c.plotInteractionLengths(c.calcForceCalibratedWeight(10, 0.02200), np.linspace(.016, .032, 2000))
+# c.plotPowerDifferencesNormalized(np.linspace(0, c.calcForceCalibratedWeight(1.6835, 0.03165), 1000))
+c.plotInteractionLengths(c.calcForceCalibratedWeight(1.6835, 0.03165), np.linspace(.016, .032, 2000))
 
 
 # print("CALC: ", c.calcForce(6.4888,  .0002/.0002))
