@@ -10,6 +10,7 @@ class agiltronController:
         self.baudrate = 9600
         self.ser = None
         self.posCommand = bytes([0x01, 0x16, 0x00, 0x00, 0x00, 0x00])
+        self.checkVCommand = bytes([0x01, 0x18, 0x00, 0x00, 0x00, 0x00])
         self.running = False
 
     def openPort(self):
@@ -111,6 +112,18 @@ class agiltronController:
 
         pos = int.from_bytes(response[3:6], byteorder='big')
         print("Position as int:", pos)
+        return pos
+
+    def checkMaxVelocity(self):
+        self.send_bits(self.checkVCommand)
+        response = self.ser.read(6)
+
+        print("Received: ", response.hex(' '))
+        maxVelocity = int.from_bytes(response[3:6], byteorder='big')
+        print("Max velocity is: ", maxVelocity)
+        return maxVelocity
+
+    
 
     # claude generated ahh function 😭
     def scale_int(self, value, in_min=0, in_max=50, out_min=0, out_max=700000):
