@@ -117,6 +117,51 @@ class AgiltronGUI:
         )
         self.get_pos_btn.grid(row=3, column=0, columnspan=2, pady=5)
 
+        # Separator
+        ttk.Separator(control_frame, orient=tk.HORIZONTAL).grid(
+            row=4, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=10
+        )
+
+        # Max Velocity input
+        ttk.Label(control_frame, text="Max Velocity:").grid(
+            row=5, column=0, sticky=tk.W, pady=5
+        )
+
+        self.vel_var = tk.StringVar(value="0")
+        self.vel_spinbox = ttk.Spinbox(
+            control_frame, from_=0, to=4294967295, textvariable=self.vel_var, width=10
+        )
+        self.vel_spinbox.grid(row=5, column=1, sticky=tk.W, padx=(5, 0), pady=5)
+
+        # Max Velocity slider (scaled for easier interaction)
+        self.vel_slider = ttk.Scale(
+            control_frame,
+            from_=0,
+            to=1000000,
+            orient=tk.HORIZONTAL,
+            variable=self.vel_var,
+            command=lambda v: self.vel_var.set(f"{int(float(v))}"),
+        )
+        self.vel_slider.grid(row=6, column=0, columnspan=2, sticky=(tk.W, tk.E), pady=5)
+
+        # Set max velocity button
+        self.set_vel_btn = ttk.Button(
+            control_frame,
+            text="Set Max Velocity",
+            command=self.set_velocity,
+            state="disabled",
+        )
+        self.set_vel_btn.grid(row=7, column=0, columnspan=2, pady=5)
+
+        # Get max velocity button
+        self.get_vel_btn = ttk.Button(
+            control_frame,
+            text="Get Max Velocity",
+            command=self.get_velocity,
+            state="disabled",
+        )
+        self.get_vel_btn.grid(row=8, column=0, columnspan=2, pady=5)
+
         # Console section
         console_frame = ttk.LabelFrame(main_frame, text="Console Output", padding="10")
         console_frame.grid(row=2, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
@@ -174,12 +219,16 @@ class AgiltronGUI:
             self.disconnect_btn.config(state="normal")
             self.set_pos_btn.config(state="normal")
             self.get_pos_btn.config(state="normal")
+            self.set_vel_btn.config(state="normal")
+            self.get_vel_btn.config(state="normal")
         else:
             self.status_label.config(text="Status: Disconnected", foreground="red")
             self.connect_btn.config(state="normal")
             self.disconnect_btn.config(state="disabled")
             self.set_pos_btn.config(state="disabled")
             self.get_pos_btn.config(state="disabled")
+            self.set_vel_btn.config(state="disabled")
+            self.get_vel_btn.config(state="disabled")
 
     def set_position(self):
         """Set the position on the controller."""
@@ -199,6 +248,24 @@ class AgiltronGUI:
         """Get the current position from the controller."""
         if self.connected:
             self.controller.getCurrentPos()
+        else:
+            print("Error: Not connected to controller")
+
+    def set_velocity(self):
+        """Set the max velocity on the controller."""
+        try:
+            velocity = int(self.vel_var.get())
+            if 0 <= velocity <= 4294967295:
+                self.controller.setMaxVelocity(velocity)
+            else:
+                print("Error: Velocity must be between 0 and 4294967295")
+        except ValueError:
+            print("Error: Invalid velocity value")
+
+    def get_velocity(self):
+        """Get the max velocity from the controller."""
+        if self.connected:
+            self.controller.checkMaxVelocity()
         else:
             print("Error: Not connected to controller")
 
