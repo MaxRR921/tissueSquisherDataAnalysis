@@ -145,6 +145,7 @@ class agiltronController:
         print("Max velocity is: ", maxVelocity)
         return maxVelocity
 
+    # these need to be tested still
     def setMaxVelocity(self, speed):
         """Set the maximum velocity of the controller."""
         bits_to_send = self.speed_to_bytes(speed)
@@ -161,8 +162,6 @@ class agiltronController:
         return userinput
 
 
-
-    # claude generated ahh function 😭
     def scale_int(self, value, in_min=0, in_max=50, out_min=0, out_max=700000):
         """
         Scale an integer from one range to another.
