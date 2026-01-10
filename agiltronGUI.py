@@ -191,7 +191,7 @@ class AgiltronGUI:
 
         def connect_thread():
             print("Attempting to connect to controller...")
-            if self.controller.start():
+            if self.controller.start(run_loop=False):
                 self.connected = True
                 self.root.after(0, self.update_connection_status, True)
                 print("Successfully connected to controller!")

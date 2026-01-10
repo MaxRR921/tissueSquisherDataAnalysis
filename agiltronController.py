@@ -75,7 +75,7 @@ class agiltronController:
 
         return out_bytes
 
-    def start(self):
+    def start(self, run_loop=True):
         # instantiate connection finder class
         finder = ConnectionFinder.ConnectionFinder()
         finder.find_slab_controller()
@@ -87,7 +87,8 @@ class agiltronController:
             return False
         else:
             print("Connection to port established")
-            self.runMainLoop()
+            if run_loop:
+                self.runMainLoop()
             return True
 
     def runMainLoop(self):
