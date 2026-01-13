@@ -6,7 +6,6 @@ from scipy.interpolate import PchipInterpolator
 import csv
 import os 
 import glob
-from mpl_toolkits.mplot3d import Axes3D  # needed for 3D projection
 
 """
 Potential issues:
@@ -670,7 +669,7 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
 
                                    deltaS = Sdiffs[499] - Sdiffs[0]
                                    print("delta s: ", deltaS)
-                                   is_linear = r2 > 0.999 and deltaS > 0.1
+                                   is_linear = r2 > 0.999 and deltaS > 0.06
 
                                    if is_linear:
                                         hitCount += 1
@@ -926,7 +925,6 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
           Sdifferences = np.zeros(500)
           linearities = np.zeros(len(interactionLengths))
 
-          totalPowerChanges = np.zeros(len(interactionLengths))
           for j, l in enumerate(interactionLengths):
                forces = np.linspace(0, targetForce, 500)
                Sdiffs = np.empty_like(forces)
@@ -946,16 +944,13 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
 
                     deltaS = Sdiffs[499] - Sdiffs[0]
                     print("delta s: ", deltaS)
-                    totalPowerChanges[j] = deltaS
-
-                    is_linear = r2 > 0.999 
+                    is_linear = r2 > 0.999 and deltaS > 0.06
 
                     if is_linear:
                          hitCount += 1
                          eqn_str = f"F = {m:.6g}*Sdiff + {b:.6g}"
                     else:
                          eqn_str = "Not linear"
-                         print("INTERACTION LENGTH:", self.l)
                     # if not (0 <= self.alpha <= np.pi/2 and 0 <= self.beta <= np.pi/2 and 0 <= self.gamma <= np.pi/2):
                     print(f"α={self.alpha:.3f}, β={self.beta:.3f}, γ={self.gamma:.3f} → R² = {r2:.4f} → Linear? {is_linear}")
 
@@ -963,19 +958,14 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
                     print(f"Fit failed at α={self.alpha:.3f}, β={self.beta:.3f}, γ={self.gamma:.3f}")
                     print(Sdiffs)
 
-          fig = plt.figure()
-          ax = fig.add_subplot(111, projection='3d')
-
-          # 3D line (with markers). If you prefer just points, use ax.scatter(...) instead.
-          ax.plot(interactionLengths, linearities, totalPowerChanges, marker='o')
-
-          ax.set_xlabel('Interaction Length (mm)')
-          ax.set_ylabel('R² Linearity')
-          ax.set_zlabel('Total Power Change (ΔS)')
-          ax.set_title(f'Linearity & ΔS vs Interaction Length (Target Force = {targetForce})')
-
-          plt.tight_layout()
+          plt.figure()
+          plt.plot(interactionLengths, linearities, marker='o')
+          plt.xlabel('Interaction Length (mm)')
+          plt.ylabel('R² Linearity')
+          plt.title(f'Linearity vs Interaction Length (Target Force = {targetForce})')
+          plt.grid(True)
           plt.show()
+
 
 
           # Example usage
