@@ -129,7 +129,7 @@ class AgiltronGUI:
 
         self.vel_var = tk.StringVar(value="0")
         self.vel_spinbox = ttk.Spinbox(
-            control_frame, from_=0, to=4294967295, textvariable=self.vel_var, width=10
+            control_frame, from_=0, to=100, textvariable=self.vel_var, width=10
         )
         self.vel_spinbox.grid(row=5, column=1, sticky=tk.W, padx=(5, 0), pady=5)
 
@@ -137,7 +137,7 @@ class AgiltronGUI:
         self.vel_slider = ttk.Scale(
             control_frame,
             from_=0,
-            to=1000000,
+            to=100,
             orient=tk.HORIZONTAL,
             variable=self.vel_var,
             command=lambda v: self.vel_var.set(f"{int(float(v))}"),
@@ -255,10 +255,10 @@ class AgiltronGUI:
         """Set the max velocity on the controller."""
         try:
             velocity = int(self.vel_var.get())
-            if 0 <= velocity <= 4294967295:
+            if 0 <= velocity <= 100:
                 self.controller.setMaxVelocity(velocity)
             else:
-                print("Error: Velocity must be between 0 and 4294967295")
+                print("Error: Velocity must be between 0 and 100")
         except ValueError:
             print("Error: Invalid velocity value")
 
