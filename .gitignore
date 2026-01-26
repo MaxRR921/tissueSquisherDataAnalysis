@@ -162,3 +162,8 @@ cython_debug/
 # project module files
 .iml
 .xml
+.idea/
+
+CLAUDE.md
+
+plan.md
