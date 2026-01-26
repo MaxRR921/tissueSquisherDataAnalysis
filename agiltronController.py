@@ -142,7 +142,7 @@ class agiltronController:
         response = self.ser.read(6)
 
         print("Received: ", response.hex(' '))
-        maxVelocity = int.from_bytes(response[3:6], byteorder='big')
+        maxVelocity = int.from_bytes(response[2:6], byteorder='big')
         print("Max velocity is: ", maxVelocity)
         return maxVelocity
 
