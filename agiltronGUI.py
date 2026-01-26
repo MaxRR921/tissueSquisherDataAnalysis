@@ -235,10 +235,7 @@ class AgiltronGUI:
         try:
             pos = int(self.pos_var.get())
             if 0 <= pos <= 50:
-                # Scale input pos to 0-700000
-                scaled_pos = self.controller.scale_int(pos)
-                bits_to_send = self.controller.pos_to_bytes(scaled_pos)
-                self.controller.send_bits(bits_to_send)
+                self.controller.setPosition(pos)
             else:
                 print("Error: Position must be between 0 and 50")
         except ValueError:

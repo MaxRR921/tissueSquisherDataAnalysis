@@ -105,12 +105,8 @@ class agiltronController:
                 break
 
             if user_input == "1":
-                pos = self.getInputPos()
-                # scale input pos to 0-700000
-                pos = self.scale_int(pos)
-
-                bits_to_send = self.pos_to_bytes(pos)
-                self.send_bits(bits_to_send)
+                pos = self.getUserInputPos()
+                self.setPosition(pos)
 
             if user_input == "2":
                 self.getCurrentPos()
@@ -122,10 +118,22 @@ class agiltronController:
             if user_input == "4":
                 self.checkMaxVelocity()
 
-    def getInputPos(self):
+    def getUserInputPos(self):
         print("Input a value between 0 and 50:")
         userinput = int(input())
         return userinput
+
+    def setPosition(self, pos):
+        """Set the position of the controller."""
+        # Scale input pos to 0-700000
+        # scale_int scales from 0-50 to 0-700000 by default
+        scaled_pos = self.scale_int(pos)
+
+        bits_to_send = self.pos_to_bytes(scaled_pos)
+        self.send_bits(bits_to_send)
+
+        print("Position set successfully")
+        return True
 
     def getCurrentPos(self):
         self.send_bits(self.posCommand)
