@@ -1,7 +1,6 @@
 import numpy as np
 import tkinter as tk
 import controller
-import powermeter
 from plotter import Plot2D
 import time
 import move
@@ -9,8 +8,22 @@ import moveGui
 import threading
 from tkinter import ttk
 from ttkthemes import ThemedTk
-import polarimeter
 import angleFinder
+
+# ============================================================================
+# PLATFORM CONFIGURATION
+# Set to False to disable Windows-only modules (powermeter, polarimeter)
+# This allows testing the GUI on Mac/Linux where win32com is unavailable
+# ============================================================================
+ENABLE_WINDOWS_MODULES = False
+# ============================================================================
+
+if ENABLE_WINDOWS_MODULES:
+    import powermeter
+    import polarimeter
+else:
+    powermeter = None
+    polarimeter = None
 import csv
 import multiprocessing
 import graphingProcess
@@ -52,20 +65,26 @@ class Gui:
             self.micrometerController = None
 
         self.polarimeter = None
-        try:
-            self.polarimeter = polarimeter.Polarimeter(self.micrometerController)
-            self.polarimeterThread = threading.Thread(target=self.polarimeter.start, args=[])
-        except:
-            print("Polarimeter Connection Error")
+        if ENABLE_WINDOWS_MODULES and polarimeter is not None:
+            try:
+                self.polarimeter = polarimeter.Polarimeter(self.micrometerController)
+                self.polarimeterThread = threading.Thread(target=self.polarimeter.start, args=[])
+            except:
+                print("Polarimeter Connection Error")
+        else:
+            print("Polarimeter disabled (ENABLE_WINDOWS_MODULES=False)")
 
-
-        try:
-            self.powermeter = powermeter.Powermeter()
-            self.powermeterThread = threading.Thread(target=self.powermeter.start, args=[])
-            print("Powermeters connected successfully")
-        except:
-            print("Powermeter Connection Error. You need two powermeters connected at all times.")
-            self.powermeter = None
+        self.powermeter = None
+        self.powermeterThread = None
+        if ENABLE_WINDOWS_MODULES and powermeter is not None:
+            try:
+                self.powermeter = powermeter.Powermeter()
+                self.powermeterThread = threading.Thread(target=self.powermeter.start, args=[])
+                print("Powermeters connected successfully")
+            except:
+                print("Powermeter Connection Error. You need two powermeters connected at all times.")
+        else:
+            print("Powermeter disabled (ENABLE_WINDOWS_MODULES=False)")
 
         # Event booleans
         self.updatingPlots = threading.Event() 
@@ -353,10 +372,10 @@ class Gui:
 
     def __collectNoise(self):
         print("collecting data")
-            
+
         if not self.powermeter.updatingDevice1CsvQueue.is_set():
             self.powermeter.updatingDevice1CsvQueue.set()
-        
+
         if not self.powermeter.updatingDevice2CsvQueue.is_set():
             self.powermeter.updatingDevice2CsvQueue.set()
 
@@ -503,7 +522,7 @@ class Gui:
             self.__raiseMicrometer()
             self.signalAngleFinder.wait()
             self.signalAngleFinder.clear()
-            angle += 10 
+            angle += 10
             powerRatios.append(self.findDeltaPowerDif())
             if(angle > 20):
                 rotate_label.config(text="compute the ideal angle")
