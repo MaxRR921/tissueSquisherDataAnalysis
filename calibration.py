@@ -1,10 +1,12 @@
-
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import ScalarFormatter
 import pandas as pd
 from scipy.interpolate import PchipInterpolator
 import csv
+import os 
+import glob
+
 """
 Potential issues:
 - Ex and Ey are each 1 value, not arrays. 
@@ -516,6 +518,62 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
           plt.show()
 
 
+     def plotPowerDifferencesNormalizedVsPhi(self, forces):
+          plt.figure()
+          Sdiff = np.zeros(len(forces))
+          phis = np.zeros(len(forces))
+
+          for i in range(len(forces)):
+               Sx, Sy = self.__calcFields(forces[i])
+               phis[i] = self.phi
+               Sdiff[i] = self.calcNormalizedPowerDifference(Sx, Sy)
+
+
+          # --- Plot 1: Sdiff vs Force ---
+          stresses = forces/(np.pi*self.b**2)
+          plt.figure()
+          plt.plot(phis, Sdiff, label='Sdifference (W)', color='tab:blue')
+
+          interp = PchipInterpolator(phis, Sdiff)
+          x_fit = np.linspace(min(phis), max(phis), 500)
+
+          # Interpolated (fitted) power differences
+          y_fit = interp(x_fit)
+
+          plt.plot(x_fit, y_fit, '--', label='Fitted Curve', color='tab:orange')
+
+          plt.xlabel('phi')
+          plt.ylabel('Power Difference Normalized')
+          plt.title('Power Difference vs Force')
+          plt.legend()
+          plt.grid(True)
+          plt.show()
+
+          # eq1 = f"{coeffs1[0]:.5e} * Force² + {coeffs1[1]:.5e} * Force + {coeffs1[2]:.5e}"
+          # print("Sdiff = " + eq1)
+          # 
+          # --- Plot 2: Force vs Sdiff (inverted axes) ---
+          plt.figure()
+          plt.plot(phis, forces, label='Force (N)', color='tab:green')
+
+          sorted_idx = np.argsort(Sdiff)
+          Sdiff_sorted = Sdiff[sorted_idx]
+          stresses_sorted = phis[sorted_idx]
+          m, m2, b = np.polyfit(Sdiff_sorted, stresses_sorted, 2)
+          print(f"y = {m:.6g} * x2 + {m2:.6g} * x + {b:.6g}")
+
+          # R² for the linear fit
+          y_pred = m*np.asarray(Sdiff_sorted) + b
+          r2 = 1 - np.sum((np.asarray(stresses_sorted) - y_pred)**2) / \
+                    np.sum((np.asarray(stresses_sorted) - np.mean(stresses_sorted))**2)
+          print(f"R^2 = {r2:.4f}")
+
+          # optional: draw the line and annotate on your existing plot
+          ax = plt.gca()
+          ax.plot(x_fit, m*x_fit + b, label=f"Linear fit: y={m:.3g}x+{b:.3g}")
+          ax.text(0.05, 0.95, f"y={m:.3g}x+{b:.3g}\nR²={r2:.4f}",
+               transform=ax.transAxes, va='top')
+          ax.legend()
 
      def plotPowerDifferencesNormalized(self, forces):
           plt.figure()
@@ -573,25 +631,25 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
           ax.legend()
           
 
-     def findBestAlphaGammaMoreBetas(self, targetForce):
+     def findBestAlphaGammaMoreBetas(self, targetForce, path):
           hitCount = 0
           iterationCount = 0
           Sdifferences = np.zeros(500)
-          out_path = "linear_hits3_new.csv"
+          out_path = path
 
           with open(out_path, "w", newline="") as fp:
                writer = csv.writer(fp)
                writer.writerow(["Difference", "Equation", "alpha(rad)", "beta(rad)", "gamma(rad)", "R^2", "Linear?"])
-               for alpha in np.linspace(0, np.pi / 4, 20):
+               for alpha in np.linspace(0, np.pi / 2, 30):
                     self.alpha = alpha
                     print("HELLO ", iterationCount, "Hit count: ", hitCount)
                     iterationCount += 1
 
-                    for gamma in np.linspace(0, np.pi / 2, 20):
+                    for gamma in np.linspace(0, np.pi / 2, 30):
                          self.gamma = gamma
                          print("HI")
 
-                         for beta in np.linspace(0, np.pi / 2, 20):
+                         for beta in np.linspace(0, np.pi / 2, 30):
                               self.beta = beta
                               print("BETA = ", self.beta)
 
@@ -611,7 +669,7 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
 
                                    deltaS = Sdiffs[499] - Sdiffs[0]
                                    print("delta s: ", deltaS)
-                                   is_linear = r2 > 0.93 and deltaS > 0.02
+                                   is_linear = r2 > 0.999 and deltaS > 0.06
 
                                    if is_linear:
                                         hitCount += 1
@@ -761,11 +819,11 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
           done = False
      #   self.gamma = 1.3
           lengths = [0.01818]
-          for gamma in np.linspace(0, np.pi/2, 30):
+          for gamma in np.linspace(0, np.pi/2, 20):
                self.gamma = gamma 
-               for alpha in np.linspace(0,np.pi/2, 30):
+               for alpha in np.linspace(0,np.pi/2, 20):
                     self.alpha = alpha
-                    for beta in np.linspace(0,np.pi/4, 30):
+                    for beta in np.linspace(0,np.pi/2, 20):
                          self.beta = beta
                          forces = np.linspace(0, targetForce, 500)
                          stresses = forces/(np.pi * self.b**2)
@@ -832,7 +890,7 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
 
 
 
-     
+#CHANGE BETA TO 45 DEGREES FROM ALPHA   
                     
 
      def findMinStartingDiff(self):
@@ -861,19 +919,170 @@ class Calibration: #Px - Py/Px+Py Use Ex0, normalize power, should match
           return (deg*2*np.pi)/180
 
           
+     def plotInteractionLengths(self, targetForce, interactionLengths):
+          hitCount = 0
+          iterationCount = 0
+          Sdifferences = np.zeros(500)
+          linearities = np.zeros(len(interactionLengths))
+
+          for j, l in enumerate(interactionLengths):
+               forces = np.linspace(0, targetForce, 500)
+               Sdiffs = np.empty_like(forces)
+               Sx0, Sy0 = self.__calcFields(0)
+               
+               for i, f in enumerate(forces):
+                    self.l = l
+                    Sx, Sy = self.__calcFields(f)
+                    Sdiffs[i] = self.calcNormalizedPowerDifference(Sx, Sy)
+
+               try:
+                    # Linear fit: Force = m * Sdiff + b
+                    m, b = np.polyfit(Sdiffs, forces, 1)
+                    y_pred = m * Sdiffs + b
+                    r2 = 1 - np.sum((forces - y_pred) ** 2) / np.sum((forces - np.mean(forces)) ** 2)
+                    linearities[j] = r2
+
+                    deltaS = Sdiffs[499] - Sdiffs[0]
+                    print("delta s: ", deltaS)
+                    is_linear = r2 > 0.999 and deltaS > 0.06
+
+                    if is_linear:
+                         hitCount += 1
+                         eqn_str = f"F = {m:.6g}*Sdiff + {b:.6g}"
+                    else:
+                         eqn_str = "Not linear"
+                    # if not (0 <= self.alpha <= np.pi/2 and 0 <= self.beta <= np.pi/2 and 0 <= self.gamma <= np.pi/2):
+                    print(f"α={self.alpha:.3f}, β={self.beta:.3f}, γ={self.gamma:.3f} → R² = {r2:.4f} → Linear? {is_linear}")
+
+               except Exception as e:
+                    print(f"Fit failed at α={self.alpha:.3f}, β={self.beta:.3f}, γ={self.gamma:.3f}")
+                    print(Sdiffs)
+
+          plt.figure()
+          plt.plot(interactionLengths, linearities, marker='o')
+          plt.xlabel('Interaction Length (mm)')
+          plt.ylabel('R² Linearity')
+          plt.title(f'Linearity vs Interaction Length (Target Force = {targetForce})')
+          plt.grid(True)
+          plt.show()
 
 
-npoints = 500
-c = Calibration(.1)
-# c.plotWRTInteractionLength(.0249, .0251, c.calcForce(6.4888, .002)/.002)
 
-print("CALCFORCE: ", c.calcForce(4.0861, .002)/.002)
+          # Example usage
+
+     def collect_hits(self, directory=".", output_file="filtered_hits.csv"):
+          files = sorted(glob.glob(os.path.join(directory, "linear_hits_*.csv")))
+          out_frames = []
+
+          for path in files:
+               df = pd.read_csv(path)
+
+               # Ensure numeric types
+               df["Difference"] = pd.to_numeric(df["Difference"], errors="coerce")
+               df["R^2"] = pd.to_numeric(df["R^2"], errors="coerce")
+
+               # Filter: R^2 formatted to 4 decimals is 1.0000, and |Difference| > 0.06
+               mask = (df["R^2"].round(4) == 1.0) & (df["Difference"].abs() > 0.06)
+               if mask.any():
+                    sub = df.loc[mask, ["Difference", "alpha(rad)", "beta(rad)", "gamma(rad)", "R^2"]].copy()
+                    sub.insert(0, "filename", os.path.basename(path))
+                    sub.rename(columns={
+                         "alpha(rad)": "alpha",
+                         "beta(rad)": "beta",
+                         "gamma(rad)": "gamma",
+                    }, inplace=True)
+                    out_frames.append(sub)
+
+          # Write output
+          cols = ["filename", "Difference", "alpha", "beta", "gamma", "R^2"]
+          if out_frames:
+               result = pd.concat(out_frames, ignore_index=True)
+               result.to_csv(output_file, index=False)
+               print(f"Saved {len(result)} rows from {len(files)} files to {output_file}")
+          else:
+               pd.DataFrame(columns=cols).to_csv(output_file, index=False)
+               print(f"No rows matched; wrote empty file with headers to {output_file}")
+
+
+
+     def write_same_angles_diff_filenames(self,
+          input_file="filtered_hits.csv",
+          output_file="more_filtered_hits.csv",
+          decimals=12
+          ):
+          df = pd.read_csv(input_file)
+
+          # Ensure required columns exist
+          required = {"filename", "Difference", "alpha", "beta", "gamma"}
+          missing = required - set(df.columns)
+          if missing:
+               raise ValueError(f"Missing columns in {input_file}: {missing}")
+
+          # Coerce to numeric (safe if already numeric)
+          for c in ["Difference", "alpha", "beta", "gamma"]:
+               df[c] = pd.to_numeric(df[c], errors="coerce")
+
+          # Build grouping keys with rounding for stability
+          df["_a"] = df["alpha"].round(decimals)
+          df["_b"] = df["beta"].round(decimals)
+          df["_g"] = df["gamma"].round(decimals)
+
+          # Keep rows whose angle-set occurs in >1 unique filename
+          mask = df.groupby(["_a", "_b", "_g"])["filename"].transform("nunique") > 1
+          out = df.loc[mask, ["filename", "Difference", "alpha", "beta", "gamma"]].copy()
+
+          # Sort (optional, but nice)
+          out = out.sort_values(["alpha", "beta", "gamma", "filename"]).reset_index(drop=True)
+
+          # Write result (empty file with headers if none)
+          out.to_csv(output_file, index=False)
+          print(f"Wrote {len(out)} rows to {output_file}")
+# Example:
+# collect_hits("./path/to/csvs", "filtered_hits.csv")
+
+# npoints = 1000
+c = Calibration(0.022)
+#alpha, beta, gamma: 
+
+# 0.21666156231653746,0.2708269528956718,0.595819296370478
+
+# c.collect_hits("C:/dev/tissueSquisherDataAnalysis")
+# c.write_same_angles_diff_filenames()
+c.alpha = np.pi/4
+c.beta = np.pi/4
+c.gamma = np.pi/2
+
+c.plotWRTInteractionLength(.02261, .02266, c.calcForce(6.4888, .002)/.002)
+
+# print("CALCFORCE: ", c.calcForce(4.0, .003)/.002)
 #only need to characterize change. we will zero it and scale it with user inputted interaction length
 
 #let's figure out exactly what interaction length does. 
 
+# for i in np.linspace(.001, .051, 50): 
+# c = Calibration(.021)
+# p_name = f"linear_hits_{0.021}.csv"
+# c.findBestAlphaGammaMoreBetas(c.calcForceCalibratedWeight(5, .021), p_name)
 
-# c.findBestAlphaGammaMoreBetas(c.calcForceCalibratedWeight(1, .1))
+
+# df = pd.read_csv(p_name)
+
+# Get the max of the 'difference' column
+# max_diff = df['Difference'].max()
+
+# print("Max difference:", max_diff)
+     
+# TWIST BETA RELATIVE TO THE ALPHA CONFIGURATION
+
+
+# prev = 0
+# incr = 0
+# for i in np.linspace(0.001, .051, 50):
+#      c.l = i
+#      p_name = f"linear_hits_{i}.csv"
+#      prev = i
+     
+
 
 
 
@@ -977,19 +1186,63 @@ print("CALCFORCE: ", c.calcForce(4.0861, .002)/.002)
 #BAD:
 #0.3306939635357677,0.3306939635357677,0.8267349088394192
 # 0.0,0.3306939635357677,0.4133674544197096
-c.alpha = 0.0  
-c.beta = 0.3306939635357677
-c.gamma = 0.4133674544197096
+# 0.6499846869496124,1.2458039833200905,0.2708269528956718
 
+# 0.37915773405394054,1.5707963267948966,0.37915773405394054
+# 0.7583154681078811,0.8124808586870155,0.37915773405394054
+
+
+# for 7 mm: 0.7583154681078811,1.4624655456366278,0.6499846869496124
+# 0.21666156231653746,0.37915773405394054,0.5416539057913436
+
+# for 19 mm: 01936:
+# 0.0,1.0833078115826873,0.37915773405394054
+
+
+# for .030 mm 0.054165390579134366,0.6499846869496124,0.595819296370478
+# c.alpha = 0
+# c.beta = 1.0833078115826873
+# c.gamma = 0.37915773405394054
 
 #haivng trouble finding a LINEAR curve that still has enough sensitivity for a soft sample.
 
 
-c.plotPowerDifferencesNormalized(np.linspace(0, c.calcForceCalibratedWeight(2.4026, .031), 500))
+
+# 0.5416539057913436, 1.5166309362157622, 0.6499846869496124
+
+#for 0.01936734693877551: 0.4333231246330749,0.595819296370478,0.3791577340539405,1.0
+
+# 1.4624655456366278,1.0833078115826873,1.2458039833200905
+#
+# 0.21666156231653746,0.2708269528956718,0.595819296370478
+#the sample - its 22 MILLLIMETERS 0 22.12 mm
+c = Calibration(0.03165)
+# c.alpha = 0.81248085
+# c.beta = 0.8124808586870155
+# c.gamma = 0.8124808586870155
+
+# for .0212
+# 1.5707963267948966,0.7583154681078811,0.7583154681078811
+# 1.191638592740956,0.9208116398452842,0.5416539057913436
+# 0.7583154681078811,0.8666462492661499,0.6499846869496124
+
+# for .02266
+# 0.3545473175924873,F = 619.093*Sdiff + -35.9488,0.9749770304244186,1.1374732021618217,0.4874885152122093,1.0000,True
+##
+##
+# 1.5166309362157622,0.8124808586870155,1.2458039833200905
+# 1.5707963267948966,0.7583154681078811,0.7583154681078811
+c.alpha = np.pi/4  # - 30 deg
+c.beta = np.pi/4 # 45 deg
+c.gamma = np.pi/2# 40 deg
+# 0.0,0.8124808586870155,0.8124808586870155
+# # c.plotPowerDifferencesNormalizedVsPhi(np.linspace(0, c.calcForceCalibratedWeight(.5, .0305), 1000))
+# c.plotPowerDifferencesNormalized(np.linspace(0, c.calcForceCalibratedWeight(1.6835, 0.03165), 1000))
+c.plotInteractionLengths(c.calcForceCalibratedWeight(1.6835, 0.03165), np.linspace(.016, .032, 2000))
 
 
-print("CALC: ", c.calcForce(6.4888,  .0002/.0002))
-print("CALC CALIBRATED WEIGHT: ", c.calcForceCalibratedWeight(2.4026, .018), 500)
+# print("CALC: ", c.calcForce(6.4888,  .0002/.0002))
+# print("CALC CALIBRATED WEIGHT: ", c.calcForceCalibratedWeight(2.4026, .007), 500)
 ## WE'LL TRY ALPHA = pi/4, beta = pi/4, gamma = pi/2
 
 # c.findMinStartingDiff()
