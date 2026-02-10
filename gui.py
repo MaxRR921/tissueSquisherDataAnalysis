@@ -11,6 +11,7 @@ from tkinter import ttk
 from ttkthemes import ThemedTk
 import polarimeter
 import angleFinder
+import agiltronController
 import csv
 import multiprocessing
 import graphingProcess
@@ -149,6 +150,8 @@ class Gui:
         #create the move list gui elements
         self.moveGui = moveGui.MoveGui(self.listFrame, self, self.moveList, 100, width=500)
 
+        self.agiltron = None
+
         self.angleFind = angleFinder.AngleFinder()
 
 
@@ -209,6 +212,7 @@ class Gui:
     """addTopMenuButtons is executed from init, calls the methods that create all of the buttons"""
     def addTopMenuButtons(self):
         self.__browseDataFileButton(self.topMenuFrame)
+        self.__initAgiltronButton(self.topMenuFrame)
         self.__startGraphingButton(self.topMenuFrame)
         self.__findAngleButton(self.topMenuFrame)
         self.alphaLabel = ttk.Label(self.topMenuFrame, text="Ideal Alpha: N/A")
@@ -228,6 +232,26 @@ class Gui:
         self.filePath = tk.filedialog.askopenfilename(filetypes=[('CSV Files', '*.csv')])
         if self.filePath:
             self.__plot()
+
+    def __initAgiltronButton(self, frameTopMenu):
+        self.agiltronButton = ttk.Button(frameTopMenu, text="Init Agiltron", command=lambda: self.__initAgiltron())
+        self.agiltronButton.pack(side='left')
+
+    def __initAgiltron(self):
+        try:
+            self.agiltron = agiltronController.agiltronController()
+            connected = self.agiltron.start(run_loop=False)
+            if connected:
+                self.agiltronButton.config(text="Agiltron Connected")
+                print("Agiltron controller initialized successfully")
+            else:
+                self.agiltron = None
+                self.agiltronButton.config(text="Agiltron Failed")
+                print("Agiltron controller failed to connect")
+        except Exception as e:
+            self.agiltron = None
+            self.agiltronButton.config(text="Agiltron Failed")
+            print(f"Agiltron Connection Error: {e}")
 
     """startpolarimeterthread starts the thread for data collection from the powlarimeter. This thread runs polarimeter.start"""
     def __startPolarimeterThread(self):
