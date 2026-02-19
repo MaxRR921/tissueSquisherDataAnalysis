@@ -127,6 +127,7 @@ class agiltronController:
         """Set the position of the controller."""
         # Scale input pos to 0-700000
         # scale_int scales from 0-50 to 0-700000 by default
+        print(f"setPosition called at pos {pos}")
         scaled_pos = self.scale_int(pos)
 
         bits_to_send = self.pos_to_bytes(scaled_pos)

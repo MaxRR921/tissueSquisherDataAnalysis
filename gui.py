@@ -1,6 +1,6 @@
 import numpy as np
 import tkinter as tk
-import controller
+import stageQueue
 from plotter import Plot2D
 import time
 import move
@@ -24,7 +24,6 @@ if ENABLE_WINDOWS_MODULES:
 else:
     powermeter = None
     polarimeter = None
-import agiltronController
 import csv
 import multiprocessing
 import graphingProcess
@@ -60,9 +59,15 @@ class Gui:
 
         #Initializing device classes.
         try:
-            self.micrometerController = controller.Controller()
-        except:
-            print("Micrometer Connection Error")
+            self.micrometerController = stageQueue.StageQueue()
+            connected = self.micrometerController.start()
+            if connected:
+                print("Stage controller connected successfully")
+            else:
+                print("Stage controller failed to connect")
+                self.micrometerController = None
+        except Exception as e:
+            print(f"Stage Controller Connection Error: {e}")
             self.micrometerController = None
 
         self.polarimeter = None
@@ -169,8 +174,6 @@ class Gui:
         #create the move list gui elements
         self.moveGui = moveGui.MoveGui(self.listFrame, self, self.moveList, 100, width=500)
 
-        self.agiltron = None
-
         self.angleFind = angleFinder.AngleFinder()
 
 
@@ -254,24 +257,27 @@ class Gui:
             self.__plot()
 
     def __initAgiltronButton(self, frameTopMenu):
-        self.agiltronButton = ttk.Button(frameTopMenu, text="Init Agiltron", command=lambda: self.__initAgiltron())
+        self.agiltronButton = ttk.Button(frameTopMenu, text="Reconnect Stage", command=lambda: self.__reconnectStage())
         self.agiltronButton.pack(side='left')
 
-    def __initAgiltron(self):
+    def __reconnectStage(self):
         try:
-            self.agiltron = agiltronController.agiltronController()
-            connected = self.agiltron.start(run_loop=False)
+            self.micrometerController = stageQueue.StageQueue()
+            connected = self.micrometerController.start()
             if connected:
-                self.agiltronButton.config(text="Agiltron Connected")
-                print("Agiltron controller initialized successfully")
+                self.agiltronButton.config(text="Stage Connected")
+                print("Stage controller reconnected successfully")
+                # Update move references to new controller
+                for m in self.moveList:
+                    m.controller = self.micrometerController
             else:
-                self.agiltron = None
-                self.agiltronButton.config(text="Agiltron Failed")
-                print("Agiltron controller failed to connect")
+                self.micrometerController = None
+                self.agiltronButton.config(text="Stage Failed")
+                print("Stage controller failed to reconnect")
         except Exception as e:
-            self.agiltron = None
-            self.agiltronButton.config(text="Agiltron Failed")
-            print(f"Agiltron Connection Error: {e}")
+            self.micrometerController = None
+            self.agiltronButton.config(text="Stage Failed")
+            print(f"Stage Reconnection Error: {e}")
 
     """startpolarimeterthread starts the thread for data collection from the powlarimeter. This thread runs polarimeter.start"""
     def __startPolarimeterThread(self):
@@ -368,8 +374,8 @@ class Gui:
 
     def __raiseMicrometer(self):
         raiseMove = move.Move(self.micrometerController)
-        raiseMove.velocity = "1"
-        raiseMove.targetHeight = "12"
+        raiseMove.velocity = 100
+        raiseMove.targetHeight = 50
         listTemp = []
         self.numExecutions = 1
         listTemp.append(raiseMove)
@@ -509,17 +515,17 @@ class Gui:
         # Begin Collection Button
         def begin_collection():
             nonlocal angle
-            min_height = str(min_height_entry.get())
-            max_height = str(max_height_entry.get())
+            min_height = int(min_height_entry.get())
+            max_height = int(max_height_entry.get())
             self.signalAngleFinder.clear()
 
-            if float(max_height) <= float(min_height):
+            if max_height <= min_height:
                 print("can't enter this height")
                 return
 
             listTemp = []
             positionMove = move.Move(self.micrometerController)
-            positionMove.velocity = "1"
+            positionMove.velocity = 100
             positionMove.targetHeight = max_height
             listTemp.append(positionMove)
             self.numExecutions = 1
@@ -531,12 +537,12 @@ class Gui:
             listTemp = []
 
             lowerMove = move.Move(self.micrometerController)
-            lowerMove.velocity = ".1" 
+            lowerMove.velocity = 10
             lowerMove.targetHeight = min_height
             listTemp.append(lowerMove)
 
             raiseMove = move.Move(self.micrometerController)
-            raiseMove.velocity = ".1"
+            raiseMove.velocity = 10
             raiseMove.targetHeight = max_height
             listTemp.append(raiseMove)
             self.numExecutions = 3
@@ -737,14 +743,12 @@ class Gui:
             else:
                 print("No polarimeter Connected")
 
-        #WARNING: BECAUSE of comparing move.targethiehgt to micrometer position, can only have one decimal place micrometer movement
-        # ALSO: won't recognize values like 0.1 and .1 as being the same. I'll fix this later.
         for i in range(self.numExecutions):
             for move in moveList:
-                if not self.stopExecution and (self.micrometerController.micrometerPosition.decode('utf-8')[3:6].strip() != move.targetHeight):
+                if not self.stopExecution and (self.micrometerController.currentPosition != move.targetHeight):
                     move.execute()
-                    print("Position:", self.micrometerController.micrometerPosition.decode('utf-8')[3:6].strip())
-                elif (self.micrometerController.micrometerPosition.decode('utf-8')[3:6].strip() == move.targetHeight):
+                    print("Position:", self.micrometerController.currentPosition)
+                elif (self.micrometerController.currentPosition == move.targetHeight):
                     print("Can't move here, this is the current position.")
                 else:
                     break

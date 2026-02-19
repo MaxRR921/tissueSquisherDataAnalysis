@@ -11,8 +11,8 @@ saveinputs saves the textbox inputs into the variables in this class.
 class Move:
 
     def __init__(self, controller):
-        self.velocity = 0.0
-        self.targetHeight = 0.0
+        self.velocity = 50
+        self.targetHeight = 0
         self.frontDelay = 0.0
         self.backDelay = 0.0
         self.controller = controller
@@ -24,8 +24,8 @@ class Move:
         time.sleep(self.backDelay)
 
     def saveInputs(self, velocity, height, frontWait, backWait):
-        self.velocity = velocity
-        self.targetHeight = height
+        self.velocity = int(velocity)
+        self.targetHeight = int(height)
         self.frontDelay = frontWait
         self.backDelay = backWait
 

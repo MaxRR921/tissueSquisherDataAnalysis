@@ -81,8 +81,8 @@ class MoveGui(ttk.Frame):
         frontDelay_var = tk.StringVar(value=str(move.frontDelay))
         backDelay_var = tk.StringVar(value=str(move.backDelay))
 
-        ttk.Label(frame, text='target height').grid(row=0, column=0)
-        ttk.Label(frame, text='velocity').grid(row=0, column=1)
+        ttk.Label(frame, text='position (0-50)').grid(row=0, column=0)
+        ttk.Label(frame, text='speed (0-100)').grid(row=0, column=1)
         ttk.Label(frame, text='front wait').grid(row=0, column=2)
         ttk.Label(frame, text='back wait').grid(row=0, column=3)
         ttk.Button(frame, text='execute', command=lambda: ((self.__executeMove(move), self.saveEntries(move, targetHeight_var, velocity_var, frontDelay_var, backDelay_var)))).grid(row=1, column=5, padx=15)
@@ -96,8 +96,8 @@ class MoveGui(ttk.Frame):
         return frame
     """save entries saves all the text variable entries to the move associated with the gui element."""
     def saveEntries(self, move, targetHeight_var, velocity_var, frontDelay_var, backDelay_var):
-        move.targetHeight = str(targetHeight_var.get())
-        move.velocity = str(velocity_var.get())
+        move.targetHeight = int(targetHeight_var.get())
+        move.velocity = int(velocity_var.get())
         move.frontDelay = float(frontDelay_var.get())
         move.backDelay = float(backDelay_var.get())
         print("MOVE:")
