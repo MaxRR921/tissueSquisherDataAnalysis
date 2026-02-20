@@ -295,6 +295,9 @@ class Gui:
 
     def startPyqtProcess(self):
         """Spawn a separate process that runs the PyQt/pyqtgraph event loop."""
+        if self.micrometerController is None:
+            print("No stage controller connected, cannot start graph.")
+            return
         # If not already running (or if the process has ended), start it
         if self.pyqt_process is None or not self.pyqt_process.is_alive():
             print("Starting PyQt process...")
@@ -417,7 +420,7 @@ class Gui:
             if not self.polarimeter.updatingCsvQueue.is_set():
                 self.polarimeter.updatingCsvQueue.set()
 
-        if self.pyqt_process is not None and self.pyqt_process.is_alive():
+        if self.pyqt_process is not None and self.pyqt_process.is_alive() and self.micrometerController is not None:
             self.micrometerController.updatingPlotQueue.set()
             if self.powermeter is not None:
                 self.powermeter.updatingDevice1PlotQueue.set()
@@ -460,8 +463,9 @@ class Gui:
         except:
             print("plot not open")
 
-        self.micrometerController.updatingCsvQueue.clear()
-        self.micrometerController.updatingPlotQueue.clear()
+        if self.micrometerController is not None:
+            self.micrometerController.updatingCsvQueue.clear()
+            self.micrometerController.updatingPlotQueue.clear()
         if self.powermeter is not None:
             self.powermeter.updatingDevice1CsvQueue.clear()
             self.powermeter.updatingDevice2CsvQueue.clear()
@@ -709,6 +713,10 @@ class Gui:
 
 
     def __collect(self, moveList, collectData):
+        if self.micrometerController is None:
+            print("No stage controller connected, cannot collect.")
+            self.executed.set()
+            return
         print("collecting data")
         if collectData:
             if not self.updatingPlots.is_set():
@@ -774,8 +782,9 @@ class Gui:
         micrometerArray = []
         powermeter1Array = []
         powermeter2Array = []
-        while not self.micrometerController.csvQueue.empty():
-            micrometerArray.append(self.micrometerController.csvQueue.get())
+        if self.micrometerController is not None:
+            while not self.micrometerController.csvQueue.empty():
+                micrometerArray.append(self.micrometerController.csvQueue.get())
 
         if self.powermeter is not None:
             while not self.powermeter.device1CsvQueue.empty():
