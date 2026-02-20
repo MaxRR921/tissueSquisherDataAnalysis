@@ -81,7 +81,7 @@ class MoveGui(ttk.Frame):
         frontDelay_var = tk.StringVar(value=str(move.frontDelay))
         backDelay_var = tk.StringVar(value=str(move.backDelay))
 
-        ttk.Label(frame, text='position (0-50)').grid(row=0, column=0)
+        ttk.Label(frame, text='position (0-120)').grid(row=0, column=0)
         ttk.Label(frame, text='speed (0-100)').grid(row=0, column=1)
         ttk.Label(frame, text='front wait').grid(row=0, column=2)
         ttk.Label(frame, text='back wait').grid(row=0, column=3)

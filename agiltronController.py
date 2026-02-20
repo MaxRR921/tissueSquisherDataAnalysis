@@ -13,6 +13,7 @@ class agiltronController:
         self.checkVCommand = bytes([0x01, 0x18, 0x00, 0x00, 0x00, 0x00])
         self.setMaxVCommand = bytes([0x01, 0x17, 0x00, 0x00, 0x00, 0x00])
         self.running = False
+        self.maxHeight = 120
 
     def openPort(self):
         try:
@@ -119,7 +120,7 @@ class agiltronController:
                 self.checkMaxVelocity()
 
     def getUserInputPos(self):
-        print("Input a value between 0 and 50:")
+        print(f"Input a value between 0 and {self.maxHeight}:")
         userinput = int(input())
         return userinput
 
@@ -177,19 +178,21 @@ class agiltronController:
 
 
     # claude generated ahh function 😭
-    def scale_int(self, value, in_min=0, in_max=50, out_min=0, out_max=700000):
+    def scale_int(self, value, in_min=0, in_max=None, out_min=0, out_max=700000):
         """
         Scale an integer from one range to another.
         Args:
             value: Input value to scale
             in_min: Minimum of input range (default 0)
-            in_max: Maximum of input range (default 50)
+            in_max: Maximum of input range (default self.maxHeight)
             out_min: Minimum of output range (default 0)
             out_max: Maximum of output range (default 700000)
 
         Returns:
             Scaled integer value
         """
+        if in_max is None:
+            in_max = self.maxHeight
         # lerp lerp lerp
         # lerp lerp
         # Linear interpolation formula

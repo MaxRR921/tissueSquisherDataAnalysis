@@ -378,7 +378,7 @@ class Gui:
     def __raiseMicrometer(self):
         raiseMove = move.Move(self.micrometerController)
         raiseMove.velocity = 100
-        raiseMove.targetHeight = 50
+        raiseMove.targetHeight = self.micrometerController.agiltron.maxHeight
         listTemp = []
         self.numExecutions = 1
         listTemp.append(raiseMove)

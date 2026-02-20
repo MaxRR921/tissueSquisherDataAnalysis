@@ -35,7 +35,7 @@ class StageQueue:
             time.sleep(0.05)
             raw_pos = self.agiltron.getCurrentPos()
             # Convert raw 0-700000 back to 0-50 scale
-            scaled_pos = self.agiltron.scale_int(raw_pos, 0, 700000, 0, 50)
+            scaled_pos = self.agiltron.scale_int(raw_pos, 0, 700000, 0, self.agiltron.maxHeight)
             self.currentPosition = scaled_pos
             if self.updatingCsvQueue.is_set():
                 self.csvQueue.put((scaled_pos, time.time()))
