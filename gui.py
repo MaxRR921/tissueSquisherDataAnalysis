@@ -378,11 +378,15 @@ class Gui:
     def __raiseMicrometer(self):
         raiseMove = move.Move(self.micrometerController)
         raiseMove.velocity = 100
-        raiseMove.targetHeight = self.micrometerController.agiltron.maxHeight
         listTemp = []
-        self.numExecutions = 1
-        listTemp.append(raiseMove)
-        self.startExecuteThread(listTemp, False)
+        if self.micrometerController is not None:
+            raiseMove.targetHeight = self.micrometerController.agiltron.maxHeight
+            self.numExecutions = 1
+            listTemp.append(raiseMove)
+        if self.micrometerController is not None:
+            self.startExecuteThread(listTemp, False)
+        else:
+            print("Cannot raise micrometer, micrometer is not connected.")
 
 
 
