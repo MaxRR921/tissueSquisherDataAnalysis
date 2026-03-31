@@ -482,7 +482,6 @@ class ConnectionFinder:
                 print("=" * 60)
 
             self.enumerate_com_ports()
-            self.enumerate_tty_ports()
             self.enumerate_wmi_usb()
 
             if verbose:
@@ -515,7 +514,6 @@ class ConnectionFinder:
                 print("MAC DEVICE ENUMERATION")
                 print("=" * 60)
 
-            self.enumerate_tty_ports()
             self.enumerate_ioreg_usb()
             self.enumerate_system_profiler_usb()
             self.enumerate_pyusb()
