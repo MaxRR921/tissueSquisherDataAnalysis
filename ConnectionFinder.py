@@ -67,6 +67,19 @@ class ConnectionFinder:
             print(f"Error running shell command: {e}")
             return []
 
+    def enumerate_tty_ports(self):
+        """Print all available /dev/tty.* port names."""
+        print("\n" + "=" * 60)
+        print("TTY / SERIAL PORTS")
+        print("=" * 60)
+
+        devices = self.list_tty_devices()
+        if devices:
+            for device in devices:
+                print(f"  {device}")
+        else:
+            print("  No TTY ports found.")
+
     def find_slab_controller(self):
         """Searches device list for a Silicon Labs USB-to-UART connection."""
         devices = self.list_tty_devices()
@@ -469,6 +482,7 @@ class ConnectionFinder:
                 print("=" * 60)
 
             self.enumerate_com_ports()
+            self.enumerate_tty_ports()
             self.enumerate_wmi_usb()
 
             if verbose:
@@ -501,6 +515,7 @@ class ConnectionFinder:
                 print("MAC DEVICE ENUMERATION")
                 print("=" * 60)
 
+            self.enumerate_tty_ports()
             self.enumerate_ioreg_usb()
             self.enumerate_system_profiler_usb()
             self.enumerate_pyusb()
