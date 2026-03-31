@@ -1,6 +1,5 @@
 import serial
 import time
-import enumerateDevices as enumerate
 import ConnectionFinder
 
 
@@ -79,7 +78,10 @@ class agiltronController:
     def start(self, run_loop=True):
         # instantiate connection finder class
         finder = ConnectionFinder.ConnectionFinder()
-        finder.find_slab_controller()
+        if not finder.check_platform():
+            print("Warning: Running on unsupported platform.")
+        finder.enumerate_all()
+        finder.find_controller()
         self.port = finder.port
 
         # try opening port
@@ -200,7 +202,7 @@ class agiltronController:
         return int(scaled)
 
     def checkControllerConnection(self):
-        out = enumerate.find_silicon_labs_device()
+        out = ConnectionFinder.ConnectionFinder().find_silicon_labs_device()
         if out is []:
             print("Device could not be found.")
             return False
