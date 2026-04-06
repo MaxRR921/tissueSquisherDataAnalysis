@@ -5,7 +5,7 @@ import ConnectionFinder
 
 class agiltronController:
     def __init__(self):
-        self.port = 'COM5'
+        self.port = 'COM3'
         self.baudrate = 9600
         self.ser = None
         self.posCommand = bytes([0x01, 0x16, 0x00, 0x00, 0x00, 0x00])
@@ -82,11 +82,30 @@ class agiltronController:
             print("Warning: Running on unsupported platform.")
         finder.enumerate_all()
         finder.find_controller()
-        self.port = finder.port
+
+        if finder.port:
+            self.port = finder.port
+        # else:
+        #     # auto-discovery failed — try fallback ports
+        #     print("[ConnectionFinder] Auto-discovery returned no port.")
+        #     print("[Fallback] Attempting fallback ports: COM5, COM3")
+        #     for fallback in ['COM5', 'COM3']:
+        #         print(f"[Fallback] Trying {fallback}...")
+        #         self.port = fallback
+        #         if self.openPort():
+        #             print(f"[Fallback] Successfully connected on {fallback}")
+        #             if run_loop:
+        #                 self.runMainLoop()
+        #             return True
+        #         else:
+        #             print(f"[Fallback] Failed to connect on {fallback}")
+        #     print("[Error] Could not connect on any fallback port (COM5, COM3). Aborting.")
+        #     return False
 
         # try opening port
         out = self.openPort()
         if not out:
+            print(f"[Error] Failed to open discovered port {self.port}")
             return False
         else:
             print("Connection to port established")
