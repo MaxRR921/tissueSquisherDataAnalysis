@@ -5,7 +5,7 @@ import ConnectionFinder
 
 class agiltronController:
     def __init__(self):
-        self.port = ''
+        self.port = 'COM5'
         self.baudrate = 9600
         self.ser = None
         self.posCommand = bytes([0x01, 0x16, 0x00, 0x00, 0x00, 0x00])

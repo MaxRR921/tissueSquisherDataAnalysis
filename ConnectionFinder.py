@@ -68,7 +68,7 @@ class ConnectionFinder:
             return []
 
     def enumerate_tty_ports(self):
-        """Print all available /dev/tty.* port names."""
+        """Print all available /dev/tty.* port names and pyserial COM ports."""
         print("\n" + "=" * 60)
         print("TTY / SERIAL PORTS")
         print("=" * 60)
@@ -79,6 +79,52 @@ class ConnectionFinder:
                 print(f"  {device}")
         else:
             print("  No TTY ports found.")
+
+        self.enumerate_serial_ports()
+
+    def enumerate_serial_ports(self) -> List[Dict[str, Any]]:
+        """List all open serial ports via pyserial (cross-platform)."""
+        print("\n" + "=" * 60)
+        print("SERIAL PORTS (via pyserial)")
+        print("=" * 60)
+
+        try:
+            from serial.tools import list_ports
+        except ImportError:
+            print("pyserial not installed. Install with: pip install pyserial")
+            return []
+
+        ports = list(list_ports.comports())
+        devices = []
+
+        for port in ports:
+            device_info = {
+                'device': port.device,
+                'name': port.description,
+                'hwid': port.hwid,
+                'vid': port.vid,
+                'pid': port.pid,
+                'serial_number': port.serial_number,
+                'manufacturer': port.manufacturer,
+            }
+            devices.append(device_info)
+
+            print(f"\n  Port: {port.device}")
+            print(f"  Description: {port.description}")
+            print(f"  HWID: {port.hwid}")
+            if port.vid is not None:
+                print(f"  Vendor ID: 0x{port.vid:04x}")
+            if port.pid is not None:
+                print(f"  Product ID: 0x{port.pid:04x}")
+            if port.serial_number:
+                print(f"  Serial: {port.serial_number}")
+            if port.manufacturer:
+                print(f"  Manufacturer: {port.manufacturer}")
+
+        if not devices:
+            print("  No serial ports found.")
+
+        return devices
 
     def find_slab_controller(self):
         """Searches device list for a Silicon Labs USB-to-UART connection."""
@@ -514,6 +560,7 @@ class ConnectionFinder:
                 print("MAC DEVICE ENUMERATION")
                 print("=" * 60)
 
+            self.enumerate_tty_ports()
             self.enumerate_ioreg_usb()
             self.enumerate_system_profiler_usb()
             self.enumerate_pyusb()
