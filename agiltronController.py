@@ -1,12 +1,11 @@
 import serial
 import time
-import enumerateDevices as enumerate
 import ConnectionFinder
 
 
 class agiltronController:
     def __init__(self):
-        self.port = ''
+        self.port = 'COM3'
         self.baudrate = 9600
         self.ser = None
         self.posCommand = bytes([0x01, 0x16, 0x00, 0x00, 0x00, 0x00])
@@ -14,6 +13,7 @@ class agiltronController:
         self.setMaxVCommand = bytes([0x01, 0x17, 0x00, 0x00, 0x00, 0x00])
         self.running = False
         self.maxHeight = 120
+        self.currentPosition = 0
 
     def openPort(self):
         try:
@@ -77,14 +77,37 @@ class agiltronController:
         return out_bytes
 
     def start(self, run_loop=True):
+        print("agiltronController.py - start called")
         # instantiate connection finder class
         finder = ConnectionFinder.ConnectionFinder()
-        finder.find_slab_controller()
-        self.port = finder.port
+        if not finder.check_platform():
+            print("Warning: Running on unsupported platform.")
+        finder.enumerate_all()
+        finder.find_controller()
+
+        if finder.port:
+            self.port = finder.port
+        # else:
+        #     # auto-discovery failed — try fallback ports
+        #     print("[ConnectionFinder] Auto-discovery returned no port.")
+        #     print("[Fallback] Attempting fallback ports: COM5, COM3")
+        #     for fallback in ['COM5', 'COM3']:
+        #         print(f"[Fallback] Trying {fallback}...")
+        #         self.port = fallback
+        #         if self.openPort():
+        #             print(f"[Fallback] Successfully connected on {fallback}")
+        #             if run_loop:
+        #                 self.runMainLoop()
+        #             return True
+        #         else:
+        #             print(f"[Fallback] Failed to connect on {fallback}")
+        #     print("[Error] Could not connect on any fallback port (COM5, COM3). Aborting.")
+        #     return False
 
         # try opening port
         out = self.openPort()
         if not out:
+            print(f"[Error] Failed to open discovered port {self.port}")
             return False
         else:
             print("Connection to port established")
@@ -136,6 +159,34 @@ class agiltronController:
 
         print("Position set successfully")
         return True
+
+    def goToHeight(self, pos, on_step=None):
+        """Move to scaled position (0-maxHeight) and block until motion stabilizes.
+        on_step(scaled) is invoked after each poll so observers (e.g. StageQueue) can sample."""
+        self.setPosition(pos)
+        stable_count = 0
+        last_raw = None
+        while stable_count < 5:
+            time.sleep(0.05)
+            raw = self.getCurrentPos()
+            scaled = self.scale_int(raw, 0, 700000, 0, self.maxHeight)
+            self.currentPosition = scaled
+            if on_step is not None:
+                on_step(scaled)
+            if last_raw is not None and raw == last_raw:
+                stable_count += 1
+            else:
+                stable_count = 0
+            last_raw = raw
+        print(f"Movement complete. Position: {self.currentPosition}")
+
+    def goHome(self):
+        """Move to position 0."""
+        self.goToHeight(0)
+
+    def setVelocity(self, speed):
+        """Public alias for setMaxVelocity (0-100)."""
+        return self.setMaxVelocity(speed)
 
     def getCurrentPos(self):
         self.send_bits(self.posCommand)
@@ -200,7 +251,7 @@ class agiltronController:
         return int(scaled)
 
     def checkControllerConnection(self):
-        out = enumerate.find_silicon_labs_device()
+        out = ConnectionFinder.ConnectionFinder().find_silicon_labs_device()
         if out is []:
             print("Device could not be found.")
             return False
