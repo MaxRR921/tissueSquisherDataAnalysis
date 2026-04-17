@@ -61,6 +61,8 @@ class Gui:
         self.signalAngleFinder.clear()
 
 
+
+
         #Initializing device classes.
         try:
             self.stage = agiltronController.agiltronController()
@@ -68,6 +70,7 @@ class Gui:
             if connected:
                 print("Stage controller connected successfully")
                 self.stageQueue = stageQueue.StageQueue(self.stage)
+                self.agiltronButton.config(text="Stage Connected")
             else:
                 print("Stage controller failed to connect")
                 self.stage = None
