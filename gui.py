@@ -60,6 +60,7 @@ class Gui:
         self.signalAngleFinder = threading.Event()
         self.signalAngleFinder.clear()
 
+        self.agiltronConnectionStatus = False
 
 
 
@@ -70,7 +71,7 @@ class Gui:
             if connected:
                 print("Stage controller connected successfully")
                 self.stageQueue = stageQueue.StageQueue(self.stage)
-                self.agiltronButton.config(text="Stage Connected")
+                self.agiltronConnectionStatus = True
             else:
                 print("Stage controller failed to connect")
                 self.stage = None
@@ -270,10 +271,18 @@ class Gui:
             self.__plot()
 
     def __initAgiltronButton(self, frameTopMenu):
-        self.agiltronButton = ttk.Button(frameTopMenu, text="Reconnect Stage", command=lambda: self.__reconnectStage())
+        buttontext = "Not Connected"
+        if self.agiltronConnectionStatus:
+            buttontext = "Stage Connected"
+        else:
+            buttontext = "Reconnect Stage"
+        self.agiltronButton = ttk.Button(frameTopMenu, text=buttontext, command=lambda: self.__reconnectStage())
         self.agiltronButton.pack(side='left')
 
     def __reconnectStage(self):
+        if self.stage is not None:
+            print("Stage already connected")
+            return
         try:
             self.stage = agiltronController.agiltronController()
             connected = self.stage.start(run_loop=False)
