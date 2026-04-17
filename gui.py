@@ -30,6 +30,9 @@ import multiprocessing
 import graphingProcess
 import matplotlib.pyplot as plt
 
+import signal
+
+
 from scipy.interpolate import interp1d
 
 """!THINKING MAYBE I SHOULD JUSt iNitiAlize all of the threads in init, then call them later"""
@@ -181,11 +184,14 @@ class Gui:
         self.angleFind = angleFinder.AngleFinder()
 
 
-        #updating all plots 
+        #updating all plots
         self.root.protocol('WM_DELETE_WINDOW', self.stop)
+        self._sigterm_received = False
+        signal.signal(signal.SIGTERM, self.handle_interrupt)
+        signal.signal(signal.SIGINT, self.handle_interrupt)
         self.root.after(10, self.updatePlotsFromData)
+        self.root.after(200, self._check_signals)
         self.stopExecution = False
-
 
 
 
@@ -930,3 +936,14 @@ class Gui:
             
 
         self.root.after(10, self.updatePlotsFromData)
+
+    def handle_interrupt(self, signum, frame):
+        print("SIGTERM/SIGINT interrupt received from user - Stop button pressed")
+        self._sigterm_received = True
+
+    def _check_signals(self):
+        if self._sigterm_received:
+            self.stop()
+            return
+        self.root.after(200, self._check_signals)
+
