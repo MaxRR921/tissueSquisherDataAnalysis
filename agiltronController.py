@@ -13,6 +13,7 @@ class agiltronController:
         self.setMaxVCommand = bytes([0x01, 0x17, 0x00, 0x00, 0x00, 0x00])
         self.running = False
         self.maxHeight = 120
+        self.currentPosition = 0
 
     def openPort(self):
         try:
@@ -76,6 +77,7 @@ class agiltronController:
         return out_bytes
 
     def start(self, run_loop=True):
+        print("agiltronController.py - start called")
         # instantiate connection finder class
         finder = ConnectionFinder.ConnectionFinder()
         if not finder.check_platform():
@@ -157,6 +159,34 @@ class agiltronController:
 
         print("Position set successfully")
         return True
+
+    def goToHeight(self, pos, on_step=None):
+        """Move to scaled position (0-maxHeight) and block until motion stabilizes.
+        on_step(scaled) is invoked after each poll so observers (e.g. StageQueue) can sample."""
+        self.setPosition(pos)
+        stable_count = 0
+        last_raw = None
+        while stable_count < 5:
+            time.sleep(0.05)
+            raw = self.getCurrentPos()
+            scaled = self.scale_int(raw, 0, 700000, 0, self.maxHeight)
+            self.currentPosition = scaled
+            if on_step is not None:
+                on_step(scaled)
+            if last_raw is not None and raw == last_raw:
+                stable_count += 1
+            else:
+                stable_count = 0
+            last_raw = raw
+        print(f"Movement complete. Position: {self.currentPosition}")
+
+    def goHome(self):
+        """Move to position 0."""
+        self.goToHeight(0)
+
+    def setVelocity(self, speed):
+        """Public alias for setMaxVelocity (0-100)."""
+        return self.setMaxVelocity(speed)
 
     def getCurrentPos(self):
         self.send_bits(self.posCommand)
