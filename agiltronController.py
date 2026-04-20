@@ -189,10 +189,15 @@ class agiltronController:
         return self.setMaxVelocity(speed)
 
     def getCurrentPos(self):
+        self.ser.reset_input_buffer()
         self.send_bits(self.posCommand)
         response = self.ser.read(6)
 
         print(f"Received: {response.hex(' ')}, ", response)
+
+        if len(response) < 6:
+            print(f"Short read: got {len(response)} bytes")
+            return self.currentPosition
 
         pos = int.from_bytes(response[3:6], byteorder='big')
         print("Position as int:", pos)
