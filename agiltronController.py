@@ -13,6 +13,7 @@ class agiltronController:
         self.setMaxVCommand = bytes([0x01, 0x17, 0x00, 0x00, 0x00, 0x00])
         self.running = False
         self.maxHeight = 120
+        self.maxRaw = 700000
         self.currentPosition = 0
 
     def openPort(self):
@@ -173,7 +174,7 @@ class agiltronController:
         while stable_count < 5:
             time.sleep(0.05)
             raw = self.getCurrentPos()
-            scaled = self.scale_int(raw, 0, 700000, 0, self.maxHeight)
+            scaled = self.scale_int(raw, 0, self.maxRaw, 0, self.maxHeight)
             self.currentPosition = scaled
             if on_step is not None:
                 on_step(scaled)
@@ -252,7 +253,7 @@ class agiltronController:
 
 
     # claude generated ahh function 😭
-    def scale_int(self, value, in_min=0, in_max=None, out_min=0, out_max=700000):
+    def scale_int(self, value, in_min=0, in_max=None, out_min=0, out_max=None):
         """
         Scale an integer from one range to another.
         Args:
@@ -267,6 +268,8 @@ class agiltronController:
         """
         if in_max is None:
             in_max = self.maxHeight
+        if out_max is None:
+            out_max = self.maxRaw
         # lerp lerp lerp
         # lerp lerp
         # Linear interpolation formula
