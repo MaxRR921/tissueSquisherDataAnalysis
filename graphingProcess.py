@@ -28,6 +28,7 @@ class GraphingProcess(QtWidgets.QMainWindow):
         self.plot1 = pg.PlotWidget()
         self.plot1.setLabel('left', "Micrometer Position (mm)")
         self.plot1.setLabel('bottom', "Time")
+        self.plot1.setYRange(0, 120, padding=0)
         self.curve1 = self.plot1.plot([], [], pen='r')
         layout.addWidget(self.plot1, 0, 0)  # Row 0, Col 0
 
