@@ -154,8 +154,11 @@ class agiltronController:
         print(f"setPosition called at pos {pos}")
         scaled_pos = self.scale_int(pos)
 
+        self.ser.flush() # wait for current output to finish
+        self.ser.reset_output_buffer()
         bits_to_send = self.pos_to_bytes(scaled_pos)
         self.send_bits(bits_to_send)
+        self.ser.flush() # wait for this output to finish
 
         print("Position set successfully")
         return True
@@ -163,6 +166,7 @@ class agiltronController:
     def goToHeight(self, pos, on_step=None):
         """Move to scaled position (0-maxHeight) and block until motion stabilizes.
         on_step(scaled) is invoked after each poll so observers (e.g. StageQueue) can sample."""
+
         self.setPosition(pos)
         stable_count = 0
         last_raw = None
@@ -182,16 +186,27 @@ class agiltronController:
 
     def goHome(self):
         """Move to position 0."""
+        self.ser.flush()
+        self.ser.reset_input_buffer()
         self.goToHeight(0)
 
     def setVelocity(self, speed):
         """Public alias for setMaxVelocity (0-100)."""
+        self.ser.flush()
+        print("Output Flushed")
         return self.setMaxVelocity(speed)
 
     def getCurrentPos(self):
-        self.ser.reset_input_buffer()
+        self.ser.reset_output_buffer()
+        print("Output buffer reset")
         self.send_bits(self.posCommand)
+        self.ser.flush()
+        print("Output Flushed")
+
+        self.ser.reset_input_buffer()
+        print("Input buffer reset")
         response = self.ser.read(6)
+        self.ser.flush()
 
         print(f"Received: {response.hex(' ')}, ", response)
 
@@ -201,6 +216,7 @@ class agiltronController:
 
         pos = int.from_bytes(response[3:6], byteorder='big')
         print("Position as int:", pos)
+
         return pos
 
     def checkMaxVelocity(self):
