@@ -174,6 +174,8 @@ class agiltronController:
         while stable_count < 5:
             time.sleep(0.05)
             raw = self.getCurrentPos()
+            if raw is None:
+                continue
             scaled = self.scale_int(raw, 0, self.maxRaw, 0, self.maxHeight)
             self.currentPosition = scaled
             if on_step is not None:
@@ -198,24 +200,21 @@ class agiltronController:
         return self.setMaxVelocity(speed)
 
     def getCurrentPos(self):
-        self.ser.flush()
-        print("Current output Flushed")
         self.ser.reset_output_buffer()
         print("Output buffer reset")
+        self.ser.reset_input_buffer()
+        print("Input buffer reset")
         self.send_bits(self.posCommand)
         self.ser.flush()
         print("Output Flushed")
 
-        self.ser.reset_input_buffer()
-        print("Input buffer reset")
         response = self.ser.read(6)
-        self.ser.flush()
 
         print(f"Received: {response.hex(' ')}, ", response)
 
         if len(response) < 6:
             print(f"Short read: got {len(response)} bytes")
-            return self.currentPosition
+            return None
 
         pos = int.from_bytes(response[3:6], byteorder='big')
         print("Position as int:", pos)
