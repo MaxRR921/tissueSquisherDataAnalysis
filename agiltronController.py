@@ -197,6 +197,8 @@ class agiltronController:
         return self.setMaxVelocity(speed)
 
     def getCurrentPos(self):
+        self.ser.flush()
+        print("Current output Flushed")
         self.ser.reset_output_buffer()
         print("Output buffer reset")
         self.send_bits(self.posCommand)
