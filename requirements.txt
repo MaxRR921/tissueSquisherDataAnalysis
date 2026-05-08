@@ -1,0 +1,11 @@
+numpy==2.4.1
+pyqt5==5.15.11
+scipy==1.17.0
+pyserial==3.5
+tkthemes==0.1.2
+matplotlib>=3.10.8
+pandas>=3.0.0
+pyqtgraph>=0.14.0
+
+# Windows-only dependencies (required for powermeters and polarimeter)
+# pywin32==306; platform_system=="Windows"

@@ -1,7 +1,7 @@
 import numpy as np
 import tkinter as tk
-import controller
-import powermeter
+import stageQueue
+import agiltronController
 from plotter import Plot2D
 import time
 import move
@@ -9,12 +9,29 @@ import moveGui
 import threading
 from tkinter import ttk
 from ttkthemes import ThemedTk
-import polarimeter
 import angleFinder
+
+# ============================================================================
+# PLATFORM CONFIGURATION
+# Set to False to disable Windows-only modules (powermeter, polarimeter)
+# This allows testing the GUI on Mac/Linux where win32com is unavailable
+# ============================================================================
+ENABLE_WINDOWS_MODULES = False
+# ============================================================================
+
+if ENABLE_WINDOWS_MODULES:
+    import powermeter
+    import polarimeter
+else:
+    powermeter = None
+    polarimeter = None
 import csv
 import multiprocessing
 import graphingProcess
 import matplotlib.pyplot as plt
+
+import signal
+
 
 from scipy.interpolate import interp1d
 
@@ -43,29 +60,48 @@ class Gui:
         self.signalAngleFinder = threading.Event()
         self.signalAngleFinder.clear()
 
+        self.agiltronConnectionStatus = False
+
+
 
         #Initializing device classes.
         try:
-            self.micrometerController = controller.Controller()
-        except:
-            print("Micrometer Connection Error")
-            self.micrometerController = None
+            self.stage = agiltronController.agiltronController()
+            connected = self.stage.start(run_loop=False)
+            if connected:
+                print("Stage controller connected successfully")
+                self.stageQueue = stageQueue.StageQueue(self.stage)
+                self.agiltronConnectionStatus = True
+            else:
+                print("Stage controller failed to connect")
+                self.stage = None
+                self.stageQueue = None
+        except Exception as e:
+            print(f"Stage Controller Connection Error: {e}")
+            self.stage = None
+            self.stageQueue = None
 
         self.polarimeter = None
-        try:
-            self.polarimeter = polarimeter.Polarimeter(self.micrometerController)
-            self.polarimeterThread = threading.Thread(target=self.polarimeter.start, args=[])
-        except:
-            print("Polarimeter Connection Error")
+        if ENABLE_WINDOWS_MODULES and polarimeter is not None:
+            try:
+                self.polarimeter = polarimeter.Polarimeter(self.stageQueue)
+                self.polarimeterThread = threading.Thread(target=self.polarimeter.start, args=[])
+            except:
+                print("Polarimeter Connection Error")
+        else:
+            print("Polarimeter disabled (ENABLE_WINDOWS_MODULES=False)")
 
-
-        try:
-            self.powermeter = powermeter.Powermeter()
-            self.powermeterThread = threading.Thread(target=self.powermeter.start, args=[])
-            print("Powermeters connected successfully")
-        except:
-            print("Powermeter Connection Error. You need two powermeters connected at all times.")
-            self.powermeter = None
+        self.powermeter = None
+        self.powermeterThread = None
+        if ENABLE_WINDOWS_MODULES and powermeter is not None:
+            try:
+                self.powermeter = powermeter.Powermeter()
+                self.powermeterThread = threading.Thread(target=self.powermeter.start, args=[])
+                print("Powermeters connected successfully")
+            except:
+                print("Powermeter Connection Error. You need two powermeters connected at all times.")
+        else:
+            print("Powermeter disabled (ENABLE_WINDOWS_MODULES=False)")
 
         # Event booleans
         self.updatingPlots = threading.Event() 
@@ -92,7 +128,7 @@ class Gui:
 
 
         #one move by default
-        defualtMove = move.Move(self.micrometerController)
+        defualtMove = move.Move(self.stageQueue)
         self.moveList = [defualtMove]
 
         if self.powermeter is not None:
@@ -152,11 +188,14 @@ class Gui:
         self.angleFind = angleFinder.AngleFinder()
 
 
-        #updating all plots 
+        #updating all plots
         self.root.protocol('WM_DELETE_WINDOW', self.stop)
+        self._sigterm_received = False
+        signal.signal(signal.SIGTERM, self.handle_interrupt)
+        signal.signal(signal.SIGINT, self.handle_interrupt)
         self.root.after(10, self.updatePlotsFromData)
+        self.root.after(200, self._check_signals)
         self.stopExecution = False
-
 
 
 
@@ -187,12 +226,13 @@ class Gui:
             self.polarimeter.stop()
         else:
             print("No polarimeter Connected")
-        if(self.micrometerController is not None):
-            self.micrometerController.stop()
+        if self.stage is not None:
+            self.stage.closePort()
         else:
             print("No micrometer connected")
 
-        self.powermeterThread.join()
+        if self.powermeterThread is not None:
+            self.powermeterThread.join()
 
 
         if self.pyqt_process is not None and self.pyqt_process.is_alive():
@@ -209,6 +249,7 @@ class Gui:
     """addTopMenuButtons is executed from init, calls the methods that create all of the buttons"""
     def addTopMenuButtons(self):
         self.__browseDataFileButton(self.topMenuFrame)
+        self.__initAgiltronButton(self.topMenuFrame)
         self.__startGraphingButton(self.topMenuFrame)
         self.__findAngleButton(self.topMenuFrame)
         self.alphaLabel = ttk.Label(self.topMenuFrame, text="Ideal Alpha: N/A")
@@ -229,6 +270,40 @@ class Gui:
         if self.filePath:
             self.__plot()
 
+    def __initAgiltronButton(self, frameTopMenu):
+        buttontext = "Not Connected"
+        if self.agiltronConnectionStatus:
+            buttontext = "Stage Connected"
+        else:
+            buttontext = "Reconnect Stage"
+        self.agiltronButton = ttk.Button(frameTopMenu, text=buttontext, command=lambda: self.__reconnectStage())
+        self.agiltronButton.pack(side='left')
+
+    def __reconnectStage(self):
+        if self.stage is not None:
+            print("Stage already connected")
+            return
+        try:
+            self.stage = agiltronController.agiltronController()
+            connected = self.stage.start(run_loop=False)
+            if connected:
+                self.stageQueue = stageQueue.StageQueue(self.stage)
+                self.agiltronButton.config(text="Stage Connected")
+                print("Stage controller reconnected successfully")
+                # Update move references to new controller
+                for m in self.moveList:
+                    m.controller = self.stageQueue
+            else:
+                self.stage = None
+                self.stageQueue = None
+                self.agiltronButton.config(text="Stage Failed")
+                print("Stage controller failed to reconnect")
+        except Exception as e:
+            self.stage = None
+            self.stageQueue = None
+            self.agiltronButton.config(text="Stage Failed")
+            print(f"Stage Reconnection Error: {e}")
+
     """startpolarimeterthread starts the thread for data collection from the powlarimeter. This thread runs polarimeter.start"""
     def __startPolarimeterThread(self):
         print("SHOULD START")
@@ -245,17 +320,22 @@ class Gui:
 
     def startPyqtProcess(self):
         """Spawn a separate process that runs the PyQt/pyqtgraph event loop."""
+        if self.stageQueue is None:
+            print("No stage controller connected, cannot start graph.")
+            return
         # If not already running (or if the process has ended), start it
         if self.pyqt_process is None or not self.pyqt_process.is_alive():
             print("Starting PyQt process...")
-            if not self.polarimeter == None:
-                self.pyqt_process = multiprocessing.Process(target=graphingProcess.run_pyqt_app,
-                                                            args=(self.signalGraph, self.signalZero, self.micrometerController.plotQueue, self.powermeter.device1PlotQueue, self.powermeter.device2PlotQueue, self.polarimeter.dataAnalyzer.phaseQueue, self.polarimeter.dataAnalyzer.strainQueue))
-                self.pyqt_process.start()
-            elif self.polarimeter == None:
-                self.pyqt_process = multiprocessing.Process(target=graphingProcess.run_pyqt_app,
-                                                            args=(self.signalGraph, self.signalZero, self.micrometerController.plotQueue, self.powermeter.device1PlotQueue, self.powermeter.device2PlotQueue, None, None))
-                self.pyqt_process.start()
+            # Get powermeter queues (or None if powermeter disabled)
+            pow1_queue = self.powermeter.device1PlotQueue if self.powermeter is not None else None
+            pow2_queue = self.powermeter.device2PlotQueue if self.powermeter is not None else None
+            # Get polarimeter queues (or None if polarimeter disabled)
+            phase_queue = self.polarimeter.dataAnalyzer.phaseQueue if self.polarimeter is not None else None
+            strain_queue = self.polarimeter.dataAnalyzer.strainQueue if self.polarimeter is not None else None
+
+            self.pyqt_process = multiprocessing.Process(target=graphingProcess.run_pyqt_app,
+                                                        args=(self.signalGraph, self.signalZero, self.stageQueue.plotQueue, pow1_queue, pow2_queue, phase_queue, strain_queue))
+            self.pyqt_process.start()
         else:
             print("PyQt process is already running!")        
 
@@ -321,13 +401,16 @@ class Gui:
             print("Invalid input, please enter a valid number")
 
     def __raiseMicrometer(self):
-        raiseMove = move.Move(self.micrometerController)
-        raiseMove.velocity = "1"
-        raiseMove.targetHeight = "12"
+        raiseMove = move.Move(self.stageQueue)
+        raiseMove.velocity = 100
         listTemp = []
-        self.numExecutions = 1
-        listTemp.append(raiseMove)
-        self.startExecuteThread(listTemp, False)
+        if self.stage is not None:
+            raiseMove.targetHeight = self.stage.maxHeight
+            self.numExecutions = 1
+            listTemp.append(raiseMove)
+            self.startExecuteThread(listTemp, False)
+        else:
+            print("Cannot raise micrometer, micrometer is not connected.")
 
 
 
@@ -353,21 +436,23 @@ class Gui:
 
     def __collectNoise(self):
         print("collecting data")
-            
-        if not self.powermeter.updatingDevice1CsvQueue.is_set():
-            self.powermeter.updatingDevice1CsvQueue.set()
-        
-        if not self.powermeter.updatingDevice2CsvQueue.is_set():
-            self.powermeter.updatingDevice2CsvQueue.set()
+
+        if self.powermeter is not None:
+            if not self.powermeter.updatingDevice1CsvQueue.is_set():
+                self.powermeter.updatingDevice1CsvQueue.set()
+
+            if not self.powermeter.updatingDevice2CsvQueue.is_set():
+                self.powermeter.updatingDevice2CsvQueue.set()
 
         if self.polarimeter is not None:
             if not self.polarimeter.updatingCsvQueue.is_set():
                 self.polarimeter.updatingCsvQueue.set()
 
-        if self.pyqt_process is not None and self.pyqt_process.is_alive():
-            self.micrometerController.updatingPlotQueue.set()
-            self.powermeter.updatingDevice1PlotQueue.set()
-            self.powermeter.updatingDevice2PlotQueue.set()
+        if self.pyqt_process is not None and self.pyqt_process.is_alive() and self.stageQueue is not None:
+            self.stageQueue.updatingPlotQueue.set()
+            if self.powermeter is not None:
+                self.powermeter.updatingDevice1PlotQueue.set()
+                self.powermeter.updatingDevice2PlotQueue.set()
 
         #POLARIMETER NEEDS TO START RUNNING BEFORE MOVES EXECUTE. IT DOESN'T CONSTANTLY RUN LIKE THE POWERMETER.
         if(self.polarimeter is not None):
@@ -406,12 +491,14 @@ class Gui:
         except:
             print("plot not open")
 
-        self.micrometerController.updatingCsvQueue.clear()
-        self.micrometerController.updatingPlotQueue.clear()
-        self.powermeter.updatingDevice1CsvQueue.clear()
-        self.powermeter.updatingDevice2CsvQueue.clear()
-        self.powermeter.updatingDevice1PlotQueue.clear()
-        self.powermeter.updatingDevice2PlotQueue.clear()
+        if self.stageQueue is not None:
+            self.stageQueue.updatingCsvQueue.clear()
+            self.stageQueue.updatingPlotQueue.clear()
+        if self.powermeter is not None:
+            self.powermeter.updatingDevice1CsvQueue.clear()
+            self.powermeter.updatingDevice2CsvQueue.clear()
+            self.powermeter.updatingDevice1PlotQueue.clear()
+            self.powermeter.updatingDevice2PlotQueue.clear()
         if self.polarimeter is not None:
             self.polarimeter.dataAnalyzer.finishAnalyzeDataSignal.wait()
             self.polarimeter.dataAnalyzer.finishAnalyzeDataSignal.clear()
@@ -460,17 +547,17 @@ class Gui:
         # Begin Collection Button
         def begin_collection():
             nonlocal angle
-            min_height = str(min_height_entry.get())
-            max_height = str(max_height_entry.get())
+            min_height = int(min_height_entry.get())
+            max_height = int(max_height_entry.get())
             self.signalAngleFinder.clear()
 
-            if float(max_height) <= float(min_height):
+            if max_height <= min_height:
                 print("can't enter this height")
                 return
 
             listTemp = []
-            positionMove = move.Move(self.micrometerController)
-            positionMove.velocity = "1"
+            positionMove = move.Move(self.stageQueue)
+            positionMove.velocity = 100
             positionMove.targetHeight = max_height
             listTemp.append(positionMove)
             self.numExecutions = 1
@@ -481,30 +568,33 @@ class Gui:
             time.sleep(3) #need time to reinitialize everything
             listTemp = []
 
-            lowerMove = move.Move(self.micrometerController)
-            lowerMove.velocity = ".1" 
+            lowerMove = move.Move(self.stageQueue)
+            lowerMove.velocity = 10
             lowerMove.targetHeight = min_height
             listTemp.append(lowerMove)
 
-            raiseMove = move.Move(self.micrometerController)
-            raiseMove.velocity = ".1"
+            raiseMove = move.Move(self.stageQueue)
+            raiseMove.velocity = 10
             raiseMove.targetHeight = max_height
             listTemp.append(raiseMove)
             self.numExecutions = 3
-            self.powermeter.updatingAngleQueues.set()
-            print("Finding angle: ", self.powermeter.updatingAngleQueues.is_set())
+            if self.powermeter is not None:
+                self.powermeter.updatingAngleQueues.set()
+                print("Finding angle: ", self.powermeter.updatingAngleQueues.is_set())
             self.startExecuteThread(listTemp, True)
             self.signalAngleFinder.wait()
             self.signalAngleFinder.clear()
-            self.powermeter.updatingAngleQueues.clear()
-            print("Finding angle: ", self.powermeter.updatingAngleQueues.is_set())
+            if self.powermeter is not None:
+                self.powermeter.updatingAngleQueues.clear()
+                print("Finding angle: ", self.powermeter.updatingAngleQueues.is_set())
             print("SHOULD NOW RAISE MICROMETER!!!")
             time.sleep(3)
             self.__raiseMicrometer()
             self.signalAngleFinder.wait()
             self.signalAngleFinder.clear()
-            angle += 10 
-            powerRatios.append(self.findDeltaPowerDif())
+            angle += 10
+            if self.powermeter is not None:
+                powerRatios.append(self.findDeltaPowerDif())
             if(angle > 20):
                 rotate_label.config(text="compute the ideal angle")
             else:
@@ -651,29 +741,35 @@ class Gui:
 
 
     def __collect(self, moveList, collectData):
+        if self.stageQueue is None:
+            print("No stage controller connected, cannot collect.")
+            self.executed.set()
+            return
         print("collecting data")
         if collectData:
             if not self.updatingPlots.is_set():
                 self.updatingPlots.set() 
 
 
-            if not self.micrometerController.updatingCsvQueue.is_set():
-                self.micrometerController.updatingCsvQueue.set()
+            if not self.stageQueue.updatingCsvQueue.is_set():
+                self.stageQueue.updatingCsvQueue.set()
 
-            if not self.powermeter.updatingDevice1CsvQueue.is_set():
-                self.powermeter.updatingDevice1CsvQueue.set()
+            if self.powermeter is not None:
+                if not self.powermeter.updatingDevice1CsvQueue.is_set():
+                    self.powermeter.updatingDevice1CsvQueue.set()
 
-            if not self.powermeter.updatingDevice2CsvQueue.is_set():
-                self.powermeter.updatingDevice2CsvQueue.set()
+                if not self.powermeter.updatingDevice2CsvQueue.is_set():
+                    self.powermeter.updatingDevice2CsvQueue.set()
 
             if self.polarimeter is not None:
                 if not self.polarimeter.updatingCsvQueue.is_set():
                     self.polarimeter.updatingCsvQueue.set()
 
             if self.pyqt_process is not None and self.pyqt_process.is_alive():
-                self.micrometerController.updatingPlotQueue.set()
-                self.powermeter.updatingDevice1PlotQueue.set()
-                self.powermeter.updatingDevice2PlotQueue.set()
+                self.stageQueue.updatingPlotQueue.set()
+                if self.powermeter is not None:
+                    self.powermeter.updatingDevice1PlotQueue.set()
+                    self.powermeter.updatingDevice2PlotQueue.set()
 
 
             #POLARIMETER NEEDS TO START RUNNING BEFORE MOVES EXECUTE. IT DOESN'T CONSTANTLY RUN LIKE THE POWERMETER.
@@ -683,14 +779,12 @@ class Gui:
             else:
                 print("No polarimeter Connected")
 
-        #WARNING: BECAUSE of comparing move.targethiehgt to micrometer position, can only have one decimal place micrometer movement
-        # ALSO: won't recognize values like 0.1 and .1 as being the same. I'll fix this later.
         for i in range(self.numExecutions):
             for move in moveList:
-                if not self.stopExecution and (self.micrometerController.micrometerPosition.decode('utf-8')[3:6].strip() != move.targetHeight):
+                if not self.stopExecution and (self.stage.currentPosition != move.targetHeight):
                     move.execute()
-                    print("Position:", self.micrometerController.micrometerPosition.decode('utf-8')[3:6].strip())
-                elif (self.micrometerController.micrometerPosition.decode('utf-8')[3:6].strip() == move.targetHeight):
+                    print("Position:", self.stage.currentPosition)
+                elif (self.stage.currentPosition == move.targetHeight):
                     print("Can't move here, this is the current position.")
                 else:
                     break
@@ -698,12 +792,13 @@ class Gui:
         self.executed.set()
         # time.sleep(2)
 
-        self.micrometerController.updatingCsvQueue.clear()
-        self.micrometerController.updatingPlotQueue.clear()
-        self.powermeter.updatingDevice1CsvQueue.clear()
-        self.powermeter.updatingDevice2CsvQueue.clear()
-        self.powermeter.updatingDevice1PlotQueue.clear()
-        self.powermeter.updatingDevice2PlotQueue.clear()
+        self.stageQueue.updatingCsvQueue.clear()
+        self.stageQueue.updatingPlotQueue.clear()
+        if self.powermeter is not None:
+            self.powermeter.updatingDevice1CsvQueue.clear()
+            self.powermeter.updatingDevice2CsvQueue.clear()
+            self.powermeter.updatingDevice1PlotQueue.clear()
+            self.powermeter.updatingDevice2PlotQueue.clear()
         if self.polarimeter is not None:
             self.polarimeter.dataAnalyzer.finishAnalyzeDataSignal.wait()
             self.polarimeter.dataAnalyzer.finishAnalyzeDataSignal.clear()
@@ -715,14 +810,16 @@ class Gui:
         micrometerArray = []
         powermeter1Array = []
         powermeter2Array = []
-        while not self.micrometerController.csvQueue.empty():
-            micrometerArray.append(self.micrometerController.csvQueue.get())
+        if self.stageQueue is not None:
+            while not self.stageQueue.csvQueue.empty():
+                micrometerArray.append(self.stageQueue.csvQueue.get())
 
-        while not self.powermeter.device1CsvQueue.empty():
-            powermeter1Array.append(self.powermeter.device1CsvQueue.get())
+        if self.powermeter is not None:
+            while not self.powermeter.device1CsvQueue.empty():
+                powermeter1Array.append(self.powermeter.device1CsvQueue.get())
 
-        while not self.powermeter.device2CsvQueue.empty():
-            powermeter2Array.append(self.powermeter.device2CsvQueue.get())
+            while not self.powermeter.device2CsvQueue.empty():
+                powermeter2Array.append(self.powermeter.device2CsvQueue.get())
 
         if micrometerArray:
             with open("micrometertime.csv", mode="w", newline="") as f:
@@ -799,7 +896,7 @@ class Gui:
 
     """addmove adds the move to the movelist and then udpates the move gui adding the move"""
     def __addMove(self, frameMoveList):
-        moveToAdd = move.Move(self.micrometerController)
+        moveToAdd = move.Move(self.stageQueue)
         self.moveList.append(moveToAdd)
         self.moveGui.updateList(self.moveList)
 
@@ -851,3 +948,14 @@ class Gui:
             
 
         self.root.after(10, self.updatePlotsFromData)
+
+    def handle_interrupt(self, signum, frame):
+        print("SIGTERM/SIGINT interrupt received from user - Stop button pressed")
+        self._sigterm_received = True
+
+    def _check_signals(self):
+        if self._sigterm_received:
+            self.stop()
+            return
+        self.root.after(200, self._check_signals)
+
