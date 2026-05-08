@@ -2,17 +2,26 @@
 name = "mainfile"
 version = "0.1.0"
 description = "Project Description"
-requires-python = ">=3.13"
+requires-python = ">=3.11,<3.13"
 dependencies = [
     "matplotlib>=3.10.8",
     "numpy>=2.4.1",
+    "opencv-python>=4.13.0.92",
     "pandas>=3.0.0",
+    "pillow>=12.1.0",
     "pyqt5>=5.15.11",
     "pyqtgraph>=0.14.0",
     "pyserial>=3.5",
+    "pyueye>=4.96.952",
     "pyusb>=1.3.1",
     "scipy>=1.17.0",
     "scipy-stubs~=1.17.1",
     "tkthemes>=0.1.2",
     "ttkthemes>=3.3.0",
+]
+
+
+[tool.uv]
+required-environments = [
+    "sys_platform == 'win32' and platform_machine == 'AMD64'"
 ]
