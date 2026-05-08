@@ -327,7 +327,11 @@ class Gui:
             print("Starting PyQt process...")
             # Get powermeter queues (or None if powermeter disabled)
             pow1_queue = self.powermeter.device1PlotQueue if self.powermeter is not None else None
+            if pow1_queue is None:
+                print("Powermeter 1 is not connected.")
             pow2_queue = self.powermeter.device2PlotQueue if self.powermeter is not None else None
+            if pow2_queue is None:
+                print("Powermeter 2 is not connected.")
             # Get polarimeter queues (or None if polarimeter disabled)
             phase_queue = self.polarimeter.dataAnalyzer.phaseQueue if self.polarimeter is not None else None
             strain_queue = self.polarimeter.dataAnalyzer.strainQueue if self.polarimeter is not None else None
