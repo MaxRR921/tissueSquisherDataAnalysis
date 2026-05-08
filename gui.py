@@ -321,8 +321,7 @@ class Gui:
     def startPyqtProcess(self):
         """Spawn a separate process that runs the PyQt/pyqtgraph event loop."""
         if self.stageQueue is None:
-            print("No stage controller connected, cannot start graph.")
-            return
+            print("No stage controller connected.")
         # If not already running (or if the process has ended), start it
         if self.pyqt_process is None or not self.pyqt_process.is_alive():
             print("Starting PyQt process...")
