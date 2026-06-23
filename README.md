@@ -1,4 +1,3 @@
-#research #note #school  
 # Fiber Optic Stress Sensor Data Collection and Analysis Software
 
 ## Goals 
