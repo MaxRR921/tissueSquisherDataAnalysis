@@ -6,7 +6,7 @@ The Fiber Optic Stress Sensor, originally developed by Dr. Harrison, uses fiber 
 This software interfaces with four devices: the two powermeters, the polarimeter, and the micrometer. It provides a GUI interface to collect data from the the sensors and control the micrometer to compress and decompress the sample. It provides an GUI to add and execute a sequence of moves to the micrometer, and easily synchronizes data collection from the sensing elements with this sequence of moves. Additionally, it displays plots in real time using a seperate PyQTGraph process. The sensors and micrometer write data to buffers initialized in the python code, which are written to CSVs and sent to the PyQTGraph process. This allows the user to see quick plots in realtime which significantly increases the efficiency of data collection. Since the devices also store data in buffers that write to CSV's after the sequence of moves is executed, the user can perform further analysis after viewing the realtime plots. 
 
 ## How To Run  
-**Required Devices:** Two Newport 845-PE-RS Virtual Optical Powermeters, One Newport TRB12CC linear actuator and CONEX-CC controller
+**Required Devices:** Two Newport 845-PE-RS (844-PE-USB)? Virtual Optical Powermeters, One Newport TRB12CC linear actuator and CONEX-CC controller
      
 **Recommended Devices (if you want to actually build the stress sensor and replicate our tests):** Thorlabs PAX1000 series polarimeter, PM fiber optic cable (jacketed and bare), 1550 Nm 50 mw laser, linear stage, presshead    
   
@@ -31,6 +31,10 @@ Additionally, the software includes the ability to display real time plots, whic
   
 As data is taken from each sensor, it is added to queues that are dispatched from the producer thread to the consumer PyQtGraph process. the PyQtGraph process dequeues data from the queues into arrays (slow, I know, but the PyQtGraphs can only plot array to my knowledge), which are then plotted. Each device thread also keeps a seperate queue from the one that is read in the PyQtGraph process and dumps it all into a csv so we can perform later analysis. 
 
+## Requirements / Dependencies
+**Newport 844-PE-USB Drivers**
+https://www.newport.com/p/844-PE-USB
+
 ### other dependencies
 **USB to UART Bridge VCP Drivers**
 https://www.silabs.com/software-and-tools/usb-to-uart-bridge-vcp-drivers?tab=overview
@@ -46,6 +50,7 @@ https://github.com/mhammond/pywin32
 
 **NI-VISA**
 https://www.ni.com/en/support/downloads/drivers/download.ni-visa.html
+
 
 
 ![Software main screen](bjasldfjas.png)
