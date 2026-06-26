@@ -31,5 +31,24 @@ Additionally, the software includes the ability to display real time plots, whic
   
 As data is taken from each sensor, it is added to queues that are dispatched from the producer thread to the consumer PyQtGraph process. the PyQtGraph process dequeues data from the queues into arrays (slow, I know, but the PyQtGraphs can only plot array to my knowledge), which are then plotted. Each device thread also keeps a seperate queue from the one that is read in the PyQtGraph process and dumps it all into a csv so we can perform later analysis. 
 
+### other dependencies
+**USB to UART Bridge VCP Drivers**
+https://www.silabs.com/software-and-tools/usb-to-uart-bridge-vcp-drivers?tab=overview
+
+**Powermeter USB Driver**
+https://www.ophiropt.com/laser--measurement/software/starlab-for-usb
+
+**Thorlabs PAX1000 Driver**
+https://www.thorlabs.com/software_pages/ViewSoftwarePage.cfm?Code=PAX
+
+**pywin32**
+https://github.com/mhammond/pywin32
+
+**NI-VISA**
+https://www.ni.com/en/support/downloads/drivers/download.ni-visa.html
+
 
 ![Software main screen](bjasldfjas.png)
+
+
+
