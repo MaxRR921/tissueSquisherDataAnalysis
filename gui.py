@@ -16,7 +16,7 @@ import angleFinder
 # Set to False to disable Windows-only modules (powermeter, polarimeter)
 # This allows testing the GUI on Mac/Linux where win32com is unavailable
 # ============================================================================
-ENABLE_WINDOWS_MODULES = False
+ENABLE_WINDOWS_MODULES = True
 # ============================================================================
 
 if ENABLE_WINDOWS_MODULES:
