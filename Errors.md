@@ -64,3 +64,8 @@ Traceback (most recent call last):
     self.run.clear()
     ^^^^^^^^
 AttributeError: 'Powermeter' object has no attribute 'run'
+
+
+
+no powermeters connected (com_error: (-2147023782, 'A dynamic link library (DLL) initialization routine failed.', None, None)). Note: you must be on windows with two Ophir powermeters attached.
+Powermeter Connection Error ((-2147023782, 'A dynamic link library (DLL) initialization routine failed.', None, None)). You need two powermeters connected at all times.
