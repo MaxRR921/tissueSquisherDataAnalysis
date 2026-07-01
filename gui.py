@@ -98,8 +98,12 @@ class Gui:
                 self.powermeter = powermeter.Powermeter()
                 self.powermeterThread = threading.Thread(target=self.powermeter.start, args=[])
                 print("Powermeters connected successfully")
-            except:
-                print("Powermeter Connection Error. You need two powermeters connected at all times.")
+            except Exception as e:
+                # Powermeter() re-raises on failure, so this now actually runs.
+                # Reset to None so every `if self.powermeter is not None` guard skips it.
+                self.powermeter = None
+                self.powermeterThread = None
+                print(f"Powermeter Connection Error ({e}). You need two powermeters connected at all times.")
         else:
             print("Powermeter disabled (ENABLE_WINDOWS_MODULES=False)")
 
