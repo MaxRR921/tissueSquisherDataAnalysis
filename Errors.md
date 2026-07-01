@@ -21,3 +21,21 @@ Traceback (most recent call last):
         "This COM object can not automate the makepy process - please run makepy manually for this object"
     )
 TypeError: This COM object can not automate the makepy process - please run makepy manually for this object
+
+
+
+PS C:\Users\OSA\dev\tissueSquisherDataAnalysis> python main.py
+agiltronController.py - start called
+Platform detected: Windows
+Platform detected: Windows
+Searching COM ports for Silicon Labs device...
+No Silicon Labs device found on COM ports.
+Serial connection error: could not open port 'COM3': FileNotFoundError(2, 'The system cannot find the file specified.', None, 2)
+[Error] Failed to open discovered port COM3
+Stage controller failed to connect
+Polarimeter Connection Error
+no powermeters connected (com_error: (-2147221005, 'Invalid class string', None, None)). Note: you must be on windows with two Ophir powermeters attached.
+Powermeter Connection Error ((-2147221005, 'Invalid class string', None, None)). You need two powermeters connected at all times.
+
+
+
