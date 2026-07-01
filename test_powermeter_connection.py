@@ -12,6 +12,7 @@ Usage: python test_powermeter_connection.py
 
 try:
     import win32com.client
+    import win32com.client.gencache
     import pythoncom
 except ImportError:
     raise SystemExit(
@@ -38,7 +39,14 @@ def main():
     pythoncom.CoInitialize()
 
     print("Connecting to OphirLMMeasurement.CoLMMeasurement...")
-    com = win32com.client.Dispatch("OphirLMMeasurement.CoLMMeasurement")
+    # EnsureDispatch (not plain Dispatch) forces win32com to build/load the
+    # makepy type-library wrapper, giving an *early-bound* object. The Ophir
+    # methods (StopAllStreams, CloseAll, ScanUSB, ...) are only reachable via
+    # the typelib interface; a plain Dispatch falls back to late binding when
+    # no gen_py cache exists and every one of those calls raises AttributeError.
+    com = win32com.client.gencache.EnsureDispatch(
+        "OphirLMMeasurement.CoLMMeasurement"
+    )
 
     try:
         com.StopAllStreams()
@@ -94,7 +102,10 @@ def main():
                 print(f"  Failed to close device: {decode_error(com, err)}")
 
     finally:
-        com.CloseAll()
+        try:
+            com.CloseAll()
+        except Exception as err:
+            print(f"Cleanup CloseAll failed: {decode_error(com, err)}")
         pythoncom.CoUninitialize()
         print("\nDone.")
 
