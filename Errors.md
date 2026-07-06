@@ -68,3 +68,7 @@ Traceback (most recent call last):
         IDispatch, None, clsctx, pythoncom.IID_IDispatch
     )
 pywintypes.com_error: (-2147221005, 'Invalid class string', None, None)
+
+
+Command to run:
+python -c "import win32api,win32con as k; g=win32api.RegQueryValue(k.HKEY_CLASSES_ROOT,'OphirLMMeasurement.CoLMMeasurement\\CLSID'); print('CLSID',g); print('DLL',win32api.RegQueryValue(k.HKEY_CLASSES_ROOT,'CLSID\\%s\\InprocServer32'%g)); import contextlib; print('TypeLib',win32api.RegQueryValue(k.HKEY_CLASSES_ROOT,'CLSID\\%s\\TypeLib'%g))"
