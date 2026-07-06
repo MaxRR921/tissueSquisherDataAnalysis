@@ -38,4 +38,33 @@ no powermeters connected (com_error: (-2147221005, 'Invalid class string', None,
 Powermeter Connection Error ((-2147221005, 'Invalid class string', None, None)). You need two powermeters connected at all times.
 
 
+Initializing COM...
+Connecting to OphirLMMeasurement.CoLMMeasurement...
+Traceback (most recent call last):
+  File "C:\Users\OSA\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\win32com\client\dynamic.py", line 81, in _GetGoodDispatch
+    IDispatch = pythoncom.connect(IDispatch)
+pywintypes.com_error: (-2147221005, 'Invalid class string', None, None)
 
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\OSA\dev\tissueSquisherDataAnalysis\test_powermeter_connection.py", line 114, in <module>
+    main()
+    ~~~~^^
+  File "C:\Users\OSA\dev\tissueSquisherDataAnalysis\test_powermeter_connection.py", line 47, in main
+    com = win32com.client.gencache.EnsureDispatch(
+        "OphirLMMeasurement.CoLMMeasurement"
+    )
+  File "C:\Users\OSA\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\win32com\client\gencache.py", line 640, in EnsureDispatch
+    disp = win32com.client.Dispatch(prog_id)
+  File "C:\Users\OSA\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\win32com\client\__init__.py", line 116, in Dispatch
+    dispatch, userName = dynamic._GetGoodDispatchAndUserName(dispatch, userName, clsctx)
+                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\OSA\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\win32com\client\dynamic.py", line 101, in _GetGoodDispatchAndUserName
+    return (_GetGoodDispatch(IDispatch, clsctx), userName)
+            ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\OSA\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\win32com\client\dynamic.py", line 83, in _GetGoodDispatch
+    IDispatch = pythoncom.CoCreateInstance(
+        IDispatch, None, clsctx, pythoncom.IID_IDispatch
+    )
+pywintypes.com_error: (-2147221005, 'Invalid class string', None, None)
