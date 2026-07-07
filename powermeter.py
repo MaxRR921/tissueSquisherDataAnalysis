@@ -32,6 +32,36 @@ class Powermeter:
     """
 
     def __init__(self):
+        # Set up all non-hardware state FIRST so the object is always safe to
+        # inspect and stop() even if the COM/hardware connection fails partway.
+        # (Previously these were assigned after ScanUSB(), so a failed connect
+        # left a half-built object with no .run / .device1Data / .deviceList,
+        # which then crashed start(), stop() and the GUI plot loop.)
+        self.OphirCom = None
+        self.deviceList = []
+        self.connected = False
+        self.device1ZeroTime = 0.0
+        self.device2ZeroTime = 0.0
+        self.device1Data = 0.0
+        self.device2Data = 0.0
+        self.device1CsvQueue = queue.Queue()
+        self.device2CsvQueue = queue.Queue()
+        self.device1PlotQueue = multiprocessing.Queue()
+        self.device2PlotQueue = multiprocessing.Queue()
+        self.updatingDevice1PlotQueue = threading.Event()
+        self.updatingDevice1PlotQueue.clear()
+        self.updatingDevice2PlotQueue = threading.Event()
+        self.updatingDevice2PlotQueue.clear()
+        self.updatingDevice1CsvQueue = threading.Event()
+        self.updatingDevice1CsvQueue.clear()
+        self.updatingDevice2CsvQueue = threading.Event()
+        self.updatingDevice2CsvQueue.clear()
+        self.angle1Queue = queue.Queue()
+        self.angle2Queue = queue.Queue()
+        self.updatingAngleQueues = threading.Event()
+        self.run = threading.Event()
+        self.run.set()  # to start running
+
         try:
             pythoncom.CoInitialize()
             self.OphirCom = win32com.client.Dispatch(
@@ -40,40 +70,20 @@ class Powermeter:
             # Stop & Close all devices
             self.OphirCom.StopAllStreams()
             self.OphirCom.CloseAll()
-            # Scan for connected Devices
+            # Scan for connected Devices (expects two powermeters)
             self.deviceList = self.OphirCom.ScanUSB()
             print(self.deviceList[0])
             print(self.deviceList[1])
-            # if any device is connected
-            self.device1ZeroTime = 0.0
-            self.device2ZeroTime = 0.0
-            self.device1Data = 0.0
-            self.device2Data = 0.0
-            self.device1CsvQueue = queue.Queue()
-            self.device2CsvQueue = queue.Queue()
-            self.device1PlotQueue = multiprocessing.Queue()
-            self.device2PlotQueue = multiprocessing.Queue()
-            self.updatingDevice1PlotQueue = threading.Event()
-            self.updatingDevice1PlotQueue.clear()
-            self.updatingDevice2PlotQueue = threading.Event()
-            self.updatingDevice2PlotQueue.clear()
-            self.updatingDevice1CsvQueue = threading.Event()
-            self.updatingDevice1CsvQueue.clear()
-            self.updatingDevice2CsvQueue = threading.Event()
-            self.updatingDevice2CsvQueue.clear()
-            self.angle1Queue = queue.Queue()
-            self.angle2Queue = queue.Queue()
-            self.updatingAngleQueues = threading.Event()
-
-            self.run = threading.Event()
-            self.run.set()  # to start running
-        except OSError as err:
-            print("OS error: {0}".format(err))
-        except ModuleNotFoundError as e:
-            print("Module not found error:", e)
-        except:
-            print("no powermeters connected. Note: you must be on windows.")
-        # Stop & Close all devices
+            self.connected = True
+        except Exception as err:
+            # Print the REAL error (COM object missing, StarLab not installed,
+            # no devices plugged in, etc.) instead of hiding it, then re-raise
+            # so the GUI knows the connection failed and sets powermeter = None.
+            print(
+                f"no powermeters connected ({type(err).__name__}: {err}). "
+                "Note: you must be on windows with two Ophir powermeters attached."
+            )
+            raise
 
     """start creates one thread for each powermeter device that should be connected. it's in a try catch block incase two devices are connected
     or there is an error, but !!I want to make it so one device could be connected...?"""
