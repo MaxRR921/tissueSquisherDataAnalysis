@@ -27,7 +27,12 @@ else:
     polarimeter = None
 import csv
 import multiprocessing
-import graphingProcess
+# NOTE: graphingProcess is imported lazily inside startPyqtProcess(), NOT here.
+# It pulls in PyQt5/pyqtgraph, whose native DLLs, when loaded before the Ophir
+# OphirLMMeasurement.dll COM server is created, make that DLL's initialization
+# fail (com_error 0x8007045A "DLL initialization routine failed"). The Ophir
+# powermeter must load first; graphingProcess runs in its own child process, so
+# the main process never needs it at import time.
 import matplotlib.pyplot as plt
 
 import signal
@@ -330,6 +335,10 @@ class Gui:
         # If not already running (or if the process has ended), start it
         if self.pyqt_process is None or not self.pyqt_process.is_alive():
             print("Starting PyQt process...")
+            # Imported here (not at module top) so PyQt5/pyqtgraph load only
+            # after the Ophir powermeter DLL is already initialized. See the
+            # note next to the removed top-level import above.
+            import graphingProcess
             # Get powermeter queues (or None if powermeter disabled)
             pow1_queue = self.powermeter.device1PlotQueue if self.powermeter is not None else None
             if pow1_queue is None:
