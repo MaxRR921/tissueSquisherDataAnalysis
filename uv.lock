@@ -153,7 +153,7 @@ dependencies = [
     { name = "pyqt5" },
     { name = "pyqtgraph" },
     { name = "pyserial" },
-    { name = "pyueye" },
+    { name = "pyueye", marker = "sys_platform == 'win32'" },
     { name = "pyusb" },
     { name = "pywin32", marker = "sys_platform == 'win32'" },
     { name = "scipy" },
@@ -172,7 +172,7 @@ requires-dist = [
     { name = "pyqt5", specifier = ">=5.15.11" },
     { name = "pyqtgraph", specifier = ">=0.14.0" },
     { name = "pyserial", specifier = ">=3.5" },
-    { name = "pyueye", specifier = ">=4.96.952" },
+    { name = "pyueye", marker = "sys_platform == 'win32'", specifier = ">=4.96.952" },
     { name = "pyusb", specifier = ">=1.3.1" },
     { name = "pywin32", marker = "sys_platform == 'win32'", specifier = ">=306" },
     { name = "scipy", specifier = ">=1.17.0" },
@@ -486,7 +486,7 @@ name = "pyueye"
 version = "4.96.952"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "enum-compat" },
+    { name = "enum-compat", marker = "sys_platform == 'win32'" },
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/48/b9/2a372f906a4f5f197509f5fbc165f1e0e321daf4b6361edfcf46d0fe6888/pyueye-4.96.952-py2.py3-none-any.whl", hash = "sha256:b1393355be8d2072730f1c617a7b22a99186989a6f62a1386a5ff04fbcf30cd5", size = 57149, upload-time = "2022-06-28T13:45:11.217Z" },
