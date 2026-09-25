@@ -20,6 +20,7 @@ class GraphingProcess(QtWidgets.QMainWindow):
         self.signalGraph = signalGraph
         self.signalZero = signalZero
         self.initial = 0.0
+        self.t0 = None  # time.time() of first sample in the run; x-axes are seconds since this
         # Create a container widget and a QGridLayout
         container = QtWidgets.QWidget()
         layout = QtWidgets.QGridLayout(container)
@@ -27,7 +28,7 @@ class GraphingProcess(QtWidgets.QMainWindow):
         # Subplot 1
         self.plot1 = pg.PlotWidget()
         self.plot1.setLabel('left', "Micrometer Position (mm)")
-        self.plot1.setLabel('bottom', "Time")
+        self.plot1.setLabel('bottom', "Time since start (s)")
         self.plot1.setYRange(0, 120, padding=0)
         self.curve1 = self.plot1.plot([], [], pen='r')
         layout.addWidget(self.plot1, 0, 0)  # Row 0, Col 0
@@ -35,14 +36,14 @@ class GraphingProcess(QtWidgets.QMainWindow):
         # Subplot 2
         self.plot2 = pg.PlotWidget()
         self.plot2.setLabel('left', "Power 1 (W)")
-        self.plot2.setLabel('bottom', "Time")
+        self.plot2.setLabel('bottom', "Time since start (s)")
         self.curve2 = self.plot2.plot([], [], pen='g')
         layout.addWidget(self.plot2, 0, 1)  # Row 0, Col 1
 
         # Subplot 3
         self.plot3 = pg.PlotWidget()
         self.plot3.setLabel('left', "Power 2 (W)")
-        self.plot3.setLabel('bottom', "Time")
+        self.plot3.setLabel('bottom', "Time since start (s)")
         self.curve3 = self.plot3.plot([], [], pen='b')
         layout.addWidget(self.plot3, 0, 2)  # Row 1, Col 0
 
@@ -63,7 +64,7 @@ class GraphingProcess(QtWidgets.QMainWindow):
 
         self.plot6 = pg.PlotWidget()
         self.plot6.setLabel('left', "Power Difference (W)")
-        self.plot6.setLabel('bottom', "Time")
+        self.plot6.setLabel('bottom', "Time since start (s)")
         self.curve6 = self.plot6.plot([], [], pen='orange')
         layout.addWidget(self.plot6, 1, 0)  # Row 1, Col 1
         # Put the container into the MainWindow
@@ -86,6 +87,12 @@ class GraphingProcess(QtWidgets.QMainWindow):
         self.timer.timeout.connect(self.check_queue)
         
         self.timer.start(100)  # 10 Hz
+
+    def _elapsed(self, t):
+        """Convert an absolute time.time() stamp to seconds since the first sample of the run."""
+        if self.t0 is None:
+            self.t0 = t
+        return t - self.t0
 
    #NOTE: POWERMETER IS ACTUALLY POLLING QUITE SLOW.... so i made it update only when powermeter updates and the graph is way slower. 
     def check_queue(self):
@@ -119,11 +126,12 @@ class GraphingProcess(QtWidgets.QMainWindow):
                 self.y_data3.clear()
                 self.x_data4.clear()
                 self.y_data4.clear()
+                self.t0 = None
 
 
         while not self.micrometerQueue.empty():
             x, y = self.micrometerQueue.get_nowait()
-            self.x_data1.append(x)
+            self.x_data1.append(self._elapsed(x))
             self.y_data1.append(y)
             if len(self.y_data1) <= 5 and len(self.y_data1) > 0:
                 self.initialMicrometerPosition = self.y_data1[0]
@@ -131,12 +139,12 @@ class GraphingProcess(QtWidgets.QMainWindow):
 
         while not self.powermeter1Queue.empty():
             x,y = self.powermeter1Queue.get_nowait()
-            self.x_data2.append(x)
+            self.x_data2.append(self._elapsed(x))
             self.y_data2.append(y)
                 
         while not self.powermeter2Queue.empty():
             x,y = self.powermeter2Queue.get_nowait()
-            self.x_data3.append(x)
+            self.x_data3.append(self._elapsed(x))
             self.y_data3.append(y)
 
         if not self.phaseQueue == None and not self.strainQueue == None:
