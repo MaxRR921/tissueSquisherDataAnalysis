@@ -1,3 +1,5 @@
+import platform
+
 from pyueye import ueye
 import numpy as np
 import cv2
@@ -18,7 +20,10 @@ class UEyeCamera:
         self.height = None
         self.bits_per_pixel = 8
 
-        self.init_camera()
+        if platform.system() == "Windows":
+            self.init_camera()
+        else:
+            print("UEyeCamera is required to be run on Windows")
 
     def check(self, ret, name):
         if ret != ueye.IS_SUCCESS:
