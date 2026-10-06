@@ -27,7 +27,7 @@ class Polarimeter():
         self.initTime = 0
         #you need to have a windows machine because that's the only one that can have this driver. this line loads this from the default
         #path this driver is installed in on your machine
-        self.lib = cdll.LoadLibrary("C:\Program Files\IVI Foundation\VISA\Win64\Bin\TLPAX_64.dll")
+        self.lib = cdll.LoadLibrary(r"C:\Program Files\IVI Foundation\VISA\Win64\Bin\TLPAX_64.dll")
         self.run = False
         # Detect and initialize PAX1000 device
         self.instrumentHandle = c_ulong()
