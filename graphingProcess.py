@@ -7,6 +7,26 @@ import pyqtgraph as pg
 from scipy.interpolate import interp1d
 import numpy as np
 
+class SecondsAxis(pg.AxisItem):
+    """Bottom axis that ticks at whole seconds (0, 1, 2, ...), widening the step (2, 5, 10, ...) as the run gets longer."""
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.enableAutoSIPrefix(False)
+
+    def tickValues(self, minVal, maxVal, size):
+        span = maxVal - minVal
+        if span <= 0:
+            return []
+        step = 1
+        while span / step > 10:
+            step = next(m * 10 ** e for e in range(len(str(step)) + 1) for m in (1, 2, 5) if m * 10 ** e > step)
+        first = int(np.ceil(minVal / step)) * step
+        return [(step, list(range(first, int(maxVal) + 1, step)))]
+
+    def tickStrings(self, values, scale, spacing):
+        return [str(int(round(v))) for v in values]
+
+
 class GraphingProcess(QtWidgets.QMainWindow):
     def __init__(self, signalGraph, signalZero, micrometerQueue, powermeter1Queue, powermeter2Queue, phaseQueue, strainQueue):
         super().__init__()
@@ -26,7 +46,7 @@ class GraphingProcess(QtWidgets.QMainWindow):
         layout = QtWidgets.QGridLayout(container)
 
         # Subplot 1
-        self.plot1 = pg.PlotWidget()
+        self.plot1 = pg.PlotWidget(axisItems={'bottom': SecondsAxis(orientation='bottom')})
         self.plot1.setLabel('left', "Micrometer Position (mm)")
         self.plot1.setLabel('bottom', "Time since start (s)")
         self.plot1.setYRange(0, 120, padding=0)
@@ -34,14 +54,14 @@ class GraphingProcess(QtWidgets.QMainWindow):
         layout.addWidget(self.plot1, 0, 0)  # Row 0, Col 0
 
         # Subplot 2
-        self.plot2 = pg.PlotWidget()
+        self.plot2 = pg.PlotWidget(axisItems={'bottom': SecondsAxis(orientation='bottom')})
         self.plot2.setLabel('left', "Power 1 (W)")
         self.plot2.setLabel('bottom', "Time since start (s)")
         self.curve2 = self.plot2.plot([], [], pen='g')
         layout.addWidget(self.plot2, 0, 1)  # Row 0, Col 1
 
         # Subplot 3
-        self.plot3 = pg.PlotWidget()
+        self.plot3 = pg.PlotWidget(axisItems={'bottom': SecondsAxis(orientation='bottom')})
         self.plot3.setLabel('left', "Power 2 (W)")
         self.plot3.setLabel('bottom', "Time since start (s)")
         self.curve3 = self.plot3.plot([], [], pen='b')
@@ -62,7 +82,7 @@ class GraphingProcess(QtWidgets.QMainWindow):
 
 
 
-        self.plot6 = pg.PlotWidget()
+        self.plot6 = pg.PlotWidget(axisItems={'bottom': SecondsAxis(orientation='bottom')})
         self.plot6.setLabel('left', "Power Difference (W)")
         self.plot6.setLabel('bottom', "Time since start (s)")
         self.curve6 = self.plot6.plot([], [], pen='orange')
