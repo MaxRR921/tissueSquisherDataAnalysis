@@ -130,6 +130,9 @@ class Gui:
         self.s1Text = tk.StringVar()
         self.s2Text = tk.StringVar()
         self.s3Text = tk.StringVar()
+        self.moveTimeText = tk.StringVar()
+        self.moveTimeText.set("last move: --")
+        self.pendingMoveTime = None
         self.power1Text.set("p1 not reading")
         self.power2Text.set("p2 not reading") 
 
@@ -388,6 +391,8 @@ class Gui:
         raiseMicrometerButton = ttk.Button(listFrame, text='Raise Micrometer', command=lambda: self.__raiseMicrometer())
         raiseMicrometerButton.grid(row=1, column=2, sticky='sw', pady=5, padx=30)
 
+        ttk.Label(listFrame, textvariable=self.moveTimeText).grid(row=2, column=4, sticky='w', pady=5, padx=5)
+
         if self.powermeter is not None:
             power1Text = ttk.Label(listFrame, textvariable=self.power1Text).grid(row=2, column=3, sticky = 'w', pady=5, padx=2)
             power1Text = ttk.Label(listFrame, textvariable=self.power2Text).grid(row=2, column=3, sticky = 'e', pady=5, padx=10)
@@ -435,9 +440,9 @@ class Gui:
     """startExecuteThread resets all of the constantly polling plots... starts the execute thread which calls 
     thecollect method. 
     !! should make it just use self.movelist...."""
-    def startExecuteThread(self, moveList, collectData):
+    def startExecuteThread(self, moveList, collectData, timed=False):
         self.signalGraph.put("STOP")
-        self.executeThread = threading.Thread(target=self.__collect, args=[moveList, collectData])
+        self.executeThread = threading.Thread(target=self.__collect, args=[moveList, collectData, timed])
         self.executeThread.start()
 
     def startNoiseThread(self):
@@ -757,7 +762,7 @@ class Gui:
 
 
 
-    def __collect(self, moveList, collectData):
+    def __collect(self, moveList, collectData, timed=False):
         if self.stageQueue is None:
             print("No stage controller connected, cannot collect.")
             self.executed.set()
@@ -796,6 +801,8 @@ class Gui:
             else:
                 print("No polarimeter Connected")
 
+        if timed:
+            self.stageQueue.lastMoveTiming = None
         for i in range(self.numExecutions):
             for move in moveList:
                 if not self.stopExecution and (self.stage.currentPosition != move.targetHeight):
@@ -806,6 +813,9 @@ class Gui:
                 else:
                     break
 
+        if timed:
+            self.pendingMoveTime = self.__formatMoveTiming(self.stageQueue.lastMoveTiming)
+            print(self.pendingMoveTime)
         self.executed.set()
         # time.sleep(2)
 
@@ -822,6 +832,16 @@ class Gui:
             self.polarimeter.updatingCsvQueue.clear()
         self.generateCsvs()
         print("DONE")
+
+    @staticmethod
+    def __formatMoveTiming(timing):
+        if timing is None:
+            return "last move: did not move"
+        moveStart, moveEnd, firstRx, lastRx = timing
+        readings = f"{lastRx - firstRx:.2f} s first→last reading"
+        if moveStart is None:
+            return f"last move: no motion detected ({readings})"
+        return f"last move: {moveEnd - moveStart:.2f} s moving ({readings})"
 
     def generateCsvs(self):
         micrometerArray = []
@@ -947,6 +967,9 @@ class Gui:
                 self.pow2Plot.generateCsvFromPlot("pow2.csv")
             self.updatingPlots.clear() 
             self.signalAngleFinder.set()
+            if self.pendingMoveTime is not None:
+                self.moveTimeText.set(self.pendingMoveTime)
+                self.pendingMoveTime = None
             self.executed.clear()
             self.stopExecution = False
 
