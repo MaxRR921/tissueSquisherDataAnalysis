@@ -164,14 +164,27 @@ class agiltronController:
         print("Position set successfully")
         return True
 
-    def goToHeight(self, pos, on_step=None):
+    def goToHeight(self, pos, on_step=None, timeout=300):
         """Move to scaled position (0-maxHeight) and block until motion stabilizes.
-        on_step(scaled) is invoked after each poll so observers (e.g. StageQueue) can sample."""
+        on_step(scaled) is invoked after each poll so observers (e.g. StageQueue) can sample.
 
+        Stability alone is not treated as done, since the stage reads unchanged both before it
+        starts moving and between counts at low speeds. Completion requires either:
+          - reading within posTolerance raw counts of the target and stable for 5 polls, or
+          - having moved at least once and stable for 20 polls (~1 s), for a stage that stops short.
+        Gives up after timeout seconds. Returns True on completion, False on timeout."""
+
+        target_raw = self.scale_int(pos)
+        pos_tolerance = 100  # raw counts (~0.017 scaled units)
         self.setPosition(pos)
         stable_count = 0
         last_raw = None
-        while stable_count < 5:
+        moved = False
+        deadline = time.time() + timeout
+        while True:
+            if time.time() > deadline:
+                print(f"[Warning] goToHeight({pos}) timed out after {timeout}s. Position: {self.currentPosition}")
+                return False
             time.sleep(0.05)
             raw = self.getCurrentPos()
             if raw is None:
@@ -183,9 +196,18 @@ class agiltronController:
             if last_raw is not None and raw == last_raw:
                 stable_count += 1
             else:
+                if last_raw is not None:
+                    moved = True
                 stable_count = 0
             last_raw = raw
+
+            if abs(raw - target_raw) <= pos_tolerance and stable_count >= 5:
+                break
+            if moved and stable_count >= 20:
+                print(f"[Warning] Stage settled {raw - target_raw} raw counts from target {target_raw}")
+                break
         print(f"Movement complete. Position: {self.currentPosition}")
+        return True
 
     def goHome(self):
         """Move to position 0."""
