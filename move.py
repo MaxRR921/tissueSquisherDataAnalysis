@@ -25,7 +25,7 @@ class Move:
 
     def saveInputs(self, velocity, height, frontWait, backWait):
         self.velocity = int(velocity)
-        self.targetHeight = int(height)
+        self.targetHeight = float(height)
         self.frontDelay = frontWait
         self.backDelay = backWait
 
