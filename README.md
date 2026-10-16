@@ -51,6 +51,9 @@ https://github.com/mhammond/pywin32
 **NI-VISA**
 https://www.ni.com/en/support/downloads/drivers/download.ni-visa.html
 
+**UEYE Software Suite**
+https://www.ids-imaging.us/download-details/AB00514.html
+
 
 
 ![Software main screen](bjasldfjas.png)

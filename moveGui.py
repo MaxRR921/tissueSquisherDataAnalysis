@@ -109,7 +109,7 @@ class MoveGui(ttk.Frame):
     def __executeMove(self, move):
         tempList = []
         tempList.append(move)
-        self.gui.startExecuteThread(tempList, True)
+        self.gui.startExecuteThread(tempList, True, timed=True)
 
     """deleteMove deletes the move that the user clicks the x on"""
     def __deleteMove(self, move, frame):
