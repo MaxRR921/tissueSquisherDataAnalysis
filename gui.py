@@ -806,8 +806,11 @@ class Gui:
         for i in range(self.numExecutions):
             for move in moveList:
                 if not self.stopExecution and (self.stage.currentPosition != move.targetHeight):
+                    startPos = self.stage.currentPosition
+                    self.stageQueue.lastMoveTiming = None
                     move.execute()
                     print("Position:", self.stage.currentPosition)
+                    self.__logMove(move, startPos, self.stage.currentPosition, self.stageQueue.lastMoveTiming)
                 elif (self.stage.currentPosition == move.targetHeight):
                     print("Can't move here, this is the current position.")
                 else:
@@ -832,6 +835,27 @@ class Gui:
             self.polarimeter.updatingCsvQueue.clear()
         self.generateCsvs()
         print("DONE")
+
+    @staticmethod
+    def __logMove(move, startPos, endPos, timing):
+        """Append one line per executed move to moves.md: timestamp, move, speed, time, distance, velocity.
+        Time is first→last detected position change (same as the GUI's 'last move' label)."""
+        distance = abs(endPos - startPos)
+        if timing is not None and timing[0] is not None:
+            elapsed = timing[1] - timing[0]
+            timeStr = f"{elapsed:.3f} s"
+            velocityStr = f"{distance / elapsed:.4f} mm/s" if elapsed > 0 else "n/a"
+        else:
+            timeStr = "no motion detected"
+            velocityStr = "n/a"
+        line = (f"{time.strftime('%Y-%m-%d %H:%M:%S')} | move: {startPos:.3f} -> {move.targetHeight} | "
+                f"speed set: {move.velocity} | time: {timeStr} | distance: {distance:.3f} mm | "
+                f"velocity: {velocityStr}  \n")
+        try:
+            with open("moves.md", mode="a", encoding="utf-8") as f:
+                f.write(line)
+        except OSError as e:
+            print(f"[Warning] Could not write moves.md: {e}")
 
     @staticmethod
     def __formatMoveTiming(timing):
