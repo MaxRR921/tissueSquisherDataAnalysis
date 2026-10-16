@@ -96,7 +96,7 @@ class MoveGui(ttk.Frame):
         return frame
     """save entries saves all the text variable entries to the move associated with the gui element."""
     def saveEntries(self, move, targetHeight_var, velocity_var, frontDelay_var, backDelay_var):
-        move.targetHeight = int(targetHeight_var.get())
+        move.targetHeight = float(targetHeight_var.get())
         move.velocity = int(velocity_var.get())
         move.frontDelay = float(frontDelay_var.get())
         move.backDelay = float(backDelay_var.get())

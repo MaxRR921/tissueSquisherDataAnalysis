@@ -798,10 +798,10 @@ class Gui:
 
         for i in range(self.numExecutions):
             for move in moveList:
-                if not self.stopExecution and (self.stage.currentPosition != move.targetHeight):
+                if not self.stopExecution and not self.stage.isAtPosition(move.targetHeight):
                     move.execute()
                     print("Position:", self.stage.currentPosition)
-                elif (self.stage.currentPosition == move.targetHeight):
+                elif self.stage.isAtPosition(move.targetHeight):
                     print("Can't move here, this is the current position.")
                 else:
                     break

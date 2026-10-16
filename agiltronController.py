@@ -14,7 +14,9 @@ class agiltronController:
         self.running = False
         self.maxHeight = 120
         self.maxRaw = 700000
-        self.currentPosition = 0
+        self.currentPosition = 0.0
+        # 2 raw counts in user units (~0.00034); positions this close count as "at" the target
+        self.positionTolerance = 2 * self.maxHeight / self.maxRaw
 
     def openPort(self):
         try:
@@ -145,15 +147,15 @@ class agiltronController:
 
     def getUserInputPos(self):
         print(f"Input a value between 0 and {self.maxHeight}:")
-        userinput = int(input())
+        userinput = float(input())
         return userinput
 
     def setPosition(self, pos):
         """Set the position of the controller."""
-        # Scale input pos to 0-700000
-        # scale_int scales from 0-50 to 0-700000 by default
+        # Scale input pos (0-maxHeight, may be fractional) to nearest raw count 0-maxRaw
         print(f"setPosition called at pos {pos}")
         scaled_pos = self.scale_int(pos)
+        scaled_pos = max(0, min(self.maxRaw, scaled_pos))
 
         self.ser.flush() # wait for current output to finish
         self.ser.reset_output_buffer()
@@ -176,7 +178,8 @@ class agiltronController:
             raw = self.getCurrentPos()
             if raw is None:
                 continue
-            scaled = self.scale_int(raw, 0, self.maxRaw, 0, self.maxHeight)
+            # keep readback as a float: truncating to int made e.g. raw 5833 (pos 1) read back as 0
+            scaled = self.scale(raw, 0, self.maxRaw, 0, self.maxHeight)
             self.currentPosition = scaled
             if on_step is not None:
                 on_step(scaled)
@@ -186,6 +189,10 @@ class agiltronController:
                 stable_count = 0
             last_raw = raw
         print(f"Movement complete. Position: {self.currentPosition}")
+
+    def isAtPosition(self, pos):
+        """True if currentPosition is within positionTolerance of pos (user units)."""
+        return abs(self.currentPosition - pos) <= self.positionTolerance
 
     def goHome(self):
         """Move to position 0."""
@@ -252,18 +259,10 @@ class agiltronController:
 
 
     # claude generated ahh function 😭
-    def scale_int(self, value, in_min=0, in_max=None, out_min=0, out_max=None):
+    def scale(self, value, in_min=0, in_max=None, out_min=0, out_max=None):
         """
-        Scale an integer from one range to another.
-        Args:
-            value: Input value to scale
-            in_min: Minimum of input range (default 0)
-            in_max: Maximum of input range (default self.maxHeight)
-            out_min: Minimum of output range (default 0)
-            out_max: Maximum of output range (default 700000)
-
-        Returns:
-            Scaled integer value
+        Linearly map value from [in_min, in_max] to [out_min, out_max] as a float.
+        Defaults map 0-maxHeight (user units) to 0-maxRaw (device counts).
         """
         if in_max is None:
             in_max = self.maxHeight
@@ -271,9 +270,11 @@ class agiltronController:
             out_max = self.maxRaw
         # lerp lerp lerp
         # lerp lerp
-        # Linear interpolation formula
-        scaled = (value - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
-        return int(scaled)
+        return (value - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
+
+    def scale_int(self, value, in_min=0, in_max=None, out_min=0, out_max=None):
+        """Same as scale(), rounded to the nearest integer (for values sent to the device)."""
+        return int(round(self.scale(value, in_min, in_max, out_min, out_max)))
 
     def checkControllerConnection(self):
         out = ConnectionFinder.ConnectionFinder().find_silicon_labs_device()
