@@ -261,7 +261,7 @@ class agiltronController:
 
     def setMaxVelocity(self, speed):
         """Set the maximum velocity of the controller."""
-        speed = self.scale_int(speed, 0, 100, 0, 250000000)
+        speed = self.scale(speed, 0, 4.38, 0, 250000000)
 
         bits_to_send = self.speed_to_bytes(speed)
         print(bits_to_send)

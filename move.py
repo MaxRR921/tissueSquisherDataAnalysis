@@ -24,7 +24,7 @@ class Move:
         time.sleep(self.backDelay)
 
     def saveInputs(self, velocity, height, frontWait, backWait):
-        self.velocity = int(velocity)
+        self.velocity = float(velocity)
         self.targetHeight = float(height)
         self.frontDelay = frontWait
         self.backDelay = backWait
