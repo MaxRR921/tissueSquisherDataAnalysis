@@ -10,6 +10,8 @@ import threading
 from tkinter import ttk
 from ttkthemes import ThemedTk
 import angleFinder
+import logger
+import formatHelper
 
 # ============================================================================
 # PLATFORM CONFIGURATION
@@ -27,6 +29,7 @@ else:
     polarimeter = None
 import csv
 import multiprocessing
+
 # NOTE: graphingProcess is imported lazily inside startPyqtProcess(), NOT here.
 # It pulls in PyQt5/pyqtgraph, whose native DLLs, when loaded before the Ophir
 # OphirLMMeasurement.dll COM server is created, make that DLL's initialization
@@ -52,11 +55,13 @@ after that it initializes some more gui elements.
 
 !starts updating all of the graphs. this is bad because that method sucks rn. because of a few reasons.
 """
+
+
 class Gui:
     def __init__(self):
-        #initializing UI
+        # initializing UI
         self.window = ThemedTk(theme="breeze")
-        self.root = tk._default_root #same as window!
+        self.root = tk._default_root  # same as window!
         self.window.title("Data GUI")
         self.window.geometry("800x800")
         self.numExecutions = 1
@@ -67,9 +72,7 @@ class Gui:
 
         self.agiltronConnectionStatus = False
 
-
-
-        #Initializing device classes.
+        # Initializing device classes.
         try:
             self.stage = agiltronController.agiltronController()
             connected = self.stage.start(run_loop=False)
@@ -90,7 +93,9 @@ class Gui:
         if ENABLE_WINDOWS_MODULES and polarimeter is not None:
             try:
                 self.polarimeter = polarimeter.Polarimeter(self.stageQueue)
-                self.polarimeterThread = threading.Thread(target=self.polarimeter.start, args=[])
+                self.polarimeterThread = threading.Thread(
+                    target=self.polarimeter.start, args=[]
+                )
             except:
                 print("Polarimeter Connection Error")
         else:
@@ -101,30 +106,34 @@ class Gui:
         if ENABLE_WINDOWS_MODULES and powermeter is not None:
             try:
                 self.powermeter = powermeter.Powermeter()
-                self.powermeterThread = threading.Thread(target=self.powermeter.start, args=[])
+                self.powermeterThread = threading.Thread(
+                    target=self.powermeter.start, args=[]
+                )
                 print("Powermeters connected successfully")
             except Exception as e:
                 # Powermeter() re-raises on failure, so this now actually runs.
                 # Reset to None so every `if self.powermeter is not None` guard skips it.
                 self.powermeter = None
                 self.powermeterThread = None
-                print(f"Powermeter Connection Error ({e}). You need two powermeters connected at all times.")
+                print(
+                    f"Powermeter Connection Error ({e}). You need two powermeters connected at all times."
+                )
         else:
             print("Powermeter disabled (ENABLE_WINDOWS_MODULES=False)")
 
         # Event booleans
-        self.updatingPlots = threading.Event() 
+        self.updatingPlots = threading.Event()
         self.updatingPlots.clear()
         self.triedMicrometer = False
         self.executed = threading.Event()
         self.executed.clear()
         self.startedPolarimeter = False
 
-        #lists for phase and strain...bad.
+        # lists for phase and strain...bad.
         self.phase = np.array(np.zeros)
         self.strain = np.array(np.zeros)
 
-        #setting up powermeter text in ui
+        # setting up powermeter text in ui
         self.power1Text = tk.StringVar()
         self.power2Text = tk.StringVar()
         self.s1Text = tk.StringVar()
@@ -134,19 +143,16 @@ class Gui:
         self.moveTimeText.set("last move: --")
         self.pendingMoveTime = None
         self.power1Text.set("p1 not reading")
-        self.power2Text.set("p2 not reading") 
+        self.power2Text.set("p2 not reading")
 
-
-
-
-        #one move by default
+        # one move by default
         defualtMove = move.Move(self.stageQueue)
         self.moveList = [defualtMove]
 
         if self.powermeter is not None:
             self.powermeterThread.start()
 
-        #plots:
+        # plots:
         self.plotList = []
         self.polPlot = None
         self.powerPlot = None
@@ -155,61 +161,65 @@ class Gui:
         self.pow2Plot = None
         self.noisePlotPowDif = None
         self.noisePlotPow1 = None
-        self.noisePlotPow2 = None 
-        #list of times recorded
+        self.noisePlotPow2 = None
+        # list of times recorded
         self.timeList = []
-        
+
         self.execTime = 1000
 
         self.deltaPowerDifferences = []
 
-
         self.pyqt_process = None
 
         # adding listFrame
-        self.listFrame = tk.Frame(self.window, width=800, height=1000)  # Adjust the width here for the left panel
-        self.listFrame.grid(row=0, column=0, columnspan= 2, rowspan=2, sticky="nsew")
+        self.listFrame = tk.Frame(
+            self.window, width=800, height=1000
+        )  # Adjust the width here for the left panel
+        self.listFrame.grid(row=0, column=0, columnspan=2, rowspan=2, sticky="nsew")
         self.listFrame.grid_propagate(False)
 
-
-
         # Create top menu frame
-        self.topMenuFrame = tk.Frame(self.window, height=30, background="light grey")  # Adjust the height here
+        self.topMenuFrame = tk.Frame(
+            self.window, height=30, background="light grey"
+        )  # Adjust the height here
         self.topMenuFrame.grid(row=0, column=0, columnspan=2, sticky="new")
         self.topMenuFrame.grid_propagate(False)
         self.addTopMenuButtons()
 
         self.readSavedIdealAlpha()
-        self.readSavedIdealBeta() 
+        self.readSavedIdealBeta()
 
-        #create bottomFrame 
+        # create bottomFrame
         self.bottomFrame = tk.Frame(self.window, height=80, background="light grey")
-        self.bottomFrame.grid(row=1, column=0, columnspan=2, sticky='sew')
+        self.bottomFrame.grid(row=1, column=0, columnspan=2, sticky="sew")
         self.bottomFrame.grid_propagate(False)
         self.addBottomFrameButtons(self.bottomFrame)
 
-        #making rows/columns expandable...
-        self.window.columnconfigure(0, weight=1)  # Make the list frame column expandable
-        self.window.columnconfigure(1, weight=3)  # Make the main frame column expandable
-        self.window.rowconfigure(0, weight=1)     # Make the row expandable
+        # making rows/columns expandable...
+        self.window.columnconfigure(
+            0, weight=1
+        )  # Make the list frame column expandable
+        self.window.columnconfigure(
+            1, weight=3
+        )  # Make the main frame column expandable
+        self.window.rowconfigure(0, weight=1)  # Make the row expandable
         self.window.rowconfigure(1, weight=2)
 
-        #create the move list gui elements
-        self.moveGui = moveGui.MoveGui(self.listFrame, self, self.moveList, 100, width=500)
+        # create the move list gui elements
+        self.moveGui = moveGui.MoveGui(
+            self.listFrame, self, self.moveList, 100, width=500
+        )
 
         self.angleFind = angleFinder.AngleFinder()
 
-
-        #updating all plots
-        self.root.protocol('WM_DELETE_WINDOW', self.stop)
+        # updating all plots
+        self.root.protocol("WM_DELETE_WINDOW", self.stop)
         self._sigterm_received = False
         signal.signal(signal.SIGTERM, self.handle_interrupt)
         signal.signal(signal.SIGINT, self.handle_interrupt)
         self.root.after(10, self.updatePlotsFromData)
         self.root.after(200, self._check_signals)
         self.stopExecution = False
-
-
 
     """stop tells the powermeters to stop collecting data. 
     !There is no detection right now of whether the powermeters are even connected...
@@ -221,20 +231,21 @@ class Gui:
 
     THis method is in need of a restructure... why does some stuff lie in try catches, should just put in if's
     """
+
     def stop(self):
         if self.powermeter is not None:
             self.powermeter.stop()
         self.stopExecution = True
-        self.updatingPlots.clear() 
+        self.updatingPlots.clear()
         try:
             self.executeThread.join()
         except:
             print("NOT currently executing")
         try:
-            self.polarimeterThread.join() #needs to join so that it's not initializing when i tell it to stop...
+            self.polarimeterThread.join()  # needs to join so that it's not initializing when i tell it to stop...
         except:
             print("polarimeter thread not yet started")
-        if(self.polarimeter is not None):
+        if self.polarimeter is not None:
             self.polarimeter.stop()
         else:
             print("No polarimeter Connected")
@@ -246,39 +257,47 @@ class Gui:
         if self.powermeterThread is not None:
             self.powermeterThread.join()
 
-
         if self.pyqt_process is not None and self.pyqt_process.is_alive():
-                print("Terminating PyQt process...")
-                self.pyqt_process.terminate()
-                self.pyqt_process.join()
+            print("Terminating PyQt process...")
+            self.pyqt_process.terminate()
+            self.pyqt_process.join()
 
         self.root.destroy()
 
     """run begins the main loop. this is fine just a tkinter thing"""
+
     def run(self):
         self.window.mainloop()
 
     """addTopMenuButtons is executed from init, calls the methods that create all of the buttons"""
+
     def addTopMenuButtons(self):
         self.__browseDataFileButton(self.topMenuFrame)
         self.__initAgiltronButton(self.topMenuFrame)
         self.__startGraphingButton(self.topMenuFrame)
         self.__findAngleButton(self.topMenuFrame)
         self.alphaLabel = ttk.Label(self.topMenuFrame, text="Ideal Alpha: N/A")
-        self.alphaLabel.pack(side='left')
+        self.alphaLabel.pack(side="left")
         self.betaLabel = ttk.Label(self.topMenuFrame, text="Ideal Ideal Beta: N/A")
-        self.betaLabel.pack(side='left')
+        self.betaLabel.pack(side="left")
 
-
-    #ALL BUTTONS IN TOP MENU
+    # ALL BUTTONS IN TOP MENU
     """browseDataFile button creates the button for browsing for the data files."""
+
     def __browseDataFileButton(self, frameTopMenu):
-        browseDataFileButton = ttk.Button(frameTopMenu, text="browse for data file", command=lambda: self.__browseFile())
-        browseDataFileButton.pack(side='left')
+        browseDataFileButton = ttk.Button(
+            frameTopMenu,
+            text="browse for data file",
+            command=lambda: self.__browseFile(),
+        )
+        browseDataFileButton.pack(side="left")
 
     """browseFile opens the file browser, is executed from the button"""
+
     def __browseFile(self):
-        self.filePath = tk.filedialog.askopenfilename(filetypes=[('CSV Files', '*.csv')])
+        self.filePath = tk.filedialog.askopenfilename(
+            filetypes=[("CSV Files", "*.csv")]
+        )
         if self.filePath:
             self.__plot()
 
@@ -288,8 +307,10 @@ class Gui:
             buttontext = "Stage Connected"
         else:
             buttontext = "Reconnect Stage"
-        self.agiltronButton = ttk.Button(frameTopMenu, text=buttontext, command=lambda: self.__reconnectStage())
-        self.agiltronButton.pack(side='left')
+        self.agiltronButton = ttk.Button(
+            frameTopMenu, text=buttontext, command=lambda: self.__reconnectStage()
+        )
+        self.agiltronButton.pack(side="left")
 
     def __reconnectStage(self):
         if self.stage is not None:
@@ -317,17 +338,27 @@ class Gui:
             print(f"Stage Reconnection Error: {e}")
 
     """startpolarimeterthread starts the thread for data collection from the powlarimeter. This thread runs polarimeter.start"""
+
     def __startPolarimeterThread(self):
         print("SHOULD START")
-        self.polarimeterThread = threading.Thread(target=self.polarimeter.start, args=[])
+        if self.polarimeter is not None:
+            self.polarimeterThread = threading.Thread(
+                target=self.polarimeter.start, args=[]
+            )
         self.polarimeterThread.start()
 
     def __startGraphingButton(self, frameTopMenu):
-        startPyQtButton = ttk.Button(frameTopMenu, text='Start PyQt Plot', command=lambda: self.startPyqtProcess())
+        startPyQtButton = ttk.Button(
+            frameTopMenu,
+            text="Start PyQt Plot",
+            command=lambda: self.startPyqtProcess(),
+        )
         startPyQtButton.pack(side="left")
 
     def __findAngleButton(self, frameTopMenu):
-        findAngleButton = ttk.Button(frameTopMenu, text='open angle finder', command=lambda: self.findAngle())
+        findAngleButton = ttk.Button(
+            frameTopMenu, text="open angle finder", command=lambda: self.findAngle()
+        )
         findAngleButton.pack(side="left")
 
     def startPyqtProcess(self):
@@ -342,70 +373,135 @@ class Gui:
             # after the Ophir powermeter DLL is already initialized. See the
             # note next to the removed top-level import above.
             import graphingProcess
+
             # Get powermeter queues (or None if powermeter disabled)
-            pow1_queue = self.powermeter.device1PlotQueue if self.powermeter is not None else None
+            pow1_queue = (
+                self.powermeter.device1PlotQueue
+                if self.powermeter is not None
+                else None
+            )
             if pow1_queue is None:
                 print("Powermeter 1 is not connected.")
-            pow2_queue = self.powermeter.device2PlotQueue if self.powermeter is not None else None
+            pow2_queue = (
+                self.powermeter.device2PlotQueue
+                if self.powermeter is not None
+                else None
+            )
             if pow2_queue is None:
                 print("Powermeter 2 is not connected.")
             # Get polarimeter queues (or None if polarimeter disabled)
-            phase_queue = self.polarimeter.dataAnalyzer.phaseQueue if self.polarimeter is not None else None
-            strain_queue = self.polarimeter.dataAnalyzer.strainQueue if self.polarimeter is not None else None
+            phase_queue = (
+                self.polarimeter.dataAnalyzer.phaseQueue
+                if self.polarimeter is not None
+                else None
+            )
+            strain_queue = (
+                self.polarimeter.dataAnalyzer.strainQueue
+                if self.polarimeter is not None
+                else None
+            )
 
-            self.pyqt_process = multiprocessing.Process(target=graphingProcess.run_pyqt_app,
-                                                        args=(self.signalGraph, self.signalZero, self.stageQueue.plotQueue, pow1_queue, pow2_queue, phase_queue, strain_queue))
+            self.pyqt_process = multiprocessing.Process(
+                target=graphingProcess.run_pyqt_app,
+                args=(
+                    self.signalGraph,
+                    self.signalZero,
+                    self.stageQueue.plotQueue,
+                    pow1_queue,
+                    pow2_queue,
+                    phase_queue,
+                    strain_queue,
+                ),
+            )
             self.pyqt_process.start()
         else:
-            print("PyQt process is already running!")        
-
+            print("PyQt process is already running!")
 
     """adds all of the buttons in the bottom frame"""
+
     def addBottomFrameButtons(self, listFrame):
         numExec = tk.StringVar()
         timeRecord = tk.StringVar()
-        ttk.Entry(listFrame, textvariable=numExec).grid(row=2, column=1, sticky='sw', pady=5)
-        ttk.Entry(listFrame, textvariable=timeRecord).grid(row=1, column=4, sticky='sw', pady=5)
+        ttk.Entry(listFrame, textvariable=numExec).grid(
+            row=2, column=1, sticky="sw", pady=5
+        )
+        ttk.Entry(listFrame, textvariable=timeRecord).grid(
+            row=1, column=4, sticky="sw", pady=5
+        )
         listFrame.grid_rowconfigure(0, weight=1)
         listFrame.grid_rowconfigure(1, weight=0)
         listFrame.grid_columnconfigure(1, weight=0)
         listFrame.grid_columnconfigure(2, weight=1)
         listFrame.grid_columnconfigure(3, weight=2)
 
-        executeAllMovesButton = ttk.Button(listFrame, text='execute all moves', command=lambda: (self.saveNumExecutions(numExec), self.startExecuteThread(self.moveList, True)))
-        executeAllMovesButton.grid(row=2, column=0, sticky='sw', pady=5, padx=30)
+        executeAllMovesButton = ttk.Button(
+            listFrame,
+            text="execute all moves",
+            command=lambda: (
+                self.saveNumExecutions(numExec),
+                self.startExecuteThread(self.moveList, True),
+            ),
+        )
+        executeAllMovesButton.grid(row=2, column=0, sticky="sw", pady=5, padx=30)
 
-        recordNoiseButton = ttk.Button(listFrame, text='Record for Time:', command=lambda: (self.saveExecuteTime(timeRecord), self.startNoiseThread()))
-        recordNoiseButton.grid(row=1, column=3, sticky='sw', pady=5, padx=30)
+        recordNoiseButton = ttk.Button(
+            listFrame,
+            text="Record for Time:",
+            command=lambda: (self.saveExecuteTime(timeRecord), self.startNoiseThread()),
+        )
+        recordNoiseButton.grid(row=1, column=3, sticky="sw", pady=5, padx=30)
 
-        addMoveButton = ttk.Button(listFrame, text='add move', command=lambda: self.__addMove(listFrame))
-        addMoveButton.grid(row=1, column=0, sticky='sw', pady=5, padx=30)
+        addMoveButton = ttk.Button(
+            listFrame, text="add move", command=lambda: self.__addMove(listFrame)
+        )
+        addMoveButton.grid(row=1, column=0, sticky="sw", pady=5, padx=30)
 
-        stopExecutionButton = ttk.Button(listFrame, text='Stop Execution', command=lambda: setattr(self, 'stopExecution', True))
-        stopExecutionButton.grid(row=1, column=1, sticky='sw', pady=5, padx=30)
+        stopExecutionButton = ttk.Button(
+            listFrame,
+            text="Stop Execution",
+            command=lambda: setattr(self, "stopExecution", True),
+        )
+        stopExecutionButton.grid(row=1, column=1, sticky="sw", pady=5, padx=30)
 
-        zeroButton = ttk.Button(listFrame, text='Zero Force', command=lambda: self.__zeroForce())
-        zeroButton.grid(row=1, column=3, sticky='sw', pady=5, padx=150)
+        zeroButton = ttk.Button(
+            listFrame, text="Zero Force", command=lambda: self.__zeroForce()
+        )
+        zeroButton.grid(row=1, column=3, sticky="sw", pady=5, padx=150)
 
+        raiseMicrometerButton = ttk.Button(
+            listFrame, text="Raise Micrometer", command=lambda: self.__raiseMicrometer()
+        )
+        raiseMicrometerButton.grid(row=1, column=2, sticky="sw", pady=5, padx=30)
 
-        raiseMicrometerButton = ttk.Button(listFrame, text='Raise Micrometer', command=lambda: self.__raiseMicrometer())
-        raiseMicrometerButton.grid(row=1, column=2, sticky='sw', pady=5, padx=30)
-
-        ttk.Label(listFrame, textvariable=self.moveTimeText).grid(row=2, column=4, sticky='w', pady=5, padx=5)
+        ttk.Label(listFrame, textvariable=self.moveTimeText).grid(
+            row=2, column=4, sticky="w", pady=5, padx=5
+        )
 
         if self.powermeter is not None:
-            power1Text = ttk.Label(listFrame, textvariable=self.power1Text).grid(row=2, column=3, sticky = 'w', pady=5, padx=2)
-            power1Text = ttk.Label(listFrame, textvariable=self.power2Text).grid(row=2, column=3, sticky = 'e', pady=5, padx=10)
-            timesText = ttk.Label(listFrame, text='times').grid(row=2, column=2, sticky= 'w', pady=5, padx=5)
+            power1Text = ttk.Label(listFrame, textvariable=self.power1Text).grid(
+                row=2, column=3, sticky="w", pady=5, padx=2
+            )
+            power1Text = ttk.Label(listFrame, textvariable=self.power2Text).grid(
+                row=2, column=3, sticky="e", pady=5, padx=10
+            )
+            timesText = ttk.Label(listFrame, text="times").grid(
+                row=2, column=2, sticky="w", pady=5, padx=5
+            )
 
         if self.polarimeter is not None:
-            s1Text = ttk.Label(listFrame, textvariable=self.s1Text).grid(row=1, column=2, sticky = 'w', pady=5, padx=.01)
-            s2Text = ttk.Label(listFrame, textvariable=self.s2Text).grid(row=1, column=3, sticky = 'w', pady=5, padx=.01)
-            s3Text = ttk.Label(listFrame, textvariable=self.s3Text).grid(row=1, column=4, sticky = 'w', pady=5, padx=.01)
-
+            s1Text = ttk.Label(listFrame, textvariable=self.s1Text).grid(
+                row=1, column=2, sticky="w", pady=5, padx=0.01
+            )
+            s2Text = ttk.Label(listFrame, textvariable=self.s2Text).grid(
+                row=1, column=3, sticky="w", pady=5, padx=0.01
+            )
+            s3Text = ttk.Label(listFrame, textvariable=self.s3Text).grid(
+                row=1, column=4, sticky="w", pady=5, padx=0.01
+            )
 
     """ saveNumExecutions is called when executeall is pressed, saves the number of executions the user entered
     in the little box at the bottom, checks for invalid input in the textbox."""
+
     def saveNumExecutions(self, numExec):
         try:
             self.numExecutions = int(numExec.get())
@@ -415,6 +511,7 @@ class Gui:
 
     """ saveExecutTime is called when Record for time is pressed, saves the time the user entered
     in the little box at the bottom, checks for invalid input in the textbox."""
+
     def saveExecuteTime(self, execTime):
         try:
             self.execTime = int(execTime.get())
@@ -434,15 +531,15 @@ class Gui:
         else:
             print("Cannot raise micrometer, micrometer is not connected.")
 
-
-
-
     """startExecuteThread resets all of the constantly polling plots... starts the execute thread which calls 
     thecollect method. 
     !! should make it just use self.movelist...."""
+
     def startExecuteThread(self, moveList, collectData, timed=False):
         self.signalGraph.put("STOP")
-        self.executeThread = threading.Thread(target=self.__collect, args=[moveList, collectData, timed])
+        self.executeThread = threading.Thread(
+            target=self.__collect, args=[moveList, collectData, timed]
+        )
         self.executeThread.start()
 
     def startNoiseThread(self):
@@ -470,14 +567,18 @@ class Gui:
             if not self.polarimeter.updatingCsvQueue.is_set():
                 self.polarimeter.updatingCsvQueue.set()
 
-        if self.pyqt_process is not None and self.pyqt_process.is_alive() and self.stageQueue is not None:
+        if (
+            self.pyqt_process is not None
+            and self.pyqt_process.is_alive()
+            and self.stageQueue is not None
+        ):
             self.stageQueue.updatingPlotQueue.set()
             if self.powermeter is not None:
                 self.powermeter.updatingDevice1PlotQueue.set()
                 self.powermeter.updatingDevice2PlotQueue.set()
 
-        #POLARIMETER NEEDS TO START RUNNING BEFORE MOVES EXECUTE. IT DOESN'T CONSTANTLY RUN LIKE THE POWERMETER.
-        if(self.polarimeter is not None):
+        # POLARIMETER NEEDS TO START RUNNING BEFORE MOVES EXECUTE. IT DOESN'T CONSTANTLY RUN LIKE THE POWERMETER.
+        if self.polarimeter is not None:
             self.polarimeter.run = True
             self.__startPolarimeterThread()
         else:
@@ -486,12 +587,12 @@ class Gui:
         currTime = time.time()
         t = self.execTime
         start_time = time.time()
-        end_time = start_time 
+        end_time = start_time
         if not self.updatingPlots.is_set():
             self.updatingPlots.set()
-        while(end_time - start_time < t):
-           end_time = time.time() 
-           print("waiting")
+        while end_time - start_time < t:
+            end_time = time.time()
+            print("waiting")
         self.updatingPlots.clear()
         try:
             self.noisePlotPowDif.generateCsvFromPlot("power dif vs. time.csv")
@@ -502,10 +603,9 @@ class Gui:
         except:
             print("plot not open")
 
-        while(time.time() - currTime < self.execTime and not self.stopExecution):
+        while time.time() - currTime < self.execTime and not self.stopExecution:
             print("collecting noise data")
-        
-        
+
         self.executed.set()
         # time.sleep(2)
         try:
@@ -528,13 +628,12 @@ class Gui:
         self.generateCsvs()
         print("DONE")
 
-
-    #STRANGE: NOTE: when doing this sometimes the pyqt plots just don't do anything. Maybe add a little wait?
+    # STRANGE: NOTE: when doing this sometimes the pyqt plots just don't do anything. Maybe add a little wait?
 
     # Need to figure out how to get the data into the angleFinder script. We need to get the minumum and maximum from the power difference!
 
-            #plan: 
-            # two new queues in the powermeters, pop them off in here and interpolate just like I did for the plot. I feel like this is good because the thing 
+    # plan:
+    # two new queues in the powermeters, pop them off in here and interpolate just like I did for the plot. I feel like this is good because the thing
 
     def findAngle(self):
         powerRatios = []
@@ -556,15 +655,14 @@ class Gui:
         max_height_entry = ttk.Entry(new_window)
         max_height_entry.pack()
 
-
         # Dropdown for saving target: alpha or beta
         ttk.Label(new_window, text="Save to:").pack(pady=(10, 0))
         save_target = tk.StringVar(value="alpha")  # default value
-        save_dropdown = ttk.Combobox(new_window, textvariable=save_target, state="readonly")
-        save_dropdown['values'] = ("alpha", "beta")
+        save_dropdown = ttk.Combobox(
+            new_window, textvariable=save_target, state="readonly"
+        )
+        save_dropdown["values"] = ("alpha", "beta")
         save_dropdown.pack()
-
-
 
         # Begin Collection Button
         def begin_collection():
@@ -587,7 +685,7 @@ class Gui:
             self.signalAngleFinder.wait()
             self.signalAngleFinder.clear()
 
-            time.sleep(3) #need time to reinitialize everything
+            time.sleep(3)  # need time to reinitialize everything
             listTemp = []
 
             lowerMove = move.Move(self.stageQueue)
@@ -617,24 +715,18 @@ class Gui:
             angle += 10
             if self.powermeter is not None:
                 powerRatios.append(self.findDeltaPowerDif())
-            if(angle > 20):
+            if angle > 20:
                 rotate_label.config(text="compute the ideal angle")
             else:
                 rotate_label.config(text=f"Rotate to {angle} degrees.")
-
-
-
-
-
-
 
         def start_collection_thread():
             self.angleThread = threading.Thread(target=begin_collection, args=[])
             self.angleThread.start()
 
-
-
-        ttk.Button(new_window, text="Begin Collection", command=start_collection_thread).pack(pady=20)
+        ttk.Button(
+            new_window, text="Begin Collection", command=start_collection_thread
+        ).pack(pady=20)
 
         def show_angle():
             angle = self.angleFind.findAngle(powerRatios)
@@ -648,11 +740,7 @@ class Gui:
             elif save_target.get() == "beta":
                 self.updateIdealBeta(angle)
 
-        ttk.Button(
-            new_window,
-            text="Compute Ideal Angle",
-            command=show_angle
-        ).pack()
+        ttk.Button(new_window, text="Compute Ideal Angle", command=show_angle).pack()
 
     def findDeltaPowerDif(self):
         time1 = []
@@ -660,17 +748,17 @@ class Gui:
         time2 = []
         power2 = []
         while not self.powermeter.angle1Queue.empty():
-            x,y = self.powermeter.angle1Queue.get_nowait()
+            x, y = self.powermeter.angle1Queue.get_nowait()
             time1.append(x)
             power1.append(y)
         while not self.powermeter.angle2Queue.empty():
-            x,y = self.powermeter.angle2Queue.get_nowait()
+            x, y = self.powermeter.angle2Queue.get_nowait()
             time2.append(x)
             power2.append(y)
         print("power 1: ", power1)
         print("power 2:", power2)
 
-        interp_func = interp1d(time2, power2, kind='linear', fill_value='extrapolate')
+        interp_func = interp1d(time2, power2, kind="linear", fill_value="extrapolate")
         aligned_pow2 = interp_func(time1)
         diff = power1 / aligned_pow2
         deltaDiff = np.abs(np.max(diff) - np.min(diff))
@@ -678,9 +766,7 @@ class Gui:
             print(deltaDiff)
         return deltaDiff
 
-
-
-    # 2 things: 
+    # 2 things:
     # 1. read for ideal alpha from file on startup, update label
     # 2. take in angle, write to file, update label
 
@@ -710,8 +796,6 @@ class Gui:
             self.alphaLabel.config(text="Failed to save ideal alpha")
             print(f"Error saving alpha: {e}")
 
-
-
     def updateIdealBeta(self, beta):
         try:
             with open("idealBeta.txt", "w") as f:
@@ -720,13 +804,6 @@ class Gui:
         except Exception as e:
             self.betaLabel.config(text="Failed to save ideal alpha")
             print(f"Error saving beta: {e}")
-
-
-
-
-
-
-
 
     """collect is a lot of logic. !should make it just use self.movelist
     if the plots currently aren't updating, it calls the recursive updatePlots function to update the plots 
@@ -743,24 +820,21 @@ class Gui:
     this starts the collection thread, each move.execute blocks the thread until the move completes 
     """
 
-    #two options for the plotting: 
-    #1. plots constantly update even when moves aren't executing 
-    #2. only update when moves are executing 
+    # two options for the plotting:
+    # 1. plots constantly update even when moves aren't executing
+    # 2. only update when moves are executing
     # conclusion: make both
-    # how should we do it? 
+    # how should we do it?
     # 1. enable plotting button after window is open. This sends a signal to all devices saying that it's time to start adding to the queues
     # 2. Reset plots button: clears the plots
-    # 3. if plots are disabled when execution is started, all of the plots are reset and enabled. 
+    # 3. if plots are disabled when execution is started, all of the plots are reset and enabled.
 
-
-    #collection sequence:
-    #1. make a new flag: executing 
-    #2. when executing is set, sensors add to their Queue.queue's 
-    #3. When executing is set, sensors add to their multiprocessing.queue's
-    #. when executed is set, gui takes all the sensor Queue.queue's and copies them to arrays, then writes the arrays to csv's (check if you
+    # collection sequence:
+    # 1. make a new flag: executing
+    # 2. when executing is set, sensors add to their Queue.queue's
+    # 3. When executing is set, sensors add to their multiprocessing.queue's
+    # . when executed is set, gui takes all the sensor Queue.queue's and copies them to arrays, then writes the arrays to csv's (check if you
     # can write a queue directly to a csv. It will write micrometer position vs. power 1 and 2 to the csvs to start.)
-
-
 
     def __collect(self, moveList, collectData, timed=False):
         if self.stageQueue is None:
@@ -770,8 +844,7 @@ class Gui:
         print("collecting data")
         if collectData:
             if not self.updatingPlots.is_set():
-                self.updatingPlots.set() 
-
+                self.updatingPlots.set()
 
             if not self.stageQueue.updatingCsvQueue.is_set():
                 self.stageQueue.updatingCsvQueue.set()
@@ -793,9 +866,8 @@ class Gui:
                     self.powermeter.updatingDevice1PlotQueue.set()
                     self.powermeter.updatingDevice2PlotQueue.set()
 
-
-            #POLARIMETER NEEDS TO START RUNNING BEFORE MOVES EXECUTE. IT DOESN'T CONSTANTLY RUN LIKE THE POWERMETER.
-            if(self.polarimeter is not None):
+            # POLARIMETER NEEDS TO START RUNNING BEFORE MOVES EXECUTE. IT DOESN'T CONSTANTLY RUN LIKE THE POWERMETER.
+            if self.polarimeter is not None:
                 self.polarimeter.run = True
                 self.__startPolarimeterThread()
             else:
@@ -805,19 +877,28 @@ class Gui:
             self.stageQueue.lastMoveTiming = None
         for i in range(self.numExecutions):
             for move in moveList:
-                if not self.stopExecution and (self.stage.currentPosition != move.targetHeight):
+                if not self.stopExecution and (
+                    self.stage.currentPosition != move.targetHeight
+                ):
                     startPos = self.stage.currentPosition
                     self.stageQueue.lastMoveTiming = None
                     move.execute()
                     print("Position:", self.stage.currentPosition)
-                    self.__logMove(move, startPos, self.stage.currentPosition, self.stageQueue.lastMoveTiming)
-                elif (self.stage.currentPosition == move.targetHeight):
+                    logger.logMove(
+                        move,
+                        startPos,
+                        self.stage.currentPosition,
+                        self.stageQueue.lastMoveTiming,
+                    )
+                elif self.stage.currentPosition == move.targetHeight:
                     print("Can't move here, this is the current position.")
                 else:
                     break
 
         if timed:
-            self.pendingMoveTime = self.__formatMoveTiming(self.stageQueue.lastMoveTiming)
+            self.pendingMoveTime = formatHelper.formatMoveTiming(
+                self.stageQueue.lastMoveTiming
+            )
             print(self.pendingMoveTime)
         self.executed.set()
         # time.sleep(2)
@@ -835,37 +916,6 @@ class Gui:
             self.polarimeter.updatingCsvQueue.clear()
         self.generateCsvs()
         print("DONE")
-
-    @staticmethod
-    def __logMove(move, startPos, endPos, timing):
-        """Append one line per executed move to moves.md: timestamp, move, speed, time, distance, velocity.
-        Time is first→last detected position change (same as the GUI's 'last move' label)."""
-        distance = abs(endPos - startPos)
-        if timing is not None and timing[0] is not None:
-            elapsed = timing[1] - timing[0]
-            timeStr = f"{elapsed:.3f} s"
-            velocityStr = f"{distance / elapsed:.4f} mm/s" if elapsed > 0 else "n/a"
-        else:
-            timeStr = "no motion detected"
-            velocityStr = "n/a"
-        line = (f"{time.strftime('%Y-%m-%d %H:%M:%S')} | move: {startPos:.3f} -> {move.targetHeight} | "
-                f"speed set: {move.velocity} | time: {timeStr} | distance: {distance:.3f} mm | "
-                f"velocity: {velocityStr}  \n")
-        try:
-            with open("moves.md", mode="a", encoding="utf-8") as f:
-                f.write(line)
-        except OSError as e:
-            print(f"[Warning] Could not write moves.md: {e}")
-
-    @staticmethod
-    def __formatMoveTiming(timing):
-        if timing is None:
-            return "last move: did not move"
-        moveStart, moveEnd, firstRx, lastRx = timing
-        readings = f"{lastRx - firstRx:.2f} s first→last reading"
-        if moveStart is None:
-            return f"last move: no motion detected ({readings})"
-        return f"last move: {moveEnd - moveStart:.2f} s moving ({readings})"
 
     def generateCsvs(self):
         micrometerArray = []
@@ -891,7 +941,6 @@ class Gui:
                 for row_tuple in micrometerArray:
                     writer.writerow(row_tuple)
 
-
         if powermeter1Array:
             with open("power1time.csv", mode="w", newline="") as f:
                 writer = csv.writer(f)
@@ -909,23 +958,24 @@ class Gui:
                 # Each element of the tuple goes into its own CSV column
                 for row_tuple in powermeter2Array:
                     writer.writerow(row_tuple)
-        
 
-        # ──────────────────────────────────────────────────────────────
-        # 1.  Read the first column of each CSV and convert to float
-        # ──────────────────────────────────────────────────────────────
+            # ──────────────────────────────────────────────────────────────
+            # 1.  Read the first column of each CSV and convert to float
+            # ──────────────────────────────────────────────────────────────
             powermeter1CalcArray, powermeter2CalcArray = [], []
 
-            for file_name, target in [("power1time.csv", powermeter1CalcArray),
-                                    ("power2time.csv", powermeter2CalcArray)]:
+            for file_name, target in [
+                ("power1time.csv", powermeter1CalcArray),
+                ("power2time.csv", powermeter2CalcArray),
+            ]:
                 with open(file_name, mode="r", newline="") as f:
                     reader = csv.reader(f)
                     for row in reader:
-                        if not row:               # skip blank lines
+                        if not row:  # skip blank lines
                             continue
                         try:
                             target.append(float(row[0]))
-                        except ValueError:        # skip header / malformed
+                        except ValueError:  # skip header / malformed
                             continue
 
             # Convert to NumPy for vector math
@@ -940,22 +990,28 @@ class Gui:
             # ──────────────────────────────────────────────────────────────
             # 2.  Compute power difference
             # ──────────────────────────────────────────────────────────────
-            powerdifference = pm1 - pm2          # ΔP = P₁ – P₂
+            powerdifference = pm1 - pm2  # ΔP = P₁ – P₂
 
         if self.polarimeter is not None:
-            if self.polarimeter.dataAnalyzer.phase is not None and self.polarimeter.dataAnalyzer.strain is not None:
+            if (
+                self.polarimeter.dataAnalyzer.phase is not None
+                and self.polarimeter.dataAnalyzer.strain is not None
+            ):
                 with open("polarimetertime.csv", mode="w", newline="") as f:
                     writer = csv.writer(f)
                     print(f"Phase: {self.polarimeter.dataAnalyzer.phase}")
                     print(f"Strain: {self.polarimeter.dataAnalyzer.strain}")
                     writer.writerow(["phase", "strain"])
-                    for phase_val, strain_val in zip(self.polarimeter.dataAnalyzer.phase, self.polarimeter.dataAnalyzer.strain):
+                    for phase_val, strain_val in zip(
+                        self.polarimeter.dataAnalyzer.phase,
+                        self.polarimeter.dataAnalyzer.strain,
+                    ):
                         writer.writerow([phase_val, strain_val])
                     self.polarimeter.dataAnalyzer.strain = None
                     self.polarimeter.dataAnalyzer.phase = None
 
-
     """addmove adds the move to the movelist and then udpates the move gui adding the move"""
+
     def __addMove(self, frameMoveList):
         moveToAdd = move.Move(self.stageQueue)
         self.moveList.append(moveToAdd)
@@ -972,14 +1028,17 @@ class Gui:
     5. recursively runs this funciton every 10 ms.
     !! also why is this self.powerplot.generatecsvfromplot line here... this seems lazy and should be put somewhere else
     """
-    """DEAL WITH PLOTTING TRY CATCH""" 
+    """DEAL WITH PLOTTING TRY CATCH"""
+
     def updatePlotsFromData(self):
         self.timeStamp = time.time()
-        if (self.executed.is_set()): #right here all of the things that need to be done immediately after move(s) are done executing happen
+        if self.executed.is_set():  # right here all of the things that need to be done immediately after move(s) are done executing happen
             if self.polarimeter is not None:
                 self.polarimeter.run = False
             else:
-                print("polarimeter could not be told to stop running because no polarimeter detected.")
+                print(
+                    "polarimeter could not be told to stop running because no polarimeter detected."
+                )
 
             if self.powerPlot is not None:
                 self.powerPlot.generateCsvFromPlot("pow.csv")
@@ -989,7 +1048,7 @@ class Gui:
                 self.pow1Plot.generateCsvFromPlot("pow1.csv")
             if self.pow2Plot is not None:
                 self.pow2Plot.generateCsvFromPlot("pow2.csv")
-            self.updatingPlots.clear() 
+            self.updatingPlots.clear()
             self.signalAngleFinder.set()
             if self.pendingMoveTime is not None:
                 self.moveTimeText.set(self.pendingMoveTime)
@@ -997,19 +1056,14 @@ class Gui:
             self.executed.clear()
             self.stopExecution = False
 
-
-
-
         if self.powermeter is not None:
             self.power1Text.set(str(self.powermeter.device1Data))
             self.power2Text.set(str(self.powermeter.device2Data))
-        
+
         if self.polarimeter is not None:
             self.s1Text.set(str(self.polarimeter.s1.value))
             self.s2Text.set(str(self.polarimeter.s2.value))
             self.s3Text.set(str(self.polarimeter.s3.value))
-
-            
 
         self.root.after(10, self.updatePlotsFromData)
 
@@ -1022,4 +1076,3 @@ class Gui:
             self.stop()
             return
         self.root.after(200, self._check_signals)
-
