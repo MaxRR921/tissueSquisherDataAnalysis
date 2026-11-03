@@ -157,15 +157,17 @@ class GraphingProcess(QtWidgets.QMainWindow):
                 self.initialMicrometerPosition = self.y_data1[0]
             print("INITIAL HEIGHT IN GRAPHING PROCESS: ", self.initialMicrometerPosition)
 
-        while not self.powermeter1Queue.empty():
-            x,y = self.powermeter1Queue.get_nowait()
-            self.x_data2.append(self._elapsed(x))
-            self.y_data2.append(y)
+        if self.powermeter1Queue is not None:
+            while not self.powermeter1Queue.empty():
+                x,y = self.powermeter1Queue.get_nowait()
+                self.x_data2.append(self._elapsed(x))
+                self.y_data2.append(y)
                 
-        while not self.powermeter2Queue.empty():
-            x,y = self.powermeter2Queue.get_nowait()
-            self.x_data3.append(self._elapsed(x))
-            self.y_data3.append(y)
+        if self.powermeter2Queue is not None:
+            while not self.powermeter2Queue.empty():
+                x,y = self.powermeter2Queue.get_nowait()
+                self.x_data3.append(self._elapsed(x))
+                self.y_data3.append(y)
 
         if not self.phaseQueue == None and not self.strainQueue == None:
             while not self.phaseQueue.empty() and not self.strainQueue.empty():
