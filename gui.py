@@ -10,6 +10,7 @@ import threading
 from tkinter import ttk
 from ttkthemes import ThemedTk
 import angleFinder
+from scripts.generateCsvs import generateCsvs
 import logger
 import formatHelper
 from experiment_settings import DEFAULT_SAMPLE_HEIGHT_MM
@@ -28,7 +29,6 @@ if ENABLE_WINDOWS_MODULES:
 else:
     powermeter = None
     polarimeter = None
-import csv
 import multiprocessing
 
 # NOTE: graphingProcess is imported lazily inside startPyqtProcess(), NOT here.
@@ -645,7 +645,7 @@ class Gui:
             self.polarimeter.dataAnalyzer.finishAnalyzeDataSignal.wait()
             self.polarimeter.dataAnalyzer.finishAnalyzeDataSignal.clear()
             self.polarimeter.updatingCsvQueue.clear()
-        self.generateCsvs()
+        generateCsvs(self.stageQueue, self.powermeter, self.polarimeter)
         print("DONE")
 
     # STRANGE: NOTE: when doing this sometimes the pyqt plots just don't do anything. Maybe add a little wait?
@@ -934,101 +934,8 @@ class Gui:
             self.polarimeter.dataAnalyzer.finishAnalyzeDataSignal.wait()
             self.polarimeter.dataAnalyzer.finishAnalyzeDataSignal.clear()
             self.polarimeter.updatingCsvQueue.clear()
-        self.generateCsvs()
+        generateCsvs(self.stageQueue, self.powermeter, self.polarimeter)
         print("DONE")
-
-    def generateCsvs(self):
-        micrometerArray = []
-        powermeter1Array = []
-        powermeter2Array = []
-        if self.stageQueue is not None:
-            while not self.stageQueue.csvQueue.empty():
-                micrometerArray.append(self.stageQueue.csvQueue.get())
-
-        if self.powermeter is not None:
-            while not self.powermeter.device1CsvQueue.empty():
-                powermeter1Array.append(self.powermeter.device1CsvQueue.get())
-
-            while not self.powermeter.device2CsvQueue.empty():
-                powermeter2Array.append(self.powermeter.device2CsvQueue.get())
-
-        if micrometerArray:
-            with open("micrometertime.csv", mode="w", newline="") as f:
-                writer = csv.writer(f)
-                # Optionally, write a header row first:
-                writer.writerow(["position (mm)", "time (seconds since jan 1 1975)"])
-                # Each element of the tuple goes into its own CSV column
-                for row_tuple in micrometerArray:
-                    writer.writerow(row_tuple)
-
-        if powermeter1Array:
-            with open("power1time.csv", mode="w", newline="") as f:
-                writer = csv.writer(f)
-                # Optionally, write a header row first:
-                writer.writerow(["power 1 (W)", "time (seconds since jan 1 1975)"])
-                # Each element of the tuple goes into its own CSV column
-                for row_tuple in powermeter1Array:
-                    writer.writerow(row_tuple)
-
-        if powermeter2Array:
-            with open("power2time.csv", mode="w", newline="") as f:
-                writer = csv.writer(f)
-                # Optionally, write a header row first:
-                writer.writerow(["power 2 (W)", "time (seconds since jan 1 1975)"])
-                # Each element of the tuple goes into its own CSV column
-                for row_tuple in powermeter2Array:
-                    writer.writerow(row_tuple)
-
-            # ──────────────────────────────────────────────────────────────
-            # 1.  Read the first column of each CSV and convert to float
-            # ──────────────────────────────────────────────────────────────
-            powermeter1CalcArray, powermeter2CalcArray = [], []
-
-            for file_name, target in [
-                ("power1time.csv", powermeter1CalcArray),
-                ("power2time.csv", powermeter2CalcArray),
-            ]:
-                with open(file_name, mode="r", newline="") as f:
-                    reader = csv.reader(f)
-                    for row in reader:
-                        if not row:  # skip blank lines
-                            continue
-                        try:
-                            target.append(float(row[0]))
-                        except ValueError:  # skip header / malformed
-                            continue
-
-            # Convert to NumPy for vector math
-
-            pm1 = np.array(powermeter1CalcArray, dtype=float)
-            pm2 = np.array(powermeter2CalcArray, dtype=float)
-
-            min_len = min(pm1.size, pm2.size)
-            pm1 = pm1[:min_len]
-            pm2 = pm2[:min_len]
-
-            # ──────────────────────────────────────────────────────────────
-            # 2.  Compute power difference
-            # ──────────────────────────────────────────────────────────────
-            powerdifference = pm1 - pm2  # ΔP = P₁ – P₂
-
-        if self.polarimeter is not None:
-            if (
-                self.polarimeter.dataAnalyzer.phase is not None
-                and self.polarimeter.dataAnalyzer.strain is not None
-            ):
-                with open("polarimetertime.csv", mode="w", newline="") as f:
-                    writer = csv.writer(f)
-                    print(f"Phase: {self.polarimeter.dataAnalyzer.phase}")
-                    print(f"Strain: {self.polarimeter.dataAnalyzer.strain}")
-                    writer.writerow(["phase", "strain"])
-                    for phase_val, strain_val in zip(
-                        self.polarimeter.dataAnalyzer.phase,
-                        self.polarimeter.dataAnalyzer.strain,
-                    ):
-                        writer.writerow([phase_val, strain_val])
-                    self.polarimeter.dataAnalyzer.strain = None
-                    self.polarimeter.dataAnalyzer.phase = None
 
     """addmove adds the move to the movelist and then udpates the move gui adding the move"""
 
