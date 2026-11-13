@@ -17,6 +17,8 @@ This software interfaces with four devices: the two powermeters, the polarimeter
 ## Software Structure 
 main.py instantiates a Gui object and calls gui.run. 
 
+Standalone device diagnostics and experimental scripts live in `scripts/`. Run them from the project root (for example, `python scripts/test_powermeter_connection.py`). Shared experiment values remain in `experiment_settings.py` at the project root.
+
 the **gui** class instantiates all device objects: powermeters, micrometer (controller.py) and polarimeter. Each one of these devices is initialized on a new thread.  
   
 The **powermeters** start taking data immediately, but when the program isn't in the collection state (e.g. when the micrometer moves are   inputted and are in the process of executing), they display the newest reading on the screen then simply throw it away. You must have the necessary windows-exclusive drivers installed in order to use the powermeters. See important links.

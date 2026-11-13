@@ -7,7 +7,7 @@ LMMeasurement-COM-Object-Manual, sections 3.6.2 "Device Communications" and
 on USB and report sensor info. Windows-only (requires pywin32 + StarLab/
 PMManager drivers installed).
 
-Usage: python test_powermeter_connection.py
+Usage (from project root): python scripts/test_powermeter_connection.py
 """
 
 try:
