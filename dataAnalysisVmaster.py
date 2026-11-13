@@ -4,6 +4,7 @@ import multiprocessing
 import threading
 import polarimeterCalibration
 import matplotlib.pyplot as plt
+from experiment_settings import DEFAULT_SAMPLE_HEIGHT_MM, ANALYSIS_COMPRESSION_RATE_MM_PER_S
 #TODO TAke out unnecessary imports 
 
 
@@ -134,8 +135,8 @@ class DataAnalyzer:
         self.phase = (self.phase + phaseCounter - self.phase[0])  # Normalize phase
 
         # Convert time to strain based on rate of micrometer motion
-        thick = 5.28  # thickness of the samples in mm
-        rate = 0.1  # rate of the micrometer (compression rate in mm/s)
+        thick = DEFAULT_SAMPLE_HEIGHT_MM
+        rate = ANALYSIS_COMPRESSION_RATE_MM_PER_S
         self.strain = (timeListNp * rate) / thick
         
         # print("Time List:", timeListNp)
@@ -262,8 +263,8 @@ class DataAnalyzer:
         self.phase = (self.phase + phaseCounter - self.phase[0])  # Normalize phase
 
         # Convert time to strain based on rate of micrometer motion
-        thick = 5.28  # thickness of the samples in mm
-        rate = 0.1  # rate of the micrometer (compression rate in mm/s)
+        thick = DEFAULT_SAMPLE_HEIGHT_MM
+        rate = ANALYSIS_COMPRESSION_RATE_MM_PER_S
         self.strain = (timeListNp * rate) / thick
         
         # print("Time List:", timeListNp)

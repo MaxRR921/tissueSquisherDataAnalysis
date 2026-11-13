@@ -12,6 +12,7 @@ from ttkthemes import ThemedTk
 import angleFinder
 import logger
 import formatHelper
+from experiment_settings import DEFAULT_SAMPLE_HEIGHT_MM
 
 # ============================================================================
 # PLATFORM CONFIGURATION
@@ -140,6 +141,8 @@ class Gui:
         self.s2Text = tk.StringVar()
         self.s3Text = tk.StringVar()
         self.moveTimeText = tk.StringVar()
+        self.sampleHeightText = tk.StringVar(value=str(DEFAULT_SAMPLE_HEIGHT_MM))
+        self.sampleWidthText = tk.StringVar()
         self.moveTimeText.set("last move: --")
         self.pendingMoveTime = None
         self.power1Text.set("p1 not reading")
@@ -422,6 +425,12 @@ class Gui:
     def addBottomFrameButtons(self, listFrame):
         numExec = tk.StringVar()
         timeRecord = tk.StringVar()
+        dimensions = ttk.Frame(listFrame)
+        dimensions.grid(row=0, column=2, columnspan=3, sticky="w", padx=5)
+        ttk.Label(dimensions, text="Sample height (mm):").pack(side="left")
+        ttk.Entry(dimensions, textvariable=self.sampleHeightText, width=7).pack(side="left")
+        ttk.Label(dimensions, text="Width/depth (mm):").pack(side="left", padx=(10, 0))
+        ttk.Entry(dimensions, textvariable=self.sampleWidthText, width=7).pack(side="left")
         ttk.Entry(listFrame, textvariable=numExec).grid(
             row=2, column=1, sticky="sw", pady=5
         )
@@ -550,7 +559,18 @@ class Gui:
         self.noiseThread.start()
 
     def __zeroForce(self):
-        self.signalZero.put("ZERO")
+        try:
+            height = float(self.sampleHeightText.get())
+            width = float(self.sampleWidthText.get())
+            if not (np.isfinite(height) and height > 0 and np.isfinite(width) and width > 0):
+                raise ValueError("dimensions must be positive and finite")
+        except ValueError:
+            print("Enter positive sample height and width in mm before zeroing force.")
+            return
+        if self.stageQueue is None:
+            print("Connect the stage before zeroing force.")
+            return
+        self.signalZero.put(("ZERO", time.time(), self.stageQueue.currentPosition, height, width))
         print("ZEROED FORCE")
 
     def __collectNoise(self):

@@ -6,6 +6,7 @@ from PyQt5 import QtWidgets, QtCore
 import pyqtgraph as pg
 from scipy.interpolate import interp1d
 import numpy as np
+from experiment_settings import POWER_DIFFERENCE_TO_FORCE
 
 class SecondsAxis(pg.AxisItem):
     """Bottom axis that ticks at whole seconds (0, 1, 2, ...), widening the step (2, 5, 10, ...) as the run gets longer."""
@@ -40,6 +41,11 @@ class GraphingProcess(QtWidgets.QMainWindow):
         self.signalGraph = signalGraph
         self.signalZero = signalZero
         self.initial = 0.0
+        self.zero_time = None
+        self.zero_position = None
+        self.sample_height = None
+        self.sample_width = None
+        self.pending_zero = None
         self.t0 = None  # time.time() of first sample in the run; x-axes are seconds since this
         # Create a container widget and a QGridLayout
         container = QtWidgets.QWidget()
@@ -69,10 +75,10 @@ class GraphingProcess(QtWidgets.QMainWindow):
 
         # Subplot 4
         self.plot4 = pg.PlotWidget()
-        self.plot4.setLabel('left', "Phase")
-        self.plot4.setLabel('bottom', "Strain")
+        self.plot4.setLabel('left', "Zeroed Normalized Power Difference")
+        self.plot4.setLabel('bottom', "Compressive Strain (ΔL/H)")
         self.curve4 = self.plot4.plot([], [], pen='y')
-        layout.addWidget(self.plot4, 1, 1)  # Row 1, Col 1
+        layout.addWidget(self.plot4, 1, 1)
 
         self.plot5 = pg.PlotWidget()
         self.plot5.setLabel('left',  "force")
@@ -97,8 +103,6 @@ class GraphingProcess(QtWidgets.QMainWindow):
         self.y_data2 = []
         self.x_data3 = []
         self.y_data3 = []
-        self.x_data4 = []
-        self.y_data4 = []
         self.force = [] 
         self.diff = []
         self.sum = []
@@ -113,6 +117,17 @@ class GraphingProcess(QtWidgets.QMainWindow):
         if self.t0 is None:
             self.t0 = t
         return t - self.t0
+
+    def _strain_at(self, times):
+        """Interpolate measured stage position, anchored at the Zero Force press."""
+        zero_elapsed = self.zero_time - self.t0
+        stage_times = [zero_elapsed]
+        positions = [self.zero_position]
+        for t, pos in zip(self.x_data1, self.y_data1):
+            if t > zero_elapsed:
+                stage_times.append(t)
+                positions.append(pos)
+        return (np.interp(times, stage_times, positions) - self.zero_position) / self.sample_height
 
    #NOTE: POWERMETER IS ACTUALLY POLLING QUITE SLOW.... so i made it update only when powermeter updates and the graph is way slower. 
     def check_queue(self):
@@ -144,8 +159,6 @@ class GraphingProcess(QtWidgets.QMainWindow):
                 self.y_data2.clear()
                 self.x_data3.clear()
                 self.y_data3.clear()
-                self.x_data4.clear()
-                self.y_data4.clear()
                 self.t0 = None
 
 
@@ -153,9 +166,6 @@ class GraphingProcess(QtWidgets.QMainWindow):
             x, y = self.micrometerQueue.get_nowait()
             self.x_data1.append(self._elapsed(x))
             self.y_data1.append(y)
-            if len(self.y_data1) <= 5 and len(self.y_data1) > 0:
-                self.initialMicrometerPosition = self.y_data1[0]
-            print("INITIAL HEIGHT IN GRAPHING PROCESS: ", self.initialMicrometerPosition)
 
         if self.powermeter1Queue is not None:
             while not self.powermeter1Queue.empty():
@@ -169,43 +179,59 @@ class GraphingProcess(QtWidgets.QMainWindow):
                 self.x_data3.append(self._elapsed(x))
                 self.y_data3.append(y)
 
-        if not self.phaseQueue == None and not self.strainQueue == None:
-            while not self.phaseQueue.empty() and not self.strainQueue.empty():
-                self.y_data4.append(self.phaseQueue.get_nowait())
-                print("PLOT")
-                self.x_data4.append(self.strainQueue.get_nowait())
-
+        if self.strainQueue is not None:
             while not self.strainQueue.empty():
-                x=self.strainQueue.get_nowait()        
+                self.strainQueue.get_nowait()
+        if self.phaseQueue is not None:
             while not self.phaseQueue.empty():
-                y=self.phaseQueue.get_nowait()
+                self.phaseQueue.get_nowait()
 
 
        
         
-        if  self.x_data3 and self.y_data3 and self.y_data2:
+        while not self.signalZero.empty():
+            self.pending_zero = self.signalZero.get_nowait()
+
+        if len(self.x_data3) >= 2 and self.y_data2:
             interp_func = interp1d(self.x_data3, self.y_data3, kind='linear', fill_value='extrapolate')
             aligned_pow2 = interp_func(self.x_data2)
             self.diff = self.y_data2 - aligned_pow2
             self.sum = self.y_data2 + aligned_pow2
-            while not self.signalZero.empty():
-                self.curve5.clear()
-                
-                self.initial = np.mean(self.diff/self.sum)
-                self.signalZero.get_nowait()
+            normalized = np.divide(self.diff, self.sum, out=np.full_like(self.sum, np.nan), where=self.sum != 0)
+
+            if self.pending_zero is not None:
+                command = self.pending_zero
+                self.pending_zero = None
+                if isinstance(command, tuple) and command[0] == "ZERO":
+                    _, zero_time, position, height, width = command
+                    elapsed = np.asarray(self.x_data2) + self.t0
+                    before = np.flatnonzero((elapsed <= zero_time) & np.isfinite(normalized))
+                    after = np.flatnonzero((elapsed > zero_time) & np.isfinite(normalized))
+                    if len(before) or len(after):
+                        index = before[-1] if len(before) else after[0]
+                        self.initial = normalized[index]
+                        self.zero_time = zero_time
+                        self.zero_position = position
+                        self.sample_height = height
+                        self.sample_width = width  # Cube face area is width ** 2 if stress is added later.
+                        self.curve4.clear()
+                        self.curve5.clear()
+                    else:
+                        self.pending_zero = command
 
         if self.diff is not None and self.sum is not None:
-            self.curve6.setData(self.x_data2, self.diff/self.sum)
-            if(self.initial != 0.0):
-                force = 5334.41 * (self.diff/self.sum - (self.initial)) 
-                print("INITIAL: ", self.initial)
-                self.curve5.setData(self.x_data2, force)
+            self.curve6.setData(self.x_data2, normalized)
+            if self.zero_time is not None:
+                times = np.asarray(self.x_data2)
+                mask = times + self.t0 >= self.zero_time
+                zeroed = normalized[mask] - self.initial
+                self.curve4.setData(self._strain_at(times[mask]), zeroed)
+                self.curve5.setData(times[mask], POWER_DIFFERENCE_TO_FORCE * zeroed)
 
 
         self.curve1.setData(self.x_data1, self.y_data1)
         self.curve2.setData(self.x_data2, self.y_data2)
         self.curve3.setData(self.x_data3, self.y_data3)
-        self.curve4.setData(self.x_data4, self.y_data4)
 
 
 
