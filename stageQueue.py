@@ -2,7 +2,7 @@ import queue
 import multiprocessing
 import threading
 
-from stageTimer import StageTimer
+from scripts.stageTimer import StageTimer
 
 
 class StageQueue:

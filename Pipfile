@@ -4,6 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+pandas-stubs = "~=3.0.0"
 
 [dev-packages]
 

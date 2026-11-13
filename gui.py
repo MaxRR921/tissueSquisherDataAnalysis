@@ -2,7 +2,6 @@ import numpy as np
 import tkinter as tk
 import stageQueue
 import agiltronController
-from plotter import Plot2D
 import time
 import move
 import moveGui
@@ -10,9 +9,8 @@ import threading
 from tkinter import ttk
 from ttkthemes import ThemedTk
 import angleFinder
+from scripts import logger, formatHelper
 from scripts.generateCsvs import generateCsvs
-import logger
-import formatHelper
 from experiment_settings import DEFAULT_SAMPLE_HEIGHT_MM
 
 # ============================================================================
@@ -37,7 +35,6 @@ import multiprocessing
 # fail (com_error 0x8007045A "DLL initialization routine failed"). The Ophir
 # powermeter must load first; graphingProcess runs in its own child process, so
 # the main process never needs it at import time.
-import matplotlib.pyplot as plt
 
 import signal
 
