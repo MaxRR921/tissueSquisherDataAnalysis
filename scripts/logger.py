@@ -1,6 +1,6 @@
 import time
 
-import formatHelper
+from scripts import formatHelper
 
 
 def logMove(move, startPos, endPos, timing, path="moves.md"):
